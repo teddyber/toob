@@ -69,9 +69,6 @@ if (isset($_POST['accesstoken'])) {
             <div class="form-floating">
                 <input class="form-control" id="at" name="accesstoken" type="text" placeholder="Access Token" required/>
                 <label for="at">Access Token</label>
-                <div class="invalid-feedback">
-                    Un Access Token est requis
-                </div>
             </div>
             <div class="form-floating">
                 <input class="form-control" id="at" name="instance" type="text" placeholder="https://piaille.fr" required/>
