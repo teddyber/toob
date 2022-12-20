@@ -65,7 +65,7 @@ if (isset($_POST['accesstoken'])) {
         </ul>
         <?php } ?>
         <hr />
-        <form action="./" method="POST" class="needs-validation">
+        <form action="./php.php" method="POST" class="needs-validation">
             <div class="form-floating">
                 <input class="form-control" id="at" name="accesstoken" type="text" placeholder="Access Token" required/>
                 <label for="at">Access Token</label>
