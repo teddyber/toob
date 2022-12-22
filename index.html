@@ -2,77 +2,212 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mastothread.html</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css"> -->
     <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
     <script>
         function post(text, reply_to) {
 
         }
         $( document ).ready(function() {
-            console.log( "ready!" );
+            // console.log( "ready!" );
+            $('#at').val(window.localStorage.getItem('at'));
+            $('#instance').val(window.localStorage.getItem('instance'));
             $('#add').click(function() {
                 $('#add').before('<div class="form-floatin"><textarea class="form-control" name="status[]" placeholder="Next..."></textarea></div>');
                 return false;
             });
             $('#submit').click(function(){
-                var reply_to='';
-                $('textarea').each(function(index, element){
-                    console.log(index);
-                    console.log(element);
-                    $.ajax('https://piaille.fr/api/v1/statuses', 
-                        {
-                            method : 'POST',
-                            async : false,//moche
-                            headers : {'Authorization' : 'Bearer m2oNyUVFLZ31RQmDGM6vPskNwpaDV3X801ebXAiPeJo'}, 
-                            data : {status: $(this).val(), visibility: "private", langage : "fr", in_reply_to_id : reply_to },
-                            success : function(data){console.log(data.id);reply_to=data.id;}
-                        }
-                    )
-                });
+                if ($("#at").val()!='' && $("#instance").val()!='') {
+                    window.localStorage.setItem('at', $("#at").val());
+                    window.localStorage.setItem('instance', $("#instance").val());
+                    var reply_to='';
+                    $('textarea').each(function(index, element){
+                        // console.log(element);
+                        $.ajax($("#instance").val()+'/api/v1/statuses', 
+                            {
+                                method : 'POST',
+                                async : false,//moche
+                                headers : {'Authorization' : 'Bearer '+$("#at").val()}, //app AT
+                                data : {status: $(this).val(), visibility: "public", langage : "fr", in_reply_to_id : reply_to },
+                                success : function(data){reply_to=data.id;}
+                            }
+                        )
+                    });
+                }
                 return false;
             });
+            $("#write").click(function(){
+                $('form').slideToggle();
+                return false;
+            });
+            $("#refresh").click(function(){
+                updateTimeline();
+                return false;
+            });
+            function updateTimeline() {
+                if (document.querySelector("#at").value!='' && document.querySelector("#instance").value!='') {
+                    $('#timeline').html('');
+                    window.localStorage.setItem('at', document.querySelector("#at").value);
+                    window.localStorage.setItem('instance', document.querySelector("#instance").value);
+                    $.ajax(document.querySelector("#instance").value+'/api/v1/timelines/home?limit=40', {
+                            method : 'GET',
+                            headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //from sengi
+                            // async : false,
+                            success : function(data){
+                                data.forEach(element => {
+                                    console.log(element);
+                                    if(document.querySelectorAll('#s'+element.id).length==0) {
+                                        $('#timeline').append(displayStatus(element, ''));
+                                        if($('[in_reply_to_id="'+element['id']+'"]').length!=0) {
+                                            document.querySelector('[in_reply_to_id="'+element['id']+'"]').parentNode.insertBefore(document.querySelector('#s'+element.id),document.querySelector('[in_reply_to_id="'+element['id']+'"]'));
+                                            document.querySelector('#s'+element.id).appendChild(document.querySelector('[in_reply_to_id="'+element['id']+'"]')); //$('[in_reply_to_id="'+element['id']+'"]').addClass('thread').removeClass('topthread').before(displayStatus(element, "topthread"));
+                                        }
+                                        // else {
+                                        //     $('#timeline').append(displayStatus(element, ''));
+                                        // }
+
+                                        // $('#s'+element.id+' div.content').click(function(){
+                                        //     window.location.href = '#status'+element.id;
+                                        // });
+                                    }
+                                });
+                            }
+                        }
+                    );
+                } //TODO else display warning
+
+
+            }
+            window.addEventListener('hashchange', (event) => {
+                console.log(window.location.hash)
+                if(window.location.hash.substring(0, 7) == '#status') $('#timeline').html('');
+                if(window.location.hash== '#home') updateTimeline();
+            });
+            updateTimeline();
+            function displayStatus(status, cssclass){
+                in_reply_to_id = status['in_reply_to_id'];
+                id = status['id'];
+                // if (in_reply_to_id==null) {
+                //     cssclass = cssclass + " top";
+                // }
+                if(status['reblog']==null) {
+                    avatar = status['account']['avatar'];
+                    display_name  = replaceEmojis(status['account'], 'display_name');
+                    content = status['content'];
+                    handle=status['account']['acct'];
+                    acct_url=status['account']['url'];
+                    reblog='';
+                    media = displayMedias(status);
+                } else {
+                    avatar = status['reblog']['account']['avatar'];
+                    display_name  = replaceEmojis(status['reblog']['account'], 'display_name');
+                    content = status['reblog']['content'];
+                    handle=status['reblog']['account']['acct'];
+                    acct_url=status['reblog']['account']['url'];
+                    acc_disp_name = replaceEmojis(status['account'], 'display_name');
+                    reblog = '<div class="reblog"><a href="'+status['account']['url']+'"><img src="'+status['account']['avatar']+'"/> '+acc_disp_name+'</a> boosted</div>';
+                    media = displayMedias(status['reblog']);
+                }
+                return '<div class="status '+cssclass+'" in_reply_to_id="'+in_reply_to_id+'" id="s'+id+'">'+reblog+'<div class="acct"><a href="'+acct_url+'"><img src="'+avatar+'"/> '+display_name+' <br/>@'+handle+'</a></div><div class="content">'+content+'</div>'+
+                '<div>'+media+'</div>'+displayCard(status)+'</div>';
+            }
+            function replaceEmojis(element, attr){
+                val = element[attr];
+                if (element['emojis'].length!=0) {
+                    for(i=0;i<element['emojis'].length;i++) {
+                        val = val.replaceAll(':'+element['emojis'][i]['shortcode']+':', '<img class="emoji" src="'+element['emojis'][i]['url']+'"/>')
+                    }
+                }
+                return val;
+            }
+            function displayCard(status){
+                if(status['card']!=null && status['card']['image']!=null){
+                    return '<a class="card" href="'+status['card']['url']+'"><div><img src="'+status['card']['image']+'"/><div class="provider">'+status['card']['provider_name']+'</div><div class="title">'+status['card']['title']+'</div><div class="desc">'+status['card']['description']+'</div></div></a>'
+                }
+                return '';
+            }
+            function displayMedias(element){
+                media  = '';
+                console.log(element);
+                nb_medias = element['media_attachments'].length;
+                if (nb_medias!=0) {
+                    for(i=0;i<nb_medias;i++) {
+                        if (element['media_attachments'][i]['type']=='image')
+                            media = media + '<img class="sized'+(nb_medias==1?1:'')+' '+(i%2?'odd':'even')+'" src="'+element['media_attachments'][i]['url']+'"/>';
+                        else 
+                            media = media + '<video controls class="sized'+(nb_medias==1?1:'')+' '+(i%2?'odd':'even')+'" src="'+element['media_attachments'][i]['url']+'"></video>'
+                    }
+                } else media='';
+                return media;
+            }
         });
     </script>
+    <style>
+        body {font-family: Arial, Helvetica, sans-serif;margin: auto;width: 95%;max-width: 512;background-color: #111;color: #ddd;font-size: small;}
+        p {margin-bottom:0;}
+        .sized1 {max-width: 100%;}
+        .content {clear: both;margin-top: 1em;}
+        .content + div {text-align: center;}
+        .reblog img {width:24;}
+        .reblog {color: #777;font-size: small;vertical-align: middle;}
+        .acct img {width: 46;float: left;margin-right: 0.5em;border-radius: 0.5em 0 0 0;}
+        a {color: gray;text-decoration: none;}
+        .acct a:hover, .reblog a:hover {text-decoration: underline;}
+        .status {border: 1px #444 solid;clear: both;padding: 0.5em;border-radius: 0.5em;margin-top: 0.2em;background-color: #222;overflow: hidden;}
+        hr {clear: both;}
+        /* .status.thread {border-left: 2px solid #444;margin-left: 23;border-radius: 0;margin-top: 0;} */
+        /* .status.topthread {border-radius: 1em 1em 0 1em;} */
+        .status .status {margin-left: 1em;}
+        /* .status.top {margin-top: 0.5em;} */
+        img.sized {max-width: 49%;margin-right:1%;cursor: zoom-in;}
+        img.sized:active, img.sized:focus, img.sized:hover {transition: all 0.35s ease-in-out; z-index: 100; transform: scale(2) translateX(25%);}
+        img.sized.odd:active, img.sized.odd:focus, img.sized.odd:hover {transform: scale(2) translateX(-25%);}
+        .btn {text-decoration: none;}
+        form {display: none;font-size: small;}
+        .btn:visited{color: #777;}
+        img.emoji {max-width: 1em;}
+        .invisible {display: none;}
+        .ellipsis:after {content: '...';}
+        .card img {float: left;height: 100;width: 100;border-radius: 1em 0 0 1em;object-fit: cover;margin-right: 0.5em;}
+        .card > div {border: #ddd solid 1px;border-radius: 1em;width: 90%;margin: auto;height: 100;overflow: hidden;font-size: small;margin-top: 0.5em;}
+        .title {font-weight: bold;padding-left: 0.5em;}
+        .description, {padding-right: 0.5em;}
+        .provider {padding-top: 0.5em;}
+        a {color: #77d;}
+        a.card {text-decoration: none;}
+        a.card:hover div {text-decoration: underline;background-color: #333;}
+        i.icon {font-style: normal;filter: grayscale(100%);}
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>MastoThread.html</h1>
+        <h1><a href="#home">MastoThread.html</a></h1>
         <hr />
-        <!-- <?php if (isset($_POST['accesstoken'])) { ?>
-        <div class="alert alert-success" role="alert">
-            Votre thread a été posté !
-        </div>
-        <div><img width="200" class="rounded float-start" src="<?php echo $avatar; ?>">
-            <h4><?php echo $display_name; ?></h4>
-        </div>
-        <ul class="list-group">
-            <?php echo $posted; ?>
-        </ul>
-        <hr />
-        <?php } ?> -->
+        <a class="btn btn-primary" id="write" href="">&nbsp;<i class="icon">⚙</i>&nbsp;</a>
         <form class="needs-validation">
             <div class="form-floating">
                 <input class="form-control" id="at" name="accesstoken" type="text" placeholder="Access Token" required/>
-                <label for="at">Access Token</label>
+                <!-- <label for="at">Access Token</label> -->
             </div>
             <div class="form-floating">
-                <input class="form-control" id="at" name="instance" type="text" placeholder="https://piaille.fr" required/>
-                <label for="at">Mastodon instance (eg. https://mastodon.social)</label>
+                <input class="form-control" id="instance" name="instance" type="text" placeholder="https://piaille.fr" required/>
+                <!-- <label for="at">Mastodon instance</label> -->
             </div>
             <div class="form-floatin">
                 <textarea class="form-control" id="firststatus" name="status[]" placeholder="Start thread" required></textarea>
                 <!-- <label>Début du thread</label> -->
             </div>
-            <div class="form-floatin">
-                <textarea class="form-control" name="status[]" placeholder="Next..." required></textarea>
-                <!-- <label for="at">Suite...</label> -->
-            </div>
-            <a class="btn btn-primary" id="add" href=""><i class="bi bi-plus-circle"></i></a>
-            <input class="btn btn-primary" type="submit" id="submit" value="Toot!"/>
+            <a class="btn btn-primary" id="add" href="">&nbsp;<i class="icon">➕</i>&nbsp;</a>
+            <a class="btn btn-primary" id="submit" href="">&nbsp;<i class="icon">📩</i>&nbsp;</a>
+            <div><a class="btn btn-primary" id="refresh" href="">&nbsp;<i class="icon">🔁</i>&nbsp;</a></div>
+            <!-- <input class="btn btn-primary" type="submit" id="submit" value="Toot!"/> -->
         </form>
+        <hr/>
+        <div id="timeline">
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script> -->
 </body>
 
 </html>
