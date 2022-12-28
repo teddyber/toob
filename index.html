@@ -11,22 +11,68 @@
     <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
+        function s(p){return document.querySelector(p);}
+        function sa(p){return document.querySelectorAll(p);}
         $( document ).ready(function() {
-            
-            // console.log( "ready!" );
-            document.querySelector('#at').setAttribute('value',window.localStorage.getItem('at'));
-            document.querySelector('#instance').setAttribute('value', window.localStorage.getItem('instance'));
+            if (window.localStorage.getItem('at') && window.localStorage.getItem('instance')) {
+                document.querySelector('#at').setAttribute('value',window.localStorage.getItem('at'));
+                document.querySelector('#instance').setAttribute('value', window.localStorage.getItem('instance'));
+            } else {
+                code = new URLSearchParams(window.location.search).get('code')
+                if(code) {
+                    $.ajax(window.localStorage.getItem('instance')+"/oauth/token",{
+                        method: 'POST',
+                        data : {
+                            client_id : window.localStorage.getItem(window.localStorage.getItem('instance')+'_client_id'),
+                            client_secret : window.localStorage.getItem(window.localStorage.getItem('instance')+'_client_secret'),
+                            grant_type : 'authorization_code',
+                            redirect_uri : window.location.protocol + '//' + window.location.host + window.location.pathname,
+                            code : code,
+                            scope : "read write"
+                        },
+                        success : function(data) {
+                            window.localStorage.setItem('at', data.access_token)
+                            window.location.href = window.location.pathname
+                        }
+                    })
+                }
+                s('#login').style.display = 'block';
+            }
+            $('#loginb').click(function(){
+                inst = s('#inst').value
+                if (inst.substring(0, 8)!='https://') inst = 'https://'+inst
+                if (!window.localStorage.getItem(inst+'_client_id')) {
+                    $.ajax(inst+"/api/v1/apps", {
+                        method: 'POST',
+                        data :  {
+                            client_name : "Toob",
+                            redirect_uris : window.location.protocol + '//' + window.location.host + window.location.pathname,
+                            scopes : "read write",
+                            website : "https://github.com/teddyber/toob"
+                        },
+                        success : function(data) {
+                            window.localStorage.setItem(inst+'_client_id', data.client_id)
+                            window.localStorage.setItem(inst+'_client_secret', data.client_secret)
+                            window.localStorage.setItem('instance', inst)
+                            window.location.href=`${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst+'_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
+                        }
+                    })
+                }
+                else {
+                    window.localStorage.setItem('instance', inst) 
+                    window.location.href=`${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst+'_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
+                }
+            })
             $('#add').click(function() {
                 $('#add').before('<div class="form-floatin"><textarea class="form-control" name="status[]" placeholder="Next..."></textarea></div>');
                 return false;
             });
             $('#submit').click(function(){
-                if (document.querySelector("#at").value()!='' && document.querySelector("#instance").value()!='') {
+                if (document.querySelector("#at").getAttribute('value')!='' && document.querySelector("#instance").getAttribute('value')!='') {
                     window.localStorage.setItem('at', document.querySelector("#at").value);
                     window.localStorage.setItem('instance', document.querySelector("#instance").value);
-                    var reply_to='';
+                    var reply_to=$('#in_reply_to').val();
                     $('textarea').each(function(index, element){
-                        // console.log(element);
                         $.ajax(document.querySelector("#instance").value+'/api/v1/statuses', 
                             {
                                 method : 'POST',
@@ -37,6 +83,10 @@
                             }
                         )
                     });
+                    console.log('terminé')
+                    $('#compose').hide();
+                    $('textarea').val('')
+                    $('textarea:not(:first)').remove();
                 }
                 return false;
             });
@@ -51,7 +101,8 @@
             function updateTimeline(which) {
                 // console.log(which)
                 if (document.querySelector("#at").value!='' && document.querySelector("#instance").value!='') {
-                    $('#timeline').html('');
+                    $('#timeline').html('').show();
+                    $('#statuscontainer').hide();
                     window.localStorage.setItem('at', document.querySelector("#at").value);
                     window.localStorage.setItem('instance', document.querySelector("#instance").value);
                     $.ajax(document.querySelector("#instance").value+'/api/v1/'+which+'?limit=40', {
@@ -101,6 +152,12 @@
                                     });
                                 });
                                 $('a.hashtag').attr('target', '')
+                                $('a.reply').click(function() {
+                                    console.log($(this).parents('.status').attr('id').substring(1))
+                                    $('#in_reply_to').val($(this).parents('.status').attr('id').substring(1))
+                                    $(this).parents('.status').first().after($('#compose').show())
+                                    return false;
+                                })
                                 $('.mention').after(function(){return '<div class="popover"><a href="'+$(this).attr('href')+'">Follow!<a></div>';})
                             }
                         }
@@ -130,11 +187,22 @@
                     // console.log(4)
                     updateStatus(window.location.hash.substring(8))
                 }
+                if(window.location.hash.substring(0, 8)== '#logout') {
+                    window.localStorage.removeItem('at')
+                    window.localStorage.removeItem('instance')
+                    window.location.href = window.location.pathname;
+                }
+                if(window.location.hash.substring(0, 8)== '#write') {
+                    feather.replace();
+
+                    $('h1').after($("#compose").show())
+                }
             }
             display();
             function updateStatus(id) {
                 // console.log(id)
-                $('#timeline').text('');
+                $('#timeline').hide();
+                $('#statuscontainer').text('').show();
                 $.ajax(document.querySelector("#instance").value+'/api/v1/statuses/'+id,
                 {
                     method: 'GET',
@@ -148,11 +216,11 @@
                             success: function(data) {
                                 i=0;
                                 data.ancestors.forEach(element => {
-                                    $('#timeline').append(displayStatus(element, (i==0?'top':'ancestor')));
+                                    $('#statuscontainer').append(displayStatus(element, (i==0?'top':'ancestor')));
                                     i++
                                 });
                                 c = current.reblog?current.reblog:current
-                                    $('#timeline').append(displayStatus(c, 'focus'+(i==0?' top':'')));
+                                    $('#statuscontainer').append(displayStatus(c, 'focus'+(i==0?' top':'')));
 
                                 data.descendants.forEach(element => {
                                     $('#s'+element.in_reply_to_id).append(displayStatus(element, 'thread'));
@@ -184,6 +252,12 @@
                                     });
                                 });
                                 $('a.hashtag').attr('target', '')
+                                $('a.reply').click(function() {
+                                    console.log($(this).parents('.status').attr('id').substring(1))
+                                    $('#in_reply_to').val($(this).parents('.status').attr('id').substring(1))
+                                    $(this).parents('.status').first().after($('#compose').show())
+                                    return false;
+                                })
                                 $('.mention').after(function(){return '<div class="popover"><a href="'+$(this).attr('href')+'">Follow!<a></div>';})
                             }
                             
@@ -247,7 +321,8 @@
                             <div class="acct">
                                 <div class="burger" style="float: right;">
                                     <span class="reblog ${st['reblogged']?' reb"':''}"><i data-feather="repeat"></i>${st['reblogs_count']!=0?st['reblogs_count']:''}</span>
-                                    <a href="#status/${id}" class="reply"><i data-feather="corner-up-left"></i>${st['replies_count']!=0?st['replies_count']:''}</a>
+                                    <a href="#status/${id}" class="info"><i data-feather="info"></i></a>
+                                    <a class="reply"><i data-feather="corner-up-left"></i>${st['replies_count']!=0?st['replies_count']:''}</a>
                                     <i data-feather="star" ${st['favourited']?'class="fav"':''}></i>
                                     <!--<a href="#status${id}"><i data-feather="info"></i></a>-->
                                     <!--<a href="#status${id}"><i data-feather="share-2"></i></a>-->
@@ -291,7 +366,7 @@
                 return '';
             }
             function displayMedias(element){
-                console.log(element)
+                // console.log(element)
 
                 media  = '';
                 nb_medias = element['media_attachments'].length;
@@ -339,7 +414,7 @@
         .btn {text-decoration: none;}
         form {display: none;font-size: small;}
         .btn:visited{color: #777;}
-        .invisible {display: none;}
+        #container > div {display: none;}
         .ellipsis:after {content: '...';}
         .card img {float: left;height: 100;width: 100;border-radius: 0.3em 0 0 0.3em;object-fit: cover;margin-right: 0.3em;}
         .card span {display: block;}
@@ -364,35 +439,38 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="container">
         <h1>
             Toob
             <a class="btn btn-primary" href="#home"><i data-feather="home"></i></a>
             <a class="btn btn-primary" href="#public"><i data-feather="users"></i></a>
+            <a class="btn btn-primary" href="#write"><i data-feather="pen-tool"></i></a>
+            <a class="btn btn-primary" href="#logout"><i data-feather="log-out"></i></a>
         </h1>
-        <hr />
-        <a class="btn btn-primary" id="write" href=""><i data-feather="settings"></i></a>
-        <form class="needs-validation">
+        <div id="settings">
+            <a class="btn btn-primary" id="write" href=""><i data-feather="settings"></i></a>
             <div class="form-floating">
-                <input class="form-control" id="at" name="accesstoken" type="text" placeholder="Access Token" required/>
-                <!-- <label for="at">Access Token</label> -->
-            </div>
-            <div class="form-floating">
-                <input class="form-control" id="instance" name="instance" type="text" placeholder="https://piaille.fr" required/>
-                <!-- <label for="at">Mastodon instance</label> -->
-            </div>
-            <div class="form-floatin">
-                <textarea class="form-control" id="firststatus" name="status[]" placeholder="Start thread" required></textarea>
-                <!-- <label>Début du thread</label> -->
-            </div>
+                    <input class="form-control" id="at" name="accesstoken" type="text" placeholder="Access Token" required/>
+                    <!-- <label for="at">Access Token</label> -->
+                </div>
+                <div class="form-floating">
+                    <input class="form-control" id="instance" name="instance" type="text" placeholder="https://piaille.fr" required/>
+                    <!-- <label for="at">Mastodon instance</label> -->
+                </div>
+                <div><a class="btn btn-primary" id="refresh" href=""><i data-feather="repeat"></i></a></div>
+                <!-- <input class="btn btn-primary" type="submit" id="submit" value="Toot!"/> -->
+            <hr/>
+        </div>
+        <div id="compose">
+            <input type="hidden" id="in_reply_to"/>
+            <textarea class="form-control" id="firststatus" name="status[]" placeholder="Start thread" required></textarea>
             <a class="btn btn-primary" id="add" href=""><i data-feather="plus"></i></a>
             <a class="btn btn-primary" id="submit" href=""><i data-feather="send"></i></a>
-            <div><a class="btn btn-primary" id="refresh" href=""><i data-feather="repeat"></i></a></div>
-            <!-- <input class="btn btn-primary" type="submit" id="submit" value="Toot!"/> -->
-        </form>
-        <hr/>
-        <div id="timeline">
+            <a class="btn btn-primary" id="submit" href=""><i data-feather="x-square"></i></a>
         </div>
+        <div id="timeline"></div>
+        <div id="statuscontainer"></div>
+        <div id="login"><input type=text id="inst"/><input id="loginb" type="submit"/></div>
     </div>
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script> -->
 </body>
