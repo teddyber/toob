@@ -1,477 +1,422 @@
 <html>
-    <head>
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Toob</title>
-    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"> -->
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css"> -->
-
     <link rel="icon" type="image/x-icon" href="./toob.svg">
-
-    <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-        function s(p){return document.querySelector(p);}
-        function sa(p){return document.querySelectorAll(p);}
-        $( document ).ready(function() {
-            if (window.localStorage.getItem('at') && window.localStorage.getItem('instance')) {
-                document.querySelector('#at').setAttribute('value',window.localStorage.getItem('at'));
-                document.querySelector('#instance').setAttribute('value', window.localStorage.getItem('instance'));
-            } else {
-                code = new URLSearchParams(window.location.search).get('code')
-                if(code) {
-                    $.ajax(window.localStorage.getItem('instance')+"/oauth/token",{
-                        method: 'POST',
-                        data : {
-                            client_id : window.localStorage.getItem(window.localStorage.getItem('instance')+'_client_id'),
-                            client_secret : window.localStorage.getItem(window.localStorage.getItem('instance')+'_client_secret'),
-                            grant_type : 'authorization_code',
-                            redirect_uri : window.location.protocol + '//' + window.location.host + window.location.pathname,
-                            code : code,
-                            scope : "read write"
-                        },
-                        success : function(data) {
-                            window.localStorage.setItem('at', data.access_token)
-                            window.location.href = window.location.pathname
-                        }
-                    })
-                }
-                s('#login').style.display = 'block';
-            }
-            $('#loginb').click(function(){
-                inst = s('#inst').value
-                if (inst.substring(0, 8)!='https://') inst = 'https://'+inst
-                if (!window.localStorage.getItem(inst+'_client_id')) {
-                    $.ajax(inst+"/api/v1/apps", {
-                        method: 'POST',
-                        data :  {
-                            client_name : "Toob",
-                            redirect_uris : window.location.protocol + '//' + window.location.host + window.location.pathname,
-                            scopes : "read write",
-                            website : "https://github.com/teddyber/toob"
-                        },
-                        success : function(data) {
-                            window.localStorage.setItem(inst+'_client_id', data.client_id)
-                            window.localStorage.setItem(inst+'_client_secret', data.client_secret)
-                            window.localStorage.setItem('instance', inst)
-                            window.location.href=`${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst+'_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
-                        }
-                    })
-                }
-                else {
-                    window.localStorage.setItem('instance', inst) 
-                    window.location.href=`${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst+'_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
-                }
-            })
-            $('#add').click(function() {
-                $('#add').before('<div class="form-floatin"><textarea class="form-control" name="status[]" placeholder="Next..."></textarea></div>');
-                return false;
-            });
-            $('#submit').click(function(){
-                if (document.querySelector("#at").getAttribute('value')!='' && document.querySelector("#instance").getAttribute('value')!='') {
-                    window.localStorage.setItem('at', document.querySelector("#at").value);
-                    window.localStorage.setItem('instance', document.querySelector("#instance").value);
-                    var reply_to=$('#in_reply_to').val();
-                    $('textarea').each(function(index, element){
-                        $.ajax(document.querySelector("#instance").value+'/api/v1/statuses', 
-                            {
-                                method : 'POST',
-                                async : false,//moche
-                                headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //app AT
-                                data : {status: $(this).val(), visibility: "public", langage : "fr", in_reply_to_id : reply_to },
-                                success : function(data){reply_to=data.id;}
-                            }
-                        )
-                    });
-                    console.log('terminé')
-                    $('#compose').hide();
-                    $('textarea').val('')
-                    $('textarea:not(:first)').remove();
-                }
-                return false;
-            });
-            $("#write").click(function(){
-                $('form').slideToggle();
-                return false;
-            });
-            // $("#refresh").click(function(){
-            //     updateTimeline('home');
-            //     return false;
-            // });
-            function updateTimeline(which) {
-                // console.log(which)
-                if (document.querySelector("#at").value!='' && document.querySelector("#instance").value!='') {
-                    $('#timeline').html('').show();
-                    $('#statuscontainer').hide();
-                    window.localStorage.setItem('at', document.querySelector("#at").value);
-                    window.localStorage.setItem('instance', document.querySelector("#instance").value);
-                    $.ajax(document.querySelector("#instance").value+'/api/v1/'+which+'?limit=40', {
-                            method : 'GET',
-                            headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //from sengi
-                            // async : false,
-                            success : function(data){
-                                data.forEach(element => {
-                                    // console.log(element);
-                                    if(document.querySelectorAll('#s'+element.id).length==0) {
-                                        $('#timeline').append(displayStatus(element, ''));
-                                        if($('[in_reply_to_id="'+element['id']+'"]').length!=0) {
-                                            document.querySelector('[in_reply_to_id="'+element['id']+'"]').parentNode.insertBefore(document.querySelector('#s'+element.id), document.querySelector('[in_reply_to_id="'+element['id']+'"]'))
-                                            // $('[in_reply_to_id="'+element['id']+'"]').removeClass('topthread').addClass('thread').before(document.querySelector('#s'+element.id));
-                                            $('#s'+element.id).append($('[in_reply_to_id="'+element['id']+'"]'))
-                                            document.querySelectorAll('[in_reply_to_id="'+element['id']+'"]').forEach(element => {
-                                                element.classList.add('thread')
-                                                element.classList.remove('topthread')
-                                            }); 
-                                            document.querySelector('#s'+element.id).classList.add('topthread')
-                                        }
-                                    }
-                                });
-                                feather.replace();
-                                $('span.reblog').click(function(){
-                                    id=$(this).parents('.status').attr('id').substring(1);
-                                    span=this;
-                                    prefix = $(this).hasClass('reb')?'un':'';
-                                    $.ajax(document.querySelector("#instance").value+`/api/v1/statuses/${id}/${prefix}reblog`, {
-                                        method : 'POST',
-                                        headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //from sengi
-                                        success: function(data){
-                                            $(span).toggleClass('reb');
-                                        }
-                                    });
-                                });
-                                $('.feather-star').click(function(){
-                                    svg=this
-                                    id=$(this).parents('.status').attr('id').substring(1);
-                                    prefix = $(this).hasClass('fav')?'un':'';
-                                    $.ajax(document.querySelector("#instance").value+`/api/v1/statuses/${id}/${prefix}favourite`, {
-                                        method : 'POST',
-                                        headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //from sengi
-                                        success: function(data){
-                                            $(svg).toggleClass('fav');
-                                        }
-                                    });
-                                });
-                                $('a.hashtag').attr('target', '')
-                                $('a.reply').click(function() {
-                                    console.log($(this).parents('.status').attr('id').substring(1))
-                                    $('#in_reply_to').val($(this).parents('.status').attr('id').substring(1))
-                                    $(this).parents('.status').first().after($('#compose').show())
-                                    return false;
-                                })
-                                $('.mention').after(function(){return '<div class="popover"><a href="'+$(this).attr('href')+'">Follow!<a></div>';})
-                            }
-                        }
-                    );
-                } //TODO else display warning
-            }
-            window.addEventListener('hashchange', (event) => {
-                display();
-            });
-            if (window.location.hash == '') window.location.hash='#home';
-            function display() {
-                // console.log(window.location.hash)
-                // if(window.location.hash.substring(0, 7) == '#status') $('#timeline').html('');
-                if(window.location.hash== '#home') {
-                    // console.log(1)
-                    updateTimeline('timelines/home');
-                }
-                if(window.location.hash== '#public') {
-                    updateTimeline('timelines/public');
-                    // console.log(2)
-                }
-                if(window.location.hash.substring(0, 6)== '#tags/') {
-                    updateTimeline('timelines/tag/'+window.location.hash.substring(6));
-                    // console.log(3)
-                }
-                if(window.location.hash.substring(0, 8)== '#status/') {
-                    // console.log(4)
-                    updateStatus(window.location.hash.substring(8))
-                }
-                if(window.location.hash.substring(0, 8)== '#logout') {
-                    window.localStorage.removeItem('at')
-                    window.localStorage.removeItem('instance')
-                    window.location.href = window.location.pathname;
-                }
-                if(window.location.hash.substring(0, 8)== '#write') {
-                    feather.replace();
-
-                    $('h1').after($("#compose").show())
-                }
-            }
-            display();
-            function updateStatus(id) {
-                // console.log(id)
-                $('#timeline').hide();
-                $('#statuscontainer').text('').show();
-                $.ajax(document.querySelector("#instance").value+'/api/v1/statuses/'+id,
-                {
-                    method: 'GET',
-                    success: function(data){
-                        // console.log(data)
-                        current = data
-
-                        $.ajax(document.querySelector("#instance").value+'/api/v1/statuses/'+(data.reblog?data.reblog.id:id)+'/context', 
-                        {
-                            method:'GET',
-                            success: function(data) {
-                                i=0;
-                                data.ancestors.forEach(element => {
-                                    $('#statuscontainer').append(displayStatus(element, (i==0?'top':'ancestor')));
-                                    i++
-                                });
-                                c = current.reblog?current.reblog:current
-                                    $('#statuscontainer').append(displayStatus(c, 'focus'+(i==0?' top':'')));
-
-                                data.descendants.forEach(element => {
-                                    $('#s'+element.in_reply_to_id).append(displayStatus(element, 'thread'));
-                                });
-                                feather.replace();
-                                //TODO : factoriser le  code ci-dessous (gros copier coller)
-                                $('span.reblog').click(function(){
-                                    id=$(this).parents('.status').attr('id').substring(1);
-                                    span=this;
-                                    prefix = $(this).hasClass('reb')?'un':'';
-                                    $.ajax(document.querySelector("#instance").value+`/api/v1/statuses/${id}/${prefix}reblog`, {
-                                        method : 'POST',
-                                        headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //from sengi
-                                        success: function(data){
-                                            $(span).toggleClass('reb');
-                                        }
-                                    });
-                                });
-                                $('.feather-star').click(function(){
-                                    svg=this
-                                    id=$(this).parents('.status').attr('id').substring(1);
-                                    prefix = $(this).hasClass('fav')?'un':'';
-                                    $.ajax(document.querySelector("#instance").value+`/api/v1/statuses/${id}/${prefix}favourite`, {
-                                        method : 'POST',
-                                        headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //from sengi
-                                        success: function(data){
-                                            $(svg).toggleClass('fav');
-                                        }
-                                    });
-                                });
-                                $('a.hashtag').attr('target', '')
-                                $('a.reply').click(function() {
-                                    console.log($(this).parents('.status').attr('id').substring(1))
-                                    $('#in_reply_to').val($(this).parents('.status').attr('id').substring(1))
-                                    $(this).parents('.status').first().after($('#compose').show())
-                                    return false;
-                                })
-                                $('.mention').after(function(){return '<div class="popover"><a href="'+$(this).attr('href')+'">Follow!<a></div>';})
-                            }
-                            
-                        })
-
-                        // feather.replace();
-                        // //TODO : factoriser le  code ci-dessous (gros copier coller)
-                        // $('span.reblog').click(function(){
-                        //     id=$(this).parents('.status').attr('id').substring(1);
-                        //     span=this;
-                        //     prefix = $(this).hasClass('reb')?'un':'';
-                        //     $.ajax(document.querySelector("#instance").value+`/api/v1/statuses/${id}/${prefix}reblog`, {
-                        //         method : 'POST',
-                        //         headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //from sengi
-                        //         success: function(data){
-                        //             $(span).toggleClass('reb');
-                        //         }
-                        //     });
-                        // });
-                        // $('.feather-star').click(function(){
-                        //     svg=this
-                        //     id=$(this).parents('.status').attr('id').substring(1);
-                        //     prefix = $(this).hasClass('fav')?'un':'';
-                        //     $.ajax(document.querySelector("#instance").value+`/api/v1/statuses/${id}/${prefix}favourite`, {
-                        //         method : 'POST',
-                        //         headers : {'Authorization' : 'Bearer '+document.querySelector("#at").value}, //from sengi
-                        //         success: function(data){
-                        //             $(svg).toggleClass('fav');
-                        //         }
-                        //     });
-                        // });
-                        // $('a.hashtag').attr('target', '')
-
-
-                    }
-                });
-            }
-            function getStatus(id) {
-
-            }
-            function displayStatus(status, cssclass){
-                in_reply_to_id = status['in_reply_to_id'];
-                id = status['id'];
-                // if (in_reply_to_id==null) {
-                //     cssclass = cssclass + " top";
-                // }
-                if(status['reblog']==null) {
-                    st = status;
-                    reblog='';
-                } else {
-                    st = status['reblog']
-                    reblog = `<div class="reblog">
-                                    <a href="${status['account']['url']}">
-                                        <img src="${status['account']['avatar']}"/> ${replaceEmojis(status['account'], 'display_name')}
-                                    </a> boosted
-                                    <div class="popover"><a href="${status['account']['url']}">Follow!</a></div>
-                                </div>`;
-                }
-                return `<div class="status ${cssclass}" in_reply_to_id="${in_reply_to_id}" id="s${id}">
-                            ${reblog}
-                            <div class="acct">
-                                <div class="burger" style="float: right;">
-                                    <span class="reblog ${st['reblogged']?' reb"':''}"><i data-feather="repeat"></i>${st['reblogs_count']!=0?st['reblogs_count']:''}</span>
-                                    <a href="#status/${id}" class="info"><i data-feather="info"></i></a>
-                                    <a class="reply"><i data-feather="corner-up-left"></i>${st['replies_count']!=0?st['replies_count']:''}</a>
-                                    <i data-feather="star" ${st['favourited']?'class="fav"':''}></i>
-                                    <!--<a href="#status${id}"><i data-feather="info"></i></a>-->
-                                    <!--<a href="#status${id}"><i data-feather="share-2"></i></a>-->
-                                </div>
-                                <div>
-                                    <img src="${st['account']['avatar']}"/>
-                                    <div>${replaceEmojis(st['account'], 'display_name')}</div>
-                                    <div>@${st['account']['acct']}</div>
-                                    <div class="popover"><a href="${st['account']['url']}">Follow!</a></div>
-                                </div>
-                            </div>
-                            <div class="content">${replaceTagsLinks(replaceEmojis(st, 'content'))}</div>
-                            <div class="media">${displayMedias(st)}</div>
-                            ${displayCard(status)}
-                        </div>`;
-            }
-
-            function replaceTagsLinks(text){
-                return text.replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/')
-            }
-            function replaceEmojis(element, attr){
-                val = element[attr];
-                if (element['emojis'].length!=0) {
-                    for(i=0;i<element['emojis'].length;i++) {
-                        val = val.replaceAll(':'+element['emojis'][i]['shortcode']+':', '<img class="emoji" src="'+element['emojis'][i]['url']+'"/>')
-                    }
-                }
-                return val;
-            }
-            function displayCard(status){
-                if(status['card']!=null && status['card']['image']!=null){
-                    return `<a class="card" href="${status['card']['url']}">
-                                <span>
-                                    <img src="${status['card']['image']}"/>
-                                    <span class="provider">${status['card']['provider_name']}</span>
-                                    <span class="title">${status['card']['title']}</span>
-                                    <span class="desc">${status['card']['description']}</span>
-                                </span>
-                            </a>`
-                }
-                return '';
-            }
-            function displayMedias(element){
-                // console.log(element)
-
-                media  = '';
-                nb_medias = element['media_attachments'].length;
-                if (nb_medias!=0) {
-                    for(i=0;i<nb_medias;i++) {
-                        if (element['media_attachments'][i]['type']=='image')
-                            media = media + `<img title="${(element.media_attachments[i].description?element.media_attachments[i].description.replace(/"/g,'&quot;'):'')}" class="sized${(nb_medias==1?1:'')} ${(i%2?'odd':'even')}" src="${element['media_attachments'][i]['url']}"/>`;
-                        else 
-                            media = media + '<video controls class="sized'+(nb_medias==1?1:'')+' '+(i%2?'odd':'even')+'" src="'+element['media_attachments'][i]['url']+'"></video>'
-                    }
-                } else media='';
-                return media;
-            }
-        });
-    </script>
     <style>
-        body {font-family: Arial, Helvetica, sans-serif;margin: auto;width: 95%;max-width: 512;background-color: #111;color: #ddd;font-size: small;}
-        p {margin-bottom:0;text-align: justify;overflow: hidden;}
-        .sized1 {max-width: 100%;}
-        .content {clear: both;margin-top: 0.3em;}
-        /* .content + div {text-align: left;} */
-        .reblog img {width:24;}
-        div.reblog {color: #777;font-size: small;vertical-align: middle;}
-        .acct img {width: 46;float: left;margin-right: 0.3em;border-radius: 0.3em 0 0 0;}
-        a {color: gray;text-decoration: none;}
-        .acct a:hover, .reblog a:hover {text-decoration: underline;}
-        .status {border: 1px #444 solid;clear: both;padding: 0.3em;border-radius: 0.3em;margin-top: 0.2em;background-color: #222;}
-        /* .status div  {overflow: hidden;} */
-        hr {clear: both;}
-        .status.thread {border: none;border-left: 2px solid #444;margin-left: 0.3em;border-radius: 0;margin-top: 0;margin-right:0;padding-right: 0;}
-        .status.focus > div > p {font-size: larger;}
-        .status.topthread {border-radius: 0.3em 0.3em 0 0.3em;border-bottom: none;}
-        .status .status {margin-left: 0.3em;}
+        body {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: small;
+            max-width: 800;
+            margin: auto;
+            background-color: #333;
+            color: #ccc;
+        }
 
-        .status.focus {border-top: none;margin-top: 0;border-radius: 0 0 0.3em 0.3em;}
-        .status.top {border-top: 1px #444 solid}
-        .status.top, .status.ancestor {border-bottom: none;margin-bottom: 0;border-radius: 0.3em 0.3em 0 0;}
-        .status.ancestor {border-top: none;margin-top: 0;border-radius: 0 0 0 0;}
+        body>div {
+            display: none;
+        }
 
-        img.emoji {max-width: 1em;}
-        /* .status.top {margin-top: 0.3em;} */
-        img.sized {width: 50%;height:100;object-fit: cover;cursor: zoom-in;z-index: 100;}
-        img.sized:active, img.sized:focus, img.sized:hover {transition: all 0.35s ease-in-out; z-index: 100; transform: scale(2) translateX(25%);height: auto;}
-        img.sized.odd:active, img.sized.odd:focus, img.sized.odd:hover {transform: scale(2) translateX(-25%);}
-        .btn {text-decoration: none;}
-        form {display: none;font-size: small;}
-        .btn:visited{color: #777;}
-        #container > div {display: none;}
-        .ellipsis:after {content: '...';}
-        .card img {float: left;height: 100;width: 100;border-radius: 0.3em 0 0 0.3em;object-fit: cover;margin-right: 0.3em;}
-        .card span {display: block;}
-        .card > span {border: #444 solid 1px;border-radius: 0.3em;width: 90%;margin: auto;height: 100;overflow: hidden;font-size: small;margin-top: 0.3em;}
-        .title {font-weight: bold;padding-left: 0.3em;}
-        .description {padding-right: 0.3em;}
-        .provider {padding-top: 0.3em;}
-        a {color: #3088D4;}
-        a.card {text-decoration: none;}
-        a.card:hover span {text-decoration: underline;background-color: #333;}
-        i.icon {font-style: normal;filter: grayscale(100%);}
+        a {
+            color: #3088D4;
+            text-decoration: none;
+        }
 
-        .burger {cursor: pointer;}
-        .fav {stroke: #3088D4; stroke-width: 3;}
-        .reb svg, .reb {color: #3088D4; stroke: #3088D4;stroke-width: 3;}
-        .reply {color: #ddd;}
+        a:hover {
+            text-decoration: underline;
+        }
 
-        .popover {visibility: hidden;position: absolute;margin-top: 1em;background-color: #222;width: 10em;border: 1px solid #ddd;padding: 0.5em;border-radius: 0.3em;font-size: small;}
-        div.acct:hover div .popover, .h-card:hover .popover, .reblog:hover .popover {visibility: visible;margin-top: -1px;}
+        .status {
+            border: 1px solid #ccc;
+            border-radius: .3em;
+            margin: .2em;
+            padding: .2em;
+            overflow: hidden;
+        }
 
-        input, textarea {width: 100%;}
+        .author {
+            float: left;
+        }
+
+        .author .account {
+            font-size: smaller;
+        }
+
+        .author img {
+            max-width: 20;
+        }
+
+        .boost img {
+            max-width: 15;
+        }
+
+        .boost {
+            font-size: smaller;
+        }
+
+        .text {
+            clear: both;
+            overflow: auto;
+        }
+
+        .text p a span.invisible {
+            display: none;
+        }
+
+        .text p a span.ellipsis::after {
+            content: '…';
+        }
+
+        .text p {
+            text-align: justify;
+        }
+
+        .media {
+            text-align: center;
+        }
+
+        .media.multi {
+            overflow-x: scroll;
+            overflow-y: hidden;
+            white-space: nowrap;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .media * {
+            max-width: 100%;
+        }
+
+        .media.multi * {
+            max-width: 95%;
+        }
+
+        img+img {
+            margin-left: .2em;
+        }
+
+        .card {
+            width: 90%;
+            margin: auto;
+            border-radius: .3em;
+            border: 1px solid #ccc;
+            height: 100px;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+
+        .card img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            float: left;
+            margin-right: .3em;
+        }
+
+        .card .title {
+            font-weight: bold;
+        }
+
+        .status .status {
+            border: none;
+            border-radius: 0;
+            border-left: 1px solid #ccc;
+            padding-right: 0;
+            margin-right: 0;
+        }
+
+        .actions {
+            text-align: right;
+            float: right;
+        }
+
+        .actions i {
+            font-style: normal;
+            font-size: large;
+        }
+
+        .actions span {
+            border-radius: .3em;
+            padding: .3em;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+
+        .status.fav .fav,
+        .status.reb .reb {
+            background-color: #ccc;
+            color: #333
+        }
+
+        #write textarea {
+            display: block;
+            width: 100%;
+            font-family: inherit;
+        }
     </style>
 </head>
+
 <body>
-    <div id="container">
-        <h1>
-            Toob
-            <a class="btn btn-primary" href="#home"><i data-feather="home"></i></a>
-            <a class="btn btn-primary" href="#public"><i data-feather="users"></i></a>
-            <a class="btn btn-primary" href="#write"><i data-feather="pen-tool"></i></a>
-            <a class="btn btn-primary" href="#logout"><i data-feather="log-out"></i></a>
-        </h1>
-        <div id="settings">
-            <a class="btn btn-primary" id="write" href=""><i data-feather="settings"></i></a>
-            <div class="form-floating">
-                    <input class="form-control" id="at" name="accesstoken" type="text" placeholder="Access Token" required/>
-                    <!-- <label for="at">Access Token</label> -->
-                </div>
-                <div class="form-floating">
-                    <input class="form-control" id="instance" name="instance" type="text" placeholder="https://piaille.fr" required/>
-                    <!-- <label for="at">Mastodon instance</label> -->
-                </div>
-                <div><a class="btn btn-primary" id="refresh" href=""><i data-feather="repeat"></i></a></div>
-                <!-- <input class="btn btn-primary" type="submit" id="submit" value="Toot!"/> -->
-            <hr/>
-        </div>
-        <div id="compose">
-            <input type="hidden" id="in_reply_to"/>
-            <textarea class="form-control" id="firststatus" name="status[]" placeholder="Start thread" required></textarea>
-            <a class="btn btn-primary" id="add" href=""><i data-feather="plus"></i></a>
-            <a class="btn btn-primary" id="submit" href=""><i data-feather="send"></i></a>
-            <a class="btn btn-primary" id="submit" href=""><i data-feather="x-square"></i></a>
-        </div>
-        <div id="timeline"></div>
-        <div id="statuscontainer"></div>
-        <div id="login"><input type=text id="inst"/><input id="loginb" type="submit"/></div>
+    <nav id="nav">
+        <h1><a href="#home">H</a> <a href="#public">P</a> <a href="#write">W</a> <a href="#logout">L</a></h1>
+    </nav>
+    <div id="timeline"></div>
+    <div id="status"></div>
+    <div id="write">
+        <input type="" id="in_reply_to_id" />
+        <textarea placeholder="..."></textarea>
+        <button id="plus">+</button>
+        <button id="toob">Toob!</button>
     </div>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script> -->
+    <div id="login">
+        <input type="hidden" id="instance" placeholder="https://piaille.fr" />
+        <button id="loginb">Se connecter</button>
+    </div>
+    <script>
+        code = new URLSearchParams(window.location.search).get('code')
+        if (code) {
+            fd = new FormData();
+            fd.append('client_id', window.localStorage.getItem(window.localStorage.getItem('instance') + '_client_id'))
+            fd.append('client_secret', window.localStorage.getItem(window.localStorage.getItem('instance') + '_client_secret'))
+            fd.append('grant_type', 'authorization_code')
+            fd.append('redirect_uri', window.location.protocol + '//' + window.location.host + window.location.pathname)
+            fd.append('code', code)
+            fd.append('scope', 'read write')
+            ajax('POST', window.localStorage.getItem('instance') + "/oauth/token", fd,
+                function (e) {
+                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        window.localStorage.setItem('at', JSON.parse(e.target.response).access_token)
+                        window.location.href = window.location.pathname
+                    }
+                }
+            )
+        }
+        s('#loginb').onclick = function () {
+            inst = s('#instance').value
+            if (inst.substring(0, 8) != 'https://') inst = 'https://' + inst
+            if (!window.localStorage.getItem(inst + '_client_id')) {
+                $.ajax(inst + "/api/v1/apps", {
+                    method: 'POST',
+                    data: {
+                        client_name: "Toob",
+                        redirect_uris: window.location.protocol + '//' + window.location.host + window.location.pathname,
+                        scopes: "read write",
+                        website: "https://github.com/teddyber/toob"
+                    },
+                    success: function (data) {
+                        window.localStorage.setItem(inst + '_client_id', data.client_id)
+                        window.localStorage.setItem(inst + '_client_secret', data.client_secret)
+                        window.localStorage.setItem('instance', inst)
+                        window.location.href = `${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst + '_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
+                    }
+                })
+            }
+            else {
+                window.localStorage.setItem('instance', inst)
+                window.location.href = `${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst + '_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
+            }
+        }
+
+        whichTimeline = '';
+        window.addEventListener('hashchange', (event) => {
+            display();
+        });
+
+        if (window.location.hash == '') {
+            if (window.localStorage.getItem('instance'))
+                window.location.hash = '#home';
+            else
+                window.location.hash = '#login';
+        } else
+            display()
+        function s(p) { return document.querySelector(p); }// Select node from Pattern
+        function sa(p) { return document.querySelectorAll(p); }// Select All nodes from Pattern
+        function n(h) { return document.createRange().createContextualFragment(h) } // create Node from Html
+        function display() {
+            if (window.location.hash == '#logout') {
+                window.localStorage.removeItem('at')
+                window.localStorage.removeItem('instance')
+                window.location.href = window.location.pathname;
+            }
+            if (window.location.hash == '#login') {
+                showOnly('#login')
+            }
+            if (window.location.hash == '#home') {
+                showOnly('#timeline')
+                updateTimeline('timelines/home');
+            }
+            if (window.location.hash == '#write') {
+                showOnly('#write')
+            }
+            if (window.location.hash == '#public') {
+                showOnly('#timeline')
+                updateTimeline('timelines/public');
+            }
+            if (window.location.hash.substring(0, 6) == '#tags/') {
+                showOnly('#timeline')
+                updateTimeline('timelines/tag/' + window.location.hash.substring(6));
+            }
+            if (window.location.hash.substring(0, 8) == '#status/') {
+                showOnly('#status')
+                updateStatus(window.location.hash.substring(8))
+            }
+
+        }
+        function showOnly(div) {
+            sa('body > div').forEach(e => { e.style.display = 'none' })
+            s(div).style.display = 'block'
+        }
+        function updateTimeline(which) {
+            if (which != whichTimeline) {
+                whichTimeline = which
+                s('#timeline').textContent = ''
+                ajax("GET", window.localStorage.getItem('instance') + '/api/v1/' + which + '?limit=40', null, function (e) {
+                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        JSON.parse(e.target.response).forEach(el => {
+                            s('#timeline').append(n(displayStatus(el)))
+                            sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
+                                s('#s' + el.id).appendChild(c)
+                            })
+                        });
+                        //activate links
+                        sa('.actions .fav').forEach(e => {
+                            e.onclick = function () {
+                                st = this.parentNode.parentNode
+                                id = this.parentNode.parentNode.getAttribute('id').substring(1);
+                                prefix = this.parentNode.parentNode.classList.contains('fav') ? 'un' : '';
+                                ajax('POST', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}/${prefix}favourite`, null, function (e) {
+                                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                                        prefix == 'un' ? st.classList.remove('fav') : st.classList.add('fav')
+                                    }
+                                })
+                            }
+                        })
+                        sa('.actions .reb').forEach(e => {
+                            e.onclick = function () {
+                                st = this.parentNode.parentNode
+                                id = this.parentNode.parentNode.getAttribute('id').substring(1);
+                                prefix = this.parentNode.parentNode.classList.contains('reb') ? 'un' : '';
+                                ajax('POST', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
+                                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                                        prefix == 'un' ? st.classList.remove('reb') : st.classList.add('reb')
+                                    }
+                                })
+                            }
+                        })
+                        sa('a.hashtag').forEach(e => { e.removeAttribute('target', '') })
+                        sa('.actions .rep').forEach(e => {
+                            e.onclick = function () {
+                                id = this.parentNode.parentNode.getAttribute('id').substring(1);
+                                s('#in_reply_to_id').setAttribute('value', id)
+                                this.parentNode.parentNode.append(s('#write'))
+                                s('#write').style.display = 'block'
+                            }
+                        })
+                    }
+                })
+            }
+        }
+        function updateStatus(id) {
+            s('#status').innerHTML = '';
+            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/statuses/' + id, new FormData(), function (e) {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    current = JSON.parse(e.target.response)
+                    ajax('GET', window.localStorage.getItem('instance') + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : id) + '/context', new FormData(), function (e) {
+                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                            i = 0;
+                            data = JSON.parse(e.target.response)
+                            data.ancestors.forEach(element => {
+                                s('#status').append(n(displayStatus(element, (i == 0 ? 'top' : 'ancestor'), 't')));
+                                i++
+                            });
+                            c = current.reblog ? current.reblog : current
+                            s('#status').append(n(displayStatus(c, 'focus' + (i == 0 ? ' top' : ''), 't')));
+
+                            data.descendants.forEach(element => {
+                                s('#t' + element.in_reply_to_id).append(n(displayStatus(element, 'thread', 't')));
+                            });
+                        }
+                    })
+                }
+            })
+        }
+        function ajax(method, url, params, success) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = success;
+            xhttp.open(method, url, true);
+            xhttp.setRequestHeader('Authorization', 'Bearer ' + window.localStorage.getItem('at'))
+            if (params)
+                xhttp.send(params);
+            else
+                xhttp.send()
+        }
+        function displayStatus(el, cssClass = '', id_prefix = 's') {
+            if (el.reblog) {
+                boost = `<img src="${el.account.avatar}"/> ${el.account.display_name} boosted`;
+                e = el.reblog;
+            } else {
+                boost = ''
+                e = el;
+            }
+            return `<div id="${id_prefix}${e.id}" in_reply_to_id="s${e.in_reply_to_id}" class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
+            <div class="boost">${boost}</div>
+            <div class="reply_to"></div>
+            <div class="author"><img src="${e.account.avatar}"/> ${e.account.display_name} <span class="account">(${e.account.acct})</span></div>
+            <div class="actions">
+                <span class="link"><a href="#status/${e.id}"><i>V</i></a></span> 
+                <span class="rep"><i>R</i>(${e.replies_count})</span>
+                <span class="reb"><i>B</i>(${e.reblogs_count})</span> 
+                <span class="fav"><i>F</i></span>
+            </div>
+            <div class="text">${e.content.replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/')}</div>
+            <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
+                if (m.type == 'image') return `<img alt="${m.description}" src="${m.preview_url}"/>`;
+                if (m.type == 'video') return `<video src="${m.url}" poster="${m.preview_url}" controls role="button" tabindex="0" volume="1"></video>`
+            }).join('')}</div>
+            ${e.card ? `<div class="card"><a href="${e.card.url}">
+                ${e.card.image ? `<img src="${e.card.image}"/>` : ''}
+                <div class="provider">${e.card.provider_name}</div>
+                <div class="title">${e.card.title}</div>
+                <div class="desc">${e.card.description}</div>
+            </a></div>`: ''}
+        </div>`
+        }
+        function resize_textarea() {
+            this.style.overflow = 'hidden';
+            this.style.height = 0;
+            this.style.height = Math.max(this.scrollHeight, 50) + 'px';
+        }
+        sa('textarea').forEach(e => {
+            e.onkeyup = resize_textarea;
+        })
+        s('#plus').onclick = function () {
+            s('#plus').parentNode.insertBefore(n('<textarea name="status[]" placeholder="Next..."></textarea>'), s('#plus'))
+        }
+        s('#toob').onclick = function () {
+            ts = sa('textarea')
+            toob(ts, 0, s('#in_reply_to_id').getAttribute('value'))
+        }
+        function toob(toots, index, in_reply_to_id = null) {
+            if (index >= toots.length) {
+                //TODO remove and empty textareas
+                window.location.hash = '#write'
+            } else {
+                fd = new FormData();
+                fd.append('status', toots[index].value)
+                fd.append('visibility', 'public')
+                fd.append('language', 'fr')
+                if (in_reply_to_id && in_reply_to_id != '') fd.append('in_reply_to_id', in_reply_to_id)
+
+                ajax('POST', window.localStorage.getItem('instance') + '/api/v1/statuses', fd, function (e) {
+                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        toob(toots, index + 1, JSON.parse(e.target.response).id);
+                    }
+                })
+            }
+        }
+    </script>
 </body>
+
 </html>
