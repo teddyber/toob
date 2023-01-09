@@ -155,6 +155,8 @@
             width: 100%;
             font-family: inherit;
         }
+        img.emoji {max-width: 1em;}
+
     </style>
 </head>
 
@@ -165,13 +167,13 @@
     <div id="timeline"></div>
     <div id="status"></div>
     <div id="write">
-        <input type="" id="in_reply_to_id" />
+        <input type="hidden" id="in_reply_to_id" />
         <textarea placeholder="..."></textarea>
         <button id="plus">+</button>
         <button id="toob">Toob!</button>
     </div>
     <div id="login">
-        <input type="hidden" id="instance" placeholder="https://piaille.fr" />
+        <input type="text" id="instance" placeholder="https://piaille.fr" />
         <button id="loginb">Se connecter</button>
     </div>
     <script>
@@ -275,6 +277,7 @@
                 ajax("GET", window.localStorage.getItem('instance') + '/api/v1/' + which + '?limit=40', null, function (e) {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(e.target.response).forEach(el => {
+                            console.log(el)
                             s('#timeline').append(n(displayStatus(el)))
                             sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
                                 s('#s' + el.id).appendChild(c)
@@ -354,7 +357,7 @@
         }
         function displayStatus(el, cssClass = '', id_prefix = 's') {
             if (el.reblog) {
-                boost = `<img src="${el.account.avatar}"/> ${el.account.display_name} boosted`;
+                boost = `<img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)} boosted`;
                 e = el.reblog;
             } else {
                 boost = ''
@@ -363,14 +366,14 @@
             return `<div id="${id_prefix}${e.id}" in_reply_to_id="s${e.in_reply_to_id}" class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
             <div class="boost">${boost}</div>
             <div class="reply_to"></div>
-            <div class="author"><img src="${e.account.avatar}"/> ${e.account.display_name} <span class="account">(${e.account.acct})</span></div>
+            <div class="author"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></div>
             <div class="actions">
                 <span class="link"><a href="#status/${e.id}"><i>V</i></a></span> 
                 <span class="rep"><i>R</i>(${e.replies_count})</span>
                 <span class="reb"><i>B</i>(${e.reblogs_count})</span> 
                 <span class="fav"><i>F</i></span>
             </div>
-            <div class="text">${e.content.replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/')}</div>
+            <div class="text">${replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/')}</div>
             <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
                 if (m.type == 'image') return `<img alt="${m.description}" src="${m.preview_url}"/>`;
                 if (m.type == 'video') return `<video src="${m.url}" poster="${m.preview_url}" controls role="button" tabindex="0" volume="1"></video>`
@@ -382,6 +385,12 @@
                 <div class="desc">${e.card.description}</div>
             </a></div>`: ''}
         </div>`
+        }
+        function replaceEmojis(array, text) {
+            array.forEach(e=>{
+                text = text.replaceAll(':'+e.shortcode+':', '<img class="emoji" src="'+e.url+'"/>')
+            })
+            return text
         }
         function resize_textarea() {
             this.style.overflow = 'hidden';
