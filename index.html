@@ -108,6 +108,19 @@
             overflow-y: auto;
         }
 
+        .iframe {
+            width: 90%;
+            margin: auto;
+            border-radius: .3em;
+            border: 1px solid #ccc;
+            height: 300px;
+        }
+
+        .iframe iframe {
+            width: 100%;
+            height: 100%;
+        }
+
         .card img {
             width: 100px;
             height: 100px;
@@ -151,7 +164,7 @@
             color: #333
         }
 
-        #write textarea {
+        #write>textarea {
             display: block;
             width: 100%;
             font-family: inherit;
@@ -172,6 +185,10 @@
         #account .avatar {
             width: 100;
         }
+
+        #media_attachments {
+            display: none;
+        }
     </style>
 </head>
 
@@ -185,6 +202,9 @@
     <div id="write">
         <input type="hidden" id="in_reply_to_id" />
         <textarea placeholder="..."></textarea>
+        <div id="media_attachments">
+            <img class="img1" /><textarea class="alt1"></textarea>
+        </div>
         <button id="plus">+</button>
         <button id="toob">Toob!</button>
     </div>
@@ -420,7 +440,6 @@
                 ajax('GET', window.localStorage.getItem('instance') + '/api/v1/accounts/search?q=' + a[a.length - 1] + '@' + a[a.length - 2], null, function () {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         if (JSON.parse(this.response).length > 0) {
-                            console.log(JSON.parse(this.response))
                             e.href = '#account/' + JSON.parse(this.response)[0].id //TODO if multiple answers
                             e.removeAttribute('target', '')
                             e.classList.remove('u-url')
@@ -444,7 +463,7 @@
                 xhttp.send()
         }
         function displayStatus(el, cssClass = '', id_prefix = 's') {
-            // console.log(e)
+            // console.log(el)
             if (el.reblog) {
                 boost = `<a href="#account/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -452,6 +471,7 @@
                 boost = ''
                 e = el;
             }
+            e.card ? console.log(e.card) : '';
             return `<div id="${id_prefix}${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="s${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
             <div class="boost">${boost}</div>
             <div class="reply_to"></div>
@@ -464,16 +484,16 @@
             </div>
             <div class="text">${replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/')}</div>
             <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
-                if (m.type == 'image') return `<img alt="${m.description}" src="${m.preview_url}"/>`;
-                if (m.type == 'video') return `<video src="${m.url}" poster="${m.preview_url}" controls volume="1"></video>`
-                if (m.type == 'gifv') return `<video src="${m.url}" poster="${m.preview_url}" autoplay loop volume="1"></video>`
+                if (m.type == 'image') return `<img alt="${m.description}" title="${m.description}" aria-label="${m.description}" src="${m.preview_url}"/>`;
+                if (m.type == 'video') return `<video src="${m.url}" poster="${m.preview_url}" controls volume="1" aria-label="${m.description}" title="${m.description}"></video>`
+                if (m.type == 'gifv') return `<video src="${m.url}" poster="${m.preview_url}" autoplay loop volume="1" aria-label="${m.description}" title="${m.description}"></video>`
             }).join('')}</div>
-            ${e.card ? `<div class="card"><a href="${e.card.url}">
+            ${e.card ? (e.card.type == 'video' ? `<div class="iframe">${e.card.html}</div>` : `<div class="card"><a href="${e.card.url}">
                 ${e.card.image ? `<img src="${e.card.image}"/>` : ''}
                 <div class="provider">${e.card.provider_name}</div>
                 <div class="title">${e.card.title}</div>
                 <div class="desc">${e.card.description}</div>
-            </a></div>`: ''}
+            </a></div>`) : ''}
         </div>`
         }
         function replaceEmojis(array, text) {
@@ -490,24 +510,138 @@
         sa('textarea').forEach(e => {
             e.onkeyup = resize_textarea;
         })
+        sa('textarea').forEach(e => { //div.bla //paste image directly
+            // e.onpaste = function (ev) {
+            //     d = ev.clipboardData || window.clipboardData
+            //     // console.log(d)
+            //     // s('#log').innerHTML += d
+            //     for (i = 0; i < d.items.length; i++) {
+            //         console.log(d.items[i].type.indexOf('text'))
+            //         if (d.items[i].type.indexOf('text') == 0) d.items[i].getAsString(data => {
+            //             if (a = new URL(data)) {
+            //                 console.log(a)
+            //                 // s('#log').innerHTML += a
+
+            //                 e.after(n(`<img id="test" />`))//onload="javascript: s('#log').innerHTML += this.complete && this.naturalHeight"/>`))
+            //                 s('#test').onload = function () {
+            //                     console.log(this.complete && this.naturalHeight)
+            //                     console.log(this.src)
+            //                     // s('#log').innerHTML += src
+
+            //                     // var img = new Image();
+            //                     // img.src = document.getElementById("test").src;
+            //                     // console.log(img)
+            //                     // var canvas = document.getElementById("canvas");
+            //                     // var context = canvas.getContext("2d");
+            //                     // context.drawImage(img, 40, 40);
+            //                 }
+            //                 s('#test').setAttribute('src', data)
+            //                 // ajax('GET', data, null, function () {
+            //                 //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            //                 //         console.log(this.response)
+            //                 //     }
+            //                 // })
+            //                 // im = s('#test')
+            //                 // console.log(im.complete && im.naturalHeight)
+            //             }
+            //             i = n(data)
+            //             console.log(i)
+            //             // e.after(n)
+            //         })
+            //         // if(d.items[i].type.indexOf('image')==0)  console.log(d.items[i].getAsFile(data=>{console.log(data)}))
+            //     }
+            // }
+            e.oninput = function (ev) { //paste or inject GIF URL
+                if ((ev.inputType == 'insertText' || ev.inputType == 'insertFromPaste') && ev.data.substring(0, 4) == 'http' && (url = new URL(ev.data))) {
+                    // e.after(n(`<img id="test" style="display: none;"/><input type="text" id="alt"/>`))  //onload="javascript: s('#log').innerHTML += this.complete && this.naturalHeight"/>`))
+                    s('#media_attachments .img1').setAttribute('src', ev.data)
+
+                }
+            }
+        })
         s('#plus').onclick = function () {
             s('#plus').parentNode.insertBefore(n('<textarea name="status[]" placeholder="Next..."></textarea>'), s('#plus'))
+            s('#write > textarea:last-of-type').focus()
         }
+        s('#media_attachments .img1').onload = function () {
+            if (this.src.substring(0, 4) == 'http' && this.complete && this.naturalHeight != 1) {
+                textarea = this.parentNode.previousSibling.previousSibling
+                src = this.src
+                console.log(this.parentNode.previousSibling.previousSibling)
+                ajax('GET', 'pj.php?url=' + this.src, null, function () {
+                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        console.log(this.src)
+                        textarea.value = textarea.value.replace(src, '') // remove URL from textarea
+                        console.log(textarea.value)
+                        s('#media_attachments .img1').setAttribute('src', 'data:' + this.getResponseHeader('content-type') + ';base64, ' + this.response)
+                        s('#media_attachments').style.display = 'inline'
+                        attach = true
+                    }
+                })
+            }
+        }
+        attach = false
         s('#toob').onclick = function () {
-            ts = sa('textarea')
-            toob(ts, 0, s('#in_reply_to_id').getAttribute('value'))
+            if (attach) {
+                const file = DataURIToBlob(s('#media_attachments .img1').getAttribute('src'))
+                const fd = new FormData();
+                fd.append('file', file, 'test.gif')
+                fd.append('description', s('#media_attachments .alt1').value)
+                ajax('POST', window.localStorage.getItem('instance') + '/api/v2/media', fd, function () {
+                    if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
+                        ts = sa('#write > textarea')
+                        id = JSON.parse(this.response).id
+                        setInterval(checkUpload(id), 1000)
+                        // toob(ts, 0, s('#in_reply_to_id').getAttribute('value'), [JSON.parse(this.response).id])
+                    }
+                })
+            } else {
+                ts = sa('#write > textarea')
+                toob(ts, 0, s('#in_reply_to_id').getAttribute('value'))
+            }
         }
-        function toob(toots, index, in_reply_to_id = null) {
+        function checkUpload(id) {
+            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/media/' + id, null, function () {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    ts = sa('#write > textarea')
+                    toob(ts, 0, s('#in_reply_to_id').getAttribute('value'), [id])
+                }
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 206) {
+                    setInterval(checkUpload(id), 1000)
+                }
+            })
+        }
+        function DataURIToBlob(dataURI) {//}: string) {
+            const splitDataURI = dataURI.split(',')
+            const byteString = splitDataURI[0].indexOf('base64') >= 0 ? atob(splitDataURI[1]) : decodeURI(splitDataURI[1])
+            const mimeString = splitDataURI[0].split(':')[1].split(';')[0]
+
+            const ia = new Uint8Array(byteString.length)
+            for (let i = 0; i < byteString.length; i++)
+                ia[i] = byteString.charCodeAt(i)
+
+            return new Blob([ia], { type: mimeString })
+        }
+        function toob(toots, index, in_reply_to_id = null, medias = null) {
             if (index >= toots.length) {
-                //TODO remove and empty textareas
-                window.location.hash = '#write'
+                i = 0
+                sa('#write > textarea').forEach(t => {
+                    t.value = ''
+                    if (i > 0) t.remove()
+                    i++
+                })
+                sa('#write img').forEach(i => { i.src = '' })
+                sa('#write textarea').forEach(t => { t.value = '' })
+                attach = false
+                s('#media_attachments').style.display = 'none'
+                window.location.hash = '#home'
             } else {
                 fd = new FormData();
                 fd.append('status', toots[index].value)
                 fd.append('visibility', 'public')
                 fd.append('language', 'fr')
+                if (medias) fd.append('media_ids[]', medias[0])
                 if (in_reply_to_id && in_reply_to_id != '') fd.append('in_reply_to_id', in_reply_to_id)
-
                 ajax('POST', window.localStorage.getItem('instance') + '/api/v1/statuses', fd, function (e) {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         toob(toots, index + 1, JSON.parse(this.response).id);
