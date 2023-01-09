@@ -75,6 +75,7 @@
 
         .media {
             text-align: center;
+            margin-top: .5em;
         }
 
         .media.multi {
@@ -155,8 +156,22 @@
             width: 100%;
             font-family: inherit;
         }
-        img.emoji {max-width: 1em;}
 
+        img.emoji {
+            max-width: 1em;
+        }
+
+        .status[in_reply_to_id] {
+            border-left: 2px solid #ccc;
+        }
+
+        #account .header {
+            width: 100%;
+        }
+
+        #account .avatar {
+            width: 100;
+        }
     </style>
 </head>
 
@@ -166,6 +181,7 @@
     </nav>
     <div id="timeline"></div>
     <div id="status"></div>
+    <div id="account"></div>
     <div id="write">
         <input type="hidden" id="in_reply_to_id" />
         <textarea placeholder="..."></textarea>
@@ -189,7 +205,7 @@
             ajax('POST', window.localStorage.getItem('instance') + "/oauth/token", fd,
                 function (e) {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        window.localStorage.setItem('at', JSON.parse(e.target.response).access_token)
+                        window.localStorage.setItem('at', JSON.parse(this.response).access_token)
                         window.location.href = window.location.pathname
                     }
                 }
@@ -222,6 +238,8 @@
         }
 
         whichTimeline = '';
+        lastAccountId = '';
+        lastStatusId = '';
         window.addEventListener('hashchange', (event) => {
             display();
         });
@@ -260,6 +278,10 @@
                 showOnly('#timeline')
                 updateTimeline('timelines/tag/' + window.location.hash.substring(6));
             }
+            if (window.location.hash.substring(0, 9) == '#account/') {
+                showOnly('#account')
+                updateAccount(window.location.hash.substring(9));
+            }
             if (window.location.hash.substring(0, 8) == '#status/') {
                 showOnly('#status')
                 updateStatus(window.location.hash.substring(8))
@@ -276,60 +298,28 @@
                 s('#timeline').textContent = ''
                 ajax("GET", window.localStorage.getItem('instance') + '/api/v1/' + which + '?limit=40', null, function (e) {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        JSON.parse(e.target.response).forEach(el => {
-                            console.log(el)
+                        JSON.parse(this.response).forEach(el => {
                             s('#timeline').append(n(displayStatus(el)))
                             sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
                                 s('#s' + el.id).appendChild(c)
                             })
                         });
-                        //activate links
-                        sa('.actions .fav').forEach(e => {
-                            e.onclick = function () {
-                                st = this.parentNode.parentNode
-                                id = this.parentNode.parentNode.getAttribute('id').substring(1);
-                                prefix = this.parentNode.parentNode.classList.contains('fav') ? 'un' : '';
-                                ajax('POST', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}/${prefix}favourite`, null, function (e) {
-                                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                                        prefix == 'un' ? st.classList.remove('fav') : st.classList.add('fav')
-                                    }
-                                })
-                            }
-                        })
-                        sa('.actions .reb').forEach(e => {
-                            e.onclick = function () {
-                                st = this.parentNode.parentNode
-                                id = this.parentNode.parentNode.getAttribute('id').substring(1);
-                                prefix = this.parentNode.parentNode.classList.contains('reb') ? 'un' : '';
-                                ajax('POST', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
-                                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                                        prefix == 'un' ? st.classList.remove('reb') : st.classList.add('reb')
-                                    }
-                                })
-                            }
-                        })
-                        sa('a.hashtag').forEach(e => { e.removeAttribute('target', '') })
-                        sa('.actions .rep').forEach(e => {
-                            e.onclick = function () {
-                                id = this.parentNode.parentNode.getAttribute('id').substring(1);
-                                s('#in_reply_to_id').setAttribute('value', id)
-                                this.parentNode.parentNode.append(s('#write'))
-                                s('#write').style.display = 'block'
-                            }
-                        })
+                        tweak();
                     }
                 })
             }
         }
         function updateStatus(id) {
+            if (id == lastStatusId) return;
+            lastStatusId = id;
             s('#status').innerHTML = '';
             ajax('GET', window.localStorage.getItem('instance') + '/api/v1/statuses/' + id, new FormData(), function (e) {
                 if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    current = JSON.parse(e.target.response)
+                    current = JSON.parse(this.response)
                     ajax('GET', window.localStorage.getItem('instance') + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : id) + '/context', new FormData(), function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             i = 0;
-                            data = JSON.parse(e.target.response)
+                            data = JSON.parse(this.response)
                             data.ancestors.forEach(element => {
                                 s('#status').append(n(displayStatus(element, (i == 0 ? 'top' : 'ancestor'), 't')));
                                 i++
@@ -340,10 +330,108 @@
                             data.descendants.forEach(element => {
                                 s('#t' + element.in_reply_to_id).append(n(displayStatus(element, 'thread', 't')));
                             });
+                            tweak();
+                        }
+                    })
+
+                }
+            })
+        }
+        function updateAccount(id) {
+            if (id == lastAccountId) return;
+            lastAccountId = id;
+            s('#account').innerHTML = '';
+            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/accounts/' + id, null, function (e) {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    data = JSON.parse(this.response)
+                    html = `
+                    <img class="header" src="${data.header}"/>
+                    <img class="avatar" src="${data.avatar}"/>
+                    <button id="follow" acct="${data.id}"></button>
+                    <div class="dn">${data.display_name}</div>
+                    <div class="acct">${data.acct}</div>
+                    <div class="note">${data.note}</div>
+                    <div class="follows">Follows ${data.following_count}</div>
+                    <div class="followed">Followed by ${data.followers_count}</div>
+                    <div class="statuses">Statuses ${data.statuses_count}</div>
+                    `
+                    s('#account').innerHTML = html
+                    s('#follow').onclick = function () {
+                        ajax('POST', window.localStorage.getItem('instance') + '/api/v1/accounts/' + id + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
+                            if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                                s('#follow').innerText = s('#follow').innerText == 'Follow' ? 'Unfollow' : 'Follow'
+                            }
+                        })
+                    }
+                    ajax('GET', window.localStorage.getItem('instance') + `/api/v1/accounts/relationships?id[]=${id}`, null, function (e) {
+                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                            s('#follow').innerText = JSON.parse(this.response)[0].following ? 'Unfollow' : 'Follow'
                         }
                     })
                 }
             })
+
+            ajax('GET', window.localStorage.getItem('instance') + `/api/v1/accounts/${id}/statuses?limit=40`, null, function (e) {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    JSON.parse(this.response).forEach(e => {
+                        s('#account').append(n(displayStatus(e)))
+                    })
+                    tweak();
+                }
+            })
+        }
+        function tweak() {
+            //activate links$
+            sa('.actions .fav').forEach(e => {
+                e.onclick = function () {
+                    st = this.parentNode.parentNode
+                    id = this.parentNode.parentNode.getAttribute('id').substring(1);
+                    prefix = this.parentNode.parentNode.classList.contains('fav') ? 'un' : '';
+                    ajax('POST', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}/${prefix}favourite`, null, function (e) {
+                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                            prefix == 'un' ? st.classList.remove('fav') : st.classList.add('fav')
+                        }
+                    })
+                }
+            })
+            sa('.actions .reb').forEach(e => {
+                e.onclick = function () {
+                    st = this.parentNode.parentNode
+                    id = this.parentNode.parentNode.getAttribute('id').substring(1);
+                    prefix = this.parentNode.parentNode.classList.contains('reb') ? 'un' : '';
+                    ajax('POST', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
+                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                            prefix == 'un' ? st.classList.remove('reb') : st.classList.add('reb')
+                        }
+                    })
+                }
+            })
+            sa('a.hashtag').forEach(e => { e.removeAttribute('target') })
+            sa('.actions .rep').forEach(e => {
+                e.onclick = function () {
+                    id = this.parentNode.parentNode.getAttribute('id').substring(1);
+                    s('#in_reply_to_id').setAttribute('value', id)
+                    this.parentNode.parentNode.append(s('#write'))
+                    s('#write').style.display = 'block'
+                }
+            })
+            sa('a.mention.u-url').forEach(e => {
+                a = e.href.split('/')
+                ajax('GET', window.localStorage.getItem('instance') + '/api/v1/accounts/search?q=' + a[a.length - 1] + '@' + a[a.length - 2], null, function () {
+                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        if (JSON.parse(this.response).length > 0) {
+                            console.log(JSON.parse(this.response))
+                            e.href = '#account/' + JSON.parse(this.response)[0].id //TODO if multiple answers
+                            e.removeAttribute('target', '')
+                            e.classList.remove('u-url')
+                        } else {
+                            console.log('less than 1')
+                            console.log(this.response)
+                        }
+                    }
+                })
+            })
+
         }
         function ajax(method, url, params, success) {
             var xhttp = new XMLHttpRequest();
@@ -356,17 +444,18 @@
                 xhttp.send()
         }
         function displayStatus(el, cssClass = '', id_prefix = 's') {
+            // console.log(e)
             if (el.reblog) {
-                boost = `<img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)} boosted`;
+                boost = `<a href="#account/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
             } else {
                 boost = ''
                 e = el;
             }
-            return `<div id="${id_prefix}${e.id}" in_reply_to_id="s${e.in_reply_to_id}" class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
+            return `<div id="${id_prefix}${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="s${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
             <div class="boost">${boost}</div>
             <div class="reply_to"></div>
-            <div class="author"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></div>
+            <div class="author"><a href="#account/${e.account.id}"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
             <div class="actions">
                 <span class="link"><a href="#status/${e.id}"><i>V</i></a></span> 
                 <span class="rep"><i>R</i>(${e.replies_count})</span>
@@ -376,7 +465,8 @@
             <div class="text">${replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/')}</div>
             <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
                 if (m.type == 'image') return `<img alt="${m.description}" src="${m.preview_url}"/>`;
-                if (m.type == 'video') return `<video src="${m.url}" poster="${m.preview_url}" controls role="button" tabindex="0" volume="1"></video>`
+                if (m.type == 'video') return `<video src="${m.url}" poster="${m.preview_url}" controls volume="1"></video>`
+                if (m.type == 'gifv') return `<video src="${m.url}" poster="${m.preview_url}" autoplay loop volume="1"></video>`
             }).join('')}</div>
             ${e.card ? `<div class="card"><a href="${e.card.url}">
                 ${e.card.image ? `<img src="${e.card.image}"/>` : ''}
@@ -387,8 +477,8 @@
         </div>`
         }
         function replaceEmojis(array, text) {
-            array.forEach(e=>{
-                text = text.replaceAll(':'+e.shortcode+':', '<img class="emoji" src="'+e.url+'"/>')
+            array.forEach(e => {
+                text = text.replaceAll(':' + e.shortcode + ':', '<img class="emoji" src="' + e.url + '"/>')
             })
             return text
         }
@@ -420,7 +510,7 @@
 
                 ajax('POST', window.localStorage.getItem('instance') + '/api/v1/statuses', fd, function (e) {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        toob(toots, index + 1, JSON.parse(e.target.response).id);
+                        toob(toots, index + 1, JSON.parse(this.response).id);
                     }
                 })
             }
