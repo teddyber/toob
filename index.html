@@ -319,6 +319,7 @@
         function sa(p) { return document.querySelectorAll(p); }// Select All nodes from Pattern
         function n(h) { return document.createRange().createContextualFragment(h) } // create Node from Html
         function display() {
+            s('body').append(s('#write'))
             if (window.location.hash == '#logout') {
                 window.localStorage.removeItem('at')
                 window.localStorage.removeItem('instance')
@@ -480,6 +481,15 @@
                     s('#in_reply_to_id').setAttribute('value', id)
                     this.parentNode.parentNode.append(s('#write'))
                     s('#write').style.display = 'block'
+                    s('#write textarea').value = '@' + this.getAttribute('author') + ' ' + this.getAttribute('mentions') + ' '
+                    s('#write textarea').focus();
+                    end = s('#write textarea').selectionEnd
+                    start = s('#write textarea').selectionStart - this.getAttribute('mentions').length
+                    s('#write textarea').value += `
+${this.getAttribute('tags')}`
+s('#write textarea').style.height = Math.max(s('#write textarea').scrollHeight, 50) + 'px';
+                    s('#write textarea').selectionStart = start - 1
+                    s('#write textarea').selectionEnd = end - 1
                 }
             })
         }
@@ -509,7 +519,8 @@
             <div class="author"><a href="#account/${e.account.id}"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
             <div class="actions">
                 <span class="link"><a href="#status/${e.id}"><i>V</i></a></span> 
-                <span class="rep"><i>R</i>(${e.replies_count})</span>
+                <span class="rep" author="${e.account.acct}" mentions="${e.mentions.map(function(m){return `@${m.acct}`}).join(' ')}" 
+                tags="${e.tags.map(function(t){return `#${t.name}`}).join(' ')}"><i>R</i>(${e.replies_count})</span>
                 <span class="reb"><i>B</i>(${e.reblogs_count})</span> 
                 <span class="fav"><i>F</i></span>
             </div>
@@ -704,6 +715,9 @@
             CW support
             pictures in threads editing
             remote instances publi/home timeline and interaction with local account
+            search
+            notifications
+            embedded (feather) icons
         */
     </script>
 </body>
