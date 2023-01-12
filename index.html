@@ -6,21 +6,61 @@
     <title>Toob</title>
     <link rel="icon" type="image/x-icon" href="./toob.svg">
     <style>
+        :root {
+            /* --color: #333;
+            --bg: #eee; */
+            --highlight: #3088D4;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --color: #333;
+                --bg: #eee;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color: #eee;
+                --bg: #333;
+            }
+        }
+
         body {
             font-family: Verdana, Geneva, Tahoma, sans-serif;
             font-size: small;
             max-width: 800;
             margin: auto;
-            background-color: #333;
-            color: #ccc;
+            background-color: var(--bg);
+            color: var(--color);
         }
 
         body>div {
             display: none;
+            margin-top: 70px;
+        }
+
+        nav {
+            position: fixed;
+            display: block;
+            width: 100%;
+            max-width: 800;
+            top: 0px;
+            background-color: var(--bg);
+            box-shadow: 0 3px 3px var(--color);
+        }
+
+        nav h1 {
+            margin-left: 2em;
+            word-spacing: 2em;
+        }
+
+        nav a.active {
+            text-decoration: underline;
         }
 
         a {
-            color: #3088D4;
+            color: var(--highlight);
             text-decoration: none;
         }
 
@@ -29,7 +69,7 @@
         }
 
         .status {
-            border: 1px solid #ccc;
+            border: 1px solid var(--color);
             border-radius: .3em;
             margin: .2em;
             padding: .2em;
@@ -102,7 +142,7 @@
             width: 90%;
             margin: auto;
             border-radius: .3em;
-            border: 1px solid #ccc;
+            border: 1px solid var(--color);
             height: 100px;
             overflow: hidden;
             overflow-y: auto;
@@ -112,7 +152,7 @@
             width: 90%;
             margin: auto;
             border-radius: .3em;
-            border: 1px solid #ccc;
+            border: 1px solid var(--color);
             height: 300px;
         }
 
@@ -136,7 +176,7 @@
         .status .status {
             border: none;
             border-radius: 0;
-            border-left: 1px solid #ccc;
+            border-left: 1px solid var(--color);
             padding-right: 0;
             margin-right: 0;
         }
@@ -155,13 +195,13 @@
             border-radius: .3em;
             padding: .3em;
             cursor: pointer;
-            border: 1px solid #ccc;
+            border: 1px solid var(--color);
         }
 
-        .status.fav .fav,
-        .status.reb .reb {
-            background-color: #ccc;
-            color: #333
+        .status.fav>div>.fav,
+        .status.reb>div>.reb {
+            background-color: var(--color);
+            color: var(--bg);
         }
 
         #write>textarea {
@@ -175,7 +215,7 @@
         }
 
         .status[in_reply_to_id] {
-            border-left: 2px solid #ccc;
+            border-left: 2px solid var(--highlight);
         }
 
         #account .header {
@@ -260,6 +300,10 @@
         whichTimeline = '';
         lastAccountId = '';
         lastStatusId = '';
+        maxId = 999999999999999999
+        waitingFor = 999999999999999999
+        // max_id=109676438557141828
+
         window.addEventListener('hashchange', (event) => {
             display();
         });
@@ -311,6 +355,8 @@
         function showOnly(div) {
             sa('body > div').forEach(e => { e.style.display = 'none' })
             s(div).style.display = 'block'
+            sa('nav a').forEach(e => { e.classList.remove('active') })
+            if (s(`[href^="${window.location.hash}"]`)) s(`[href^="${window.location.hash}"]`).classList.add('active')
         }
         function updateTimeline(which) {
             if (which != whichTimeline) {
@@ -320,6 +366,7 @@
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(this.response).forEach(el => {
                             s('#timeline').append(n(displayStatus(el)))
+                            maxId = Math.min(maxId, el.id)
                             sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
                                 s('#s' + el.id).appendChild(c)
                             })
@@ -435,22 +482,6 @@
                     s('#write').style.display = 'block'
                 }
             })
-            sa('a.mention.u-url').forEach(e => {
-                a = e.href.split('/')
-                ajax('GET', window.localStorage.getItem('instance') + '/api/v1/accounts/search?q=' + a[a.length - 1] + '@' + a[a.length - 2], null, function () {
-                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        if (JSON.parse(this.response).length > 0) {
-                            e.href = '#account/' + JSON.parse(this.response)[0].id //TODO if multiple answers
-                            e.removeAttribute('target', '')
-                            e.classList.remove('u-url')
-                        } else {
-                            console.log('less than 1')
-                            console.log(this.response)
-                        }
-                    }
-                })
-            })
-
         }
         function ajax(method, url, params, success) {
             var xhttp = new XMLHttpRequest();
@@ -471,7 +502,7 @@
                 boost = ''
                 e = el;
             }
-            e.card ? console.log(e.card) : '';
+            // e.card ? console.log(e.card) : '';
             return `<div id="${id_prefix}${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="s${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
             <div class="boost">${boost}</div>
             <div class="reply_to"></div>
@@ -482,7 +513,7 @@
                 <span class="reb"><i>B</i>(${e.reblogs_count})</span> 
                 <span class="fav"><i>F</i></span>
             </div>
-            <div class="text">${replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/')}</div>
+            <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/'))}</div>
             <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
                 if (m.type == 'image') return `<img alt="${m.description}" title="${m.description}" aria-label="${m.description}" src="${m.preview_url}"/>`;
                 if (m.type == 'video') return `<video src="${m.url}" poster="${m.preview_url}" controls volume="1" aria-label="${m.description}" title="${m.description}"></video>`
@@ -495,6 +526,12 @@
                 <div class="desc">${e.card.description}</div>
             </a></div>`) : ''}
         </div>`
+        }
+        function replaceMentions(array, text) {
+            array.forEach(m => {
+                text = text.replaceAll(`href="${m.url}"`, `href="#account/${m.id}"`).replaceAll('target="_blank"', '')
+            })
+            return text
         }
         function replaceEmojis(array, text) {
             array.forEach(e => {
@@ -567,12 +604,9 @@
             if (this.src.substring(0, 4) == 'http' && this.complete && this.naturalHeight != 1) {
                 textarea = this.parentNode.previousSibling.previousSibling
                 src = this.src
-                console.log(this.parentNode.previousSibling.previousSibling)
                 ajax('GET', 'pj.php?url=' + this.src, null, function () {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        console.log(this.src)
                         textarea.value = textarea.value.replace(src, '') // remove URL from textarea
-                        console.log(textarea.value)
                         s('#media_attachments .img1').setAttribute('src', 'data:' + this.getResponseHeader('content-type') + ';base64, ' + this.response)
                         s('#media_attachments').style.display = 'inline'
                         attach = true
@@ -623,18 +657,14 @@
             return new Blob([ia], { type: mimeString })
         }
         function toob(toots, index, in_reply_to_id = null, medias = null) {
-            if (index >= toots.length) {
-                i = 0
-                sa('#write > textarea').forEach(t => {
-                    t.value = ''
-                    if (i > 0) t.remove()
-                    i++
-                })
-                sa('#write img').forEach(i => { i.src = '' })
-                sa('#write textarea').forEach(t => { t.value = '' })
-                attach = false
-                s('#media_attachments').style.display = 'none'
-                window.location.hash = '#home'
+            if (index >= toots.length) {//nothing more to toot
+                sa('#write > textarea:not(:first-child)').forEach(t => { t.remove() }) ///remove additional textareas
+                sa('#write img').forEach(i => { i.src = '' }) //reset media attachments
+                sa('#write textarea').forEach(t => { t.value = '' })//reset remaining texteareas (alt texts)
+                attach = false // reset attachment status
+                s('#media_attachments').style.display = 'none' //hide media attachments
+                s('#account').after(s('#write'))//move #write back to its place
+                window.location.hash = '#home' //back to home page. TODO in all cases?? location.reload()
             } else {
                 fd = new FormData();
                 fd.append('status', toots[index].value)
@@ -649,6 +679,32 @@
                 })
             }
         }
+        window.onscroll = function (ev) {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                if (waitingFor > maxId) {
+                    ajax('GET', window.localStorage.getItem('instance') + '/api/v1/' + whichTimeline + '?limit=40&max_id=' + maxId, null, function () {
+                        if (this.readyState == 4 && this.status == 200) {
+                            JSON.parse(this.response).forEach(el => {
+                                s('#timeline').append(n(displayStatus(el)))
+                                maxId = Math.min(maxId, el.id)
+                                sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
+                                    s('#s' + el.id).appendChild(c)
+                                })
+                            })
+                        }
+                    })
+                    waitingFor = maxId
+                }
+            }
+        }
+        /* TODOS
+            4 pictures
+            remove picture when drafting
+            require picture description
+            CW support
+            pictures in threads editing
+            remote instances publi/home timeline and interaction with local account
+        */
     </script>
 </body>
 
