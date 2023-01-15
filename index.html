@@ -52,15 +52,16 @@
 
         nav h1 {
             margin-left: 2em;
-            word-spacing: 2em;
+            word-spacing: 1em;
         }
 
-        nav a.active {
+        nav a.active svg {
             text-decoration: underline;
+            color: var(--highlight);
         }
 
         a {
-            color: var(--highlight);
+            color: var(--color);
             text-decoration: none;
         }
 
@@ -76,6 +77,24 @@
             overflow: hidden;
         }
 
+        button,
+        label.button {
+            border: none;
+            color: #eee;
+            background-color: var(--highlight);
+            padding: 4px 8px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.2em;
+            border-radius: .5em;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
         .author {
             float: left;
         }
@@ -84,8 +103,13 @@
             font-size: smaller;
         }
 
-        .author img {
+        .author img,
+        .notif .avatar {
             max-width: 20;
+        }
+
+        .notif {
+            border-bottom: 1px solid var(--color);
         }
 
         .boost img {
@@ -200,14 +224,20 @@
 
         .status.fav>div>.fav,
         .status.reb>div>.reb {
-            background-color: var(--color);
+            background-color: var(--highlight);
             color: var(--bg);
+            border: var(--highlight);
         }
 
         #write>textarea {
             display: block;
             width: 100%;
             font-family: inherit;
+        }
+
+        textarea {
+            border-radius: .5em;
+            border: 1px solid #333;
         }
 
         img.emoji {
@@ -229,21 +259,137 @@
         #media_attachments {
             display: none;
         }
+
+        .editthread {
+            display: grid;
+            grid-template-columns: auto 2.5em;
+            grid-template-rows: 50% 50% auto;
+        }
+
+        .editthread>* {
+            margin: .1em
+        }
+
+        .editthread textarea {
+            grid-column: 1 / 2;
+            grid-row: 1 / 4;
+            font-family: inherit;
+        }
+
+        .editthread button {
+            grid-column: 2 / 3;
+            grid-row: 1 / 2;
+        }
+
+        .editthread label {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+        }
+
+        nav svg,
+        .actions svg {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+        }
+
+        .actions>span {
+            height: 24px;
+            display: inline-block;
+        }
+
+        body>svg {
+            height: 1px;
+        }
     </style>
 </head>
 
 <body>
+    <svg>
+        <defs>
+            <symbol id="home" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </symbol>
+            <symbol id="public" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </symbol>
+            <symbol id="pen" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                <path d="M2 2l7.586 7.586"></path>
+                <circle cx="11" cy="11" r="2"></circle>
+            </symbol>
+            <symbol id="bell" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </symbol>
+            <symbol id="logout" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </symbol>
+            <symbol id="tree" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <circle cx="18" cy="18" r="3"></circle>
+                <circle cx="6" cy="6" r="3"></circle>
+                <path d="M6 21V9a9 9 0 0 0 9 9"></path>
+            </symbol>
+            <symbol id="rep" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <polyline points="9 10 4 15 9 20"></polyline>
+                <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+            </symbol>
+            <symbol id="reb" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <polyline points="17 1 21 5 17 9"></polyline>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                <polyline points="7 23 3 19 7 15"></polyline>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </symbol>
+            <symbol id="star" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                </polygon>
+            </symbol>
+        </defs>
+    </svg>
     <nav id="nav">
-        <h1><a href="#home">H</a> <a href="#public">P</a> <a href="#write">W</a> <a href="#logout">L</a></h1>
+        <h1>
+            <a href="#home"><svg>
+                    <use href="#home" />
+                </svg></a>
+            <a href="#public"><svg>
+                    <use href="#public" />
+                </svg></a>
+            <a href="#write"><svg>
+                    <use href="#pen" />
+                </svg></a>
+            <a href="#notifications"><svg>
+                    <use href="#bell" />
+                </svg></a>
+            <a href="#logout"><svg>
+                    <use href="#logout" />
+                </svg></a>
+        </h1>
     </nav>
     <div id="timeline"></div>
     <div id="status"></div>
     <div id="account"></div>
     <div id="write">
         <input type="hidden" id="in_reply_to_id" />
-        <textarea placeholder="..."></textarea>
+        <textarea placeholder="What's on your mind?"></textarea>
         <div id="media_attachments">
-            <img class="img1" /><textarea class="alt1"></textarea>
+            <img class="img1" /><textarea class="alt1" placeholder="Image description"></textarea>
         </div>
         <button id="plus">+</button>
         <button id="toob">Toob!</button>
@@ -332,6 +478,10 @@
                 showOnly('#timeline')
                 updateTimeline('timelines/home');
             }
+            if (window.location.hash == '#notifications') {
+                showOnly('#timeline')
+                updateNotifications('notifications');
+            }
             if (window.location.hash == '#write') {
                 showOnly('#write')
             }
@@ -373,6 +523,45 @@
                             })
                         });
                         tweak();
+                    }
+                })
+            }
+        }
+        function updateNotifications(which) {
+            if (which != whichTimeline) {
+                whichTimeline = which
+                s('#timeline').textContent = ''
+                ajax('GET', window.localStorage.getItem('instance') + '/api/v1/' + which, null, function () {
+                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        JSON.parse(this.response).forEach(e => {
+                            switch (e.type) {
+                                case 'follow':
+                                    console.log(e)
+                                    s('#timeline').append(n(`<div class="notif"><p>
+                                        <a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${e.account.display_name} (${e.account.acct})
+                                        </a> followed you!</p></div>`))
+                                    break;
+                                case 'favourite':
+                                    s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${e.account.display_name} (${e.account.acct})
+                                        </a> favourited your status!</p>
+                                ${displayStatus(e.status)}</div>`))
+                                    break;
+                                case 'mention':
+                                    s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${e.account.display_name} (${e.account.acct})
+                                        </a> mentioned you!</p>
+                                ${displayStatus(e.status)}</div>`))
+                                    break;
+                                default:
+                                    console.log(e)
+                                    break;
+                            }
+                        })
                     }
                 })
             }
@@ -487,7 +676,7 @@
                     start = s('#write textarea').selectionStart - this.getAttribute('mentions').length
                     s('#write textarea').value += `
 ${this.getAttribute('tags')}`
-s('#write textarea').style.height = Math.max(s('#write textarea').scrollHeight, 50) + 'px';
+                    s('#write textarea').style.height = Math.max(s('#write textarea').scrollHeight, 50) + 'px';
                     s('#write textarea').selectionStart = start - 1
                     s('#write textarea').selectionEnd = end - 1
                 }
@@ -518,11 +707,11 @@ s('#write textarea').style.height = Math.max(s('#write textarea').scrollHeight, 
             <div class="reply_to"></div>
             <div class="author"><a href="#account/${e.account.id}"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
             <div class="actions">
-                <span class="link"><a href="#status/${e.id}"><i>V</i></a></span> 
-                <span class="rep" author="${e.account.acct}" mentions="${e.mentions.map(function(m){return `@${m.acct}`}).join(' ')}" 
-                tags="${e.tags.map(function(t){return `#${t.name}`}).join(' ')}"><i>R</i>(${e.replies_count})</span>
-                <span class="reb"><i>B</i>(${e.reblogs_count})</span> 
-                <span class="fav"><i>F</i></span>
+                <span class="link"><a href="#status/${e.id}"><svg><use href="#tree" /></svg></a></span> 
+                <span class="rep" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" 
+                tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#rep" /></svg>(${e.replies_count})</span>
+                <span class="reb"><svg><use href="#reb" /></svg>(${e.reblogs_count})</span> 
+                <span class="fav"><svg><use href="#star" /></svg></span>
             </div>
             <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/'))}</div>
             <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
@@ -608,8 +797,16 @@ s('#write textarea').style.height = Math.max(s('#write textarea').scrollHeight, 
             }
         })
         s('#plus').onclick = function () {
-            s('#plus').parentNode.insertBefore(n('<textarea name="status[]" placeholder="Next..."></textarea>'), s('#plus'))
+            s('#plus').parentNode.insertBefore(n(`<div class="editthread">
+                                                    <textarea name="status[]" placeholder="And then..."></textarea> 
+                                                    <button>-</button>
+                                                    <label class="button"><input type="file"/>P</label>
+                                                    </div>`), s('#plus'))
             s('#write > textarea:last-of-type').focus()
+            sa('textarea').forEach(e => {
+                e.onkeyup = resize_textarea;
+            })
+
         }
         s('#media_attachments .img1').onload = function () {
             if (this.src.substring(0, 4) == 'http' && this.complete && this.naturalHeight != 1) {
@@ -716,8 +913,6 @@ s('#write textarea').style.height = Math.max(s('#write textarea').scrollHeight, 
             pictures in threads editing
             remote instances publi/home timeline and interaction with local account
             search
-            notifications
-            embedded (feather) icons
         */
     </script>
 </body>
