@@ -583,7 +583,6 @@
         lastStatusId = '';
         maxId = 999999999999999999
         waitingFor = 999999999999999999
-        // max_id=109676438557141828
 
         window.addEventListener('hashchange', (event) => {
             display();
@@ -600,7 +599,7 @@
         function sa(p) { return document.querySelectorAll(p); }// Select All nodes from Pattern
         function n(h) { return document.createRange().createContextualFragment(h) } // create Node from Html
         function display() {
-            // console.log(window.location.hash)
+
             s('body').append(s('#write'))
             if (window.location.hash == '#logout') {
                 window.localStorage.removeItem('at')
@@ -619,9 +618,8 @@
                 updateNotifications('notifications');
             }
             if (window.location.hash == '#write') {
-                // console.log(s('#write div.editthread:last-of-type textarea'))
                 showOnly('#write')
-                s('#write div.editthread:last-of-type textarea').focus() // TODO marche pas?
+                s('#write div.editthread:last-of-type textarea').focus()
             }
             if (window.location.hash == '#public') {
                 showOnly('#timeline')
@@ -674,7 +672,6 @@
                         JSON.parse(this.response).forEach(e => {
                             switch (e.type) {
                                 case 'follow':
-                                    // console.log(e)
                                     s('#timeline').append(n(`<div class="notif"><p>
                                         <a href="#account/${e.account.id}">
                                             <img class="avatar" src="${e.account.avatar}"/>
@@ -834,15 +831,10 @@ ${this.getAttribute('tags')}`
                 e.onclick = function () {
                     poll_id = this.getAttribute('id').split('_')[1]
                     own_votes = Array.from(sa('[name="option_' + poll_id + '[]"]:checked')).map(function (i) { return i.getAttribute('id').split('_')[2] })
-
-                    // console.log(poll_id)
-                    // console.log(sa('[name="option_'+poll_id+'[]"]:checked'))
-                    // console.log(own_votes)
                     fd = new FormData()
                     fd.append('choices[]', own_votes)
                     ajax('POST', window.localStorage.getItem('instance') + `/api/v1/polls/${poll_id}/votes`, fd, function () {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            // console.log('voted')
                             window.location.hash = '#home'
                         }
                     })
@@ -954,14 +946,11 @@ ${this.getAttribute('tags')}`
             })
             sa('.cancel').forEach(e => { e.onclick = function () { this.parentNode.remove() } })
         }
-        // attach = 0 // TODO à rendre indépendant du fil de textarea...
 
         function tweakFileInput() {
             sa('input[type="file"]').forEach(e => {
                 e.onchange = function (ev) {
                     if (parseInt(e.parentNode.parentNode.parentNode.getAttribute('attach')) < 4) {
-                        // console.log(this.files[0]);
-                        // console.log(attach)
                         var file = this.files[0];
                         t = this
                         var reader = new FileReader();
@@ -978,7 +967,6 @@ ${this.getAttribute('tags')}`
             })
             sa('.piccancel').forEach(b => {
                 b.onclick = function () {
-                    // attach--; 
                     editthread = this.parentNode.parentNode.parentNode
                     editthread.setAttribute('attach', parseInt(editthread.getAttribute('attach')) - 1)
                     this.parentNode.querySelector('img').src = '';
@@ -990,13 +978,10 @@ ${this.getAttribute('tags')}`
                 i.onload = function () {
                     if (this.src.substring(0, 4) == 'http' && this.complete && this.naturalHeight != 1) {
                         textarea = this.parentNode.parentNode.parentNode.querySelector('textarea')
-                        // console.log(textarea)
                         t = this
                         src = this.src
                         ajax('GET', 'pj.php?url=' + this.src, null, function () {
                             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                                // console.log(this)
-                                // console.log(t)
                                 textarea.value = textarea.value.replace(src, '') // remove URL from textarea
                                 t.src = 'data:' + this.getResponseHeader('content-type') + ';base64, ' + this.response
                                 t.parentNode.style.display = 'block'
@@ -1051,9 +1036,6 @@ ${this.getAttribute('tags')}`
                 e.oninput = function (ev) { //paste or inject GIF URL
                     if ((ev.inputType == 'insertText' || ev.inputType == 'insertFromPaste') && ev.data.substring(0, 4) == 'http' && (url = new URL(ev.data))) {
                         attach = parseInt(e.parentNode.parentNode.getAttribute('attach'))
-                        // console.log(attach)
-                        // console.log(`.media_attachments div:nth-child(${attach + 1}) img.media`)
-                        // e.after(n(`<img id="test" style="display: none;"/><input type="text" id="alt"/>`))  //onload="javascript: s('#log').innerHTML += this.complete && this.naturalHeight"/>`))
                         e.parentNode.parentNode.querySelector(`.media_attachments div:nth-child(${attach + 1}) img.media`).src = ev.data
                     }
                 }
@@ -1083,6 +1065,7 @@ ${this.getAttribute('tags')}`
                 cleanUpWrite()
                 return
             }
+
             const uploads = []
             medias = toots[i].querySelectorAll('.media_attachments div')
             max = parseInt(toots[i].getAttribute('attach'))
@@ -1105,9 +1088,19 @@ ${this.getAttribute('tags')}`
         }
         s('#toob').onclick = function () {
             toots = sa('.editthread')
-            // for (i = 0; i < toots.length; i++) { //loop on toots
-            toot(toots, 0, s('#in_reply_to_id').getAttribute('value'))
-            // }
+            //check media descriptions
+            t = true
+            toots.forEach(toot => {
+                texts = toot.querySelectorAll('.media_attachments div[style*="block"] textarea')
+                texts.forEach(desc => {
+                    if (!desc.value) {
+                        t = false
+                    }
+                })
+            })
+            if (t) {
+                toot(toots, 0, s('#in_reply_to_id').getAttribute('value'))
+            }
         }
         function checkUpload(id) {
             return new Promise((resolve, reject) => {
@@ -1116,7 +1109,7 @@ ${this.getAttribute('tags')}`
                         resolve(id);// finished
                     }
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 206) {
-                        sleep(1000).then(v=>{resolve(checkUpload(id))})
+                        sleep(1000).then(v => { resolve(checkUpload(id)) })
                         // resolve(checkUpload(id)) // not finished, once more
                     }
                 })
@@ -1128,11 +1121,10 @@ ${this.getAttribute('tags')}`
             sa('#write img').forEach(i => { i.src = '' }) //reset media attachments
             sa('#write .editthread textarea').forEach(t => { t.value = '' })//reset remaining texteareas (alt texts)
             attach = false // reset attachment status
-            s('.media_attachments>div').style.display = 'none' //hide media attachments TODO parent/child?
+            s('.media_attachments>div').style.display = 'none' //hide media attachments 
             s('#account').after(s('#write'))//move #write back to its place
             whichTimeline = ''
-            // console.log('clean')
-            window.location.hash = window.location.hash=='#home'?'':'#home' //back to home page. TODO in all cases?? location.reload()
+            window.location.hash = window.location.hash == '#home' ? '' : '#home' //back to home page. 
 
         }
         function DataURIToBlob(dataURI) {//}: string) {
@@ -1166,11 +1158,12 @@ ${this.getAttribute('tags')}`
             }
         }
         /* TODOS
-            require picture description
             CW support
             remote instances public/home timeline and interaction with local account
             search
             compose a poll
+            poll notifications
+            keyboard nav
         */
     </script>
 </body>
