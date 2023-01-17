@@ -92,6 +92,17 @@
             color: var(--highlight);
         }
 
+        @keyframes new {
+            0% {color: var(--color)}
+            50% {color: var(--highlight);}
+            100% {color: var(--color)}
+        }
+        nav a.new svg{
+            animation-name: new;
+            animation-duration: 2s;
+            animation-iteration-count: infinite;
+        }
+
         a {
             color: var(--highlight);
             text-decoration: none;
@@ -528,6 +539,7 @@
         <button id="toob"><svg>
                 <use href="#send" />
             </svg></button>
+        <!-- <div id="log"></div> -->
     </div>
     <div id="login">
         <input type="text" id="instance" placeholder="https://piaille.fr" />
@@ -555,23 +567,36 @@
         s('#loginb').onclick = function () {
             inst = s('#instance').value
             if (inst.substring(0, 8) != 'https://') inst = 'https://' + inst
+
             if (!window.localStorage.getItem(inst + '_client_id')) {
-                $.ajax(inst + "/api/v1/apps", {
-                    method: 'POST',
-                    data: {
-                        client_name: "Toob",
-                        redirect_uris: window.location.protocol + '//' + window.location.host + window.location.pathname,
-                        scopes: "read write",
-                        website: "https://github.com/teddyber/toob"
-                    },
-                    success: function (data) {
+
+                fd = new FormData()
+                fd.append('client_name', 'Toob')
+                fd.append('redirect_uris', window.location.protocol + '//' + window.location.host + window.location.pathname)
+                fd.append('scopes', 'read write')
+                fd.append('website', "https://github.com/teddyber/toob")
+
+                ajax('POST', inst + "/api/v1/apps", fd, function () {
+                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        data = JSON.parse(this.response)
+
                         window.localStorage.setItem(inst + '_client_id', data.client_id)
                         window.localStorage.setItem(inst + '_client_secret', data.client_secret)
                         window.localStorage.setItem('instance', inst)
                         window.location.href = `${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst + '_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
                     }
                 })
+                // method: 'POST',
+                // data: {
+                //     client_name: "Toob",
+                //     redirect_uris: window.location.protocol + '//' + window.location.host + window.location.pathname,
+                //     scopes: "read write",
+                //     website: "https://github.com/teddyber/toob"
+                // },
+                // success: function (data) {
             }
+            // })
+            // }
             else {
                 window.localStorage.setItem('instance', inst)
                 window.location.href = `${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst + '_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
@@ -653,7 +678,10 @@
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(this.response).forEach(el => {
                             s('#timeline').append(n(displayStatus(el)))
-                            maxId = Math.min(maxId, el.id)
+                            if (s('[in_reply_to_id="s' + el.id + '"]')) { // put parent up in the timeline if there's a reply
+                                s('[in_reply_to_id="s' + el.id + '"]').parentNode.insertBefore(s('#s' + el.id), s('[in_reply_to_id="s' + el.id + '"]'))
+                            }
+                            maxId = Math.min(maxId, el.id)  //  remmeber oldest toot for scrolling
                             sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
                                 s('#s' + el.id).appendChild(c)
                             })
@@ -663,13 +691,32 @@
                 })
             }
         }
+        function lookForNewNotif(){
+            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/notifications', null, function () {
+                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        newestNotif = JSON.parse(this.response)[0].id
+                        // console.log('notifs: newestNotif:'+newestNotif+' localstorage:'+window.localStorage.getItem('lastnotif'))
+                        if (newestNotif>window.localStorage.getItem('lastnotif')) {
+                            // console.log('update!')
+                            s('[href="#notifications"]').classList.add('new')
+                        }
+                    }
+                })
+                // setInterval(lookForNewNotif, 5000)
+        }
+        setInterval(lookForNewNotif, 5000)
+
         function updateNotifications(which) {
             if (which != whichTimeline) {
                 whichTimeline = which
+                s('[href="#notifications"]').classList.remove('new')
                 s('#timeline').textContent = ''
                 ajax('GET', window.localStorage.getItem('instance') + '/api/v1/' + which, null, function () {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(this.response).forEach(e => {
+                            console.log(e)
+                            if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', 1) //init
+                            window.localStorage.setItem('lastnotif', Math.max(parseInt(window.localStorage.getItem('lastnotif')), parseInt(e.id)))
                             switch (e.type) {
                                 case 'follow':
                                     s('#timeline').append(n(`<div class="notif"><p>
@@ -1033,10 +1080,16 @@ ${this.getAttribute('tags')}`
                 //         // if(d.items[i].type.indexOf('image')==0)  console.log(d.items[i].getAsFile(data=>{console.log(data)}))
                 //     }
                 // }
+                // e.onkeyup = function(){
+                //     s('#log').append(n(`<div>${'ici'}</div>`))
+
+                // }
                 e.oninput = function (ev) { //paste or inject GIF URL
-                    if ((ev.inputType == 'insertText' || ev.inputType == 'insertFromPaste') && ev.data.substring(0, 4) == 'http' && (url = new URL(ev.data))) {
+
+                    if ((ev.inputType == 'insertText' || ev.inputType == 'insertFromPaste' || ev.inputType == 'insertCompositionText') && ev.data.substring(0, 4) == 'http' && (url = new URL(ev.data))) {
                         attach = parseInt(e.parentNode.parentNode.getAttribute('attach'))
                         e.parentNode.parentNode.querySelector(`.media_attachments div:nth-child(${attach + 1}) img.media`).src = ev.data
+                        // s('#log').append(n(`<div>${'ici là3'}</div>`))
                     }
                 }
             })
@@ -1068,6 +1121,7 @@ ${this.getAttribute('tags')}`
 
             const uploads = []
             medias = toots[i].querySelectorAll('.media_attachments div')
+            toots[i].querySelectorAll('textarea').forEach(t => { t.disabled = true })
             max = parseInt(toots[i].getAttribute('attach'))
             for (j = 0; j < max; j++) { //loop on img
                 uploads.push(uploadFile(toots[i], j).then(r => { return r.id }))
@@ -1075,13 +1129,14 @@ ${this.getAttribute('tags')}`
             const results = await Promise.all(uploads) //uploads and wait for each to be ready
             fd = new FormData();
             fd.append('status', toots[i].querySelector('.post textarea').value)
-            fd.append('visibility', 'direct')
-            fd.append('language', 'fr')
+            fd.append('visibility', 'public')
+            // fd.append('language', 'fr')
             results.forEach(r => { fd.append('media_ids[]', r) }) // attach all medias
             if (in_reply_to_id && in_reply_to_id != '') fd.append('in_reply_to_id', in_reply_to_id)
 
             ajax('POST', window.localStorage.getItem('instance') + '/api/v1/statuses', fd, function () {
                 if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
+                    toots[i].style.display = 'none'
                     toot(toots, i + 1, JSON.parse(this.response).id) // toot next one
                 }
             })
@@ -1118,16 +1173,17 @@ ${this.getAttribute('tags')}`
         function cleanUpWrite() {
             sa('#write .editthread:not(:first-child)').forEach(t => { t.remove() }) ///remove additional textareas
             s('#write .editthread').setAttribute('attach', 0)
+            s('#write .editthread').style.display = 'block'
             sa('#write img').forEach(i => { i.src = '' }) //reset media attachments
-            sa('#write .editthread textarea').forEach(t => { t.value = '' })//reset remaining texteareas (alt texts)
+            sa('#write .editthread textarea').forEach(t => { t.value = ''; t.disabled = false })//reset remaining texteareas (alt texts)
             attach = false // reset attachment status
-            s('.media_attachments>div').style.display = 'none' //hide media attachments 
+            sa('.media_attachments>div').forEach(d => { d.style.display = 'none' })  //hide media attachments 
             s('#account').after(s('#write'))//move #write back to its place
             whichTimeline = ''
             window.location.hash = window.location.hash == '#home' ? '' : '#home' //back to home page. 
 
         }
-        function DataURIToBlob(dataURI) {//}: string) {
+        function DataURIToBlob(dataURI) {
             const splitDataURI = dataURI.split(',')
             const byteString = splitDataURI[0].indexOf('base64') >= 0 ? atob(splitDataURI[1]) : decodeURI(splitDataURI[1])
             const mimeString = splitDataURI[0].split(':')[1].split(';')[0]
@@ -1162,8 +1218,11 @@ ${this.getAttribute('tags')}`
             remote instances public/home timeline and interaction with local account
             search
             compose a poll
-            poll notifications
             keyboard nav
+            delete toot
+            edit toot
+            PWA
+            notifications periodic polling
         */
     </script>
 </body>
