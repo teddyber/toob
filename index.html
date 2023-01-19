@@ -93,11 +93,20 @@
         }
 
         @keyframes new {
-            0% {color: var(--color)}
-            50% {color: var(--highlight);}
-            100% {color: var(--color)}
+            0% {
+                color: var(--color)
+            }
+
+            50% {
+                color: var(--highlight);
+            }
+
+            100% {
+                color: var(--color)
+            }
         }
-        nav a.new svg{
+
+        nav a.new svg {
             animation-name: new;
             animation-duration: 2s;
             animation-iteration-count: infinite;
@@ -147,7 +156,7 @@
         }
 
         .author img,
-        .notif .avatar {
+        .avatar {
             max-width: 20;
         }
 
@@ -476,6 +485,22 @@
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                 <circle cx="12" cy="13" r="4"></circle>
             </symbol>
+            <symbol id="searchi" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </symbol>
+            <symbol id="trendi" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+            </symbol>
+            <symbol id="quote" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <line x1="10" y1="8" x2="10" y2="12"></line>
+                <line x1="14" y1="8" x2="14" y2="12"></line>
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </symbol>
         </defs>
     </svg>
     <nav id="nav">
@@ -491,6 +516,12 @@
                 </svg></a>
             <a href="#notifications"><svg>
                     <use href="#bell" />
+                </svg></a>
+            <a href="#trend"><svg>
+                    <use href="#trendi" />
+                </svg></a>
+            <a href="#search"><svg>
+                    <use href="#searchi" />
                 </svg></a>
             <a href="#logout"><svg>
                     <use href="#logout" />
@@ -540,6 +571,9 @@
                 <use href="#send" />
             </svg></button>
         <!-- <div id="log"></div> -->
+    </div>
+    <div id="search">
+        <input type="text" placeholder="Search terms" />
     </div>
     <div id="login">
         <input type="text" id="instance" placeholder="https://piaille.fr" />
@@ -623,46 +657,77 @@
         function s(p) { return document.querySelector(p); }// Select node from Pattern
         function sa(p) { return document.querySelectorAll(p); }// Select All nodes from Pattern
         function n(h) { return document.createRange().createContextualFragment(h) } // create Node from Html
+
         function display() {
-
             s('body').append(s('#write'))
-            if (window.location.hash == '#logout') {
-                window.localStorage.removeItem('at')
-                window.localStorage.removeItem('instance')
-                window.location.href = window.location.pathname;
-            }
-            if (window.location.hash == '#login') {
-                showOnly('#login')
-            }
-            if (window.location.hash == '#home' || window.location.hash == '') {
-                showOnly('#timeline')
-                updateTimeline('timelines/home');
-            }
-            if (window.location.hash == '#notifications') {
-                showOnly('#timeline')
-                updateNotifications('notifications');
-            }
-            if (window.location.hash == '#write') {
-                showOnly('#write')
-                s('#write div.editthread:last-of-type textarea').focus()
-            }
-            if (window.location.hash == '#public') {
-                showOnly('#timeline')
-                updateTimeline('timelines/public');
-            }
-            if (window.location.hash.substring(0, 6) == '#tags/') {
-                showOnly('#timeline')
-                updateTimeline('timelines/tag/' + window.location.hash.substring(6));
-            }
-            if (window.location.hash.substring(0, 9) == '#account/') {
-                showOnly('#account')
-                updateAccount(window.location.hash.substring(9));
-            }
-            if (window.location.hash.substring(0, 8) == '#status/') {
-                showOnly('#status')
-                updateStatus(window.location.hash.substring(8))
-            }
+            hash = window.location.hash.split('/')[0]
+            switch (hash) {
+                case '#logout':
+                    window.localStorage.removeItem('at')
+                    window.localStorage.removeItem('instance')
+                    window.location.href = window.location.pathname;
+                    break;
+                case '#login':
+                    showOnly('#login')
+                    break;
+                case '#home':
+                    showOnly('#timeline')
+                    updateTimeline('timelines/home');
+                    break;
+                case '#trend':
+                    showOnly('#timeline')
+                    updateTimeline('timelines/trend');
+                    break;
+                case '#notifications':
+                    showOnly('#timeline')
+                    updateNotifications('notifications');
+                    break;
+                case '#write':
+                    showOnly('#write')
+                    s('#write div.editthread:last-of-type textarea').focus()
+                    break;
+                case '#public':
+                    showOnly('#timeline')
+                    updateTimeline('timelines/public');
+                    break;
+                case '#search':
+                    showOnly('#search')
+                    updateSearch(window.location.hash.substring(8));
+                    break;
+                case '#tags':
+                    showOnly('#timeline')
+                    updateTimeline('timelines/tag/' + window.location.hash.substring(6));
+                    break;
+                case '#account':
+                    showOnly('#account')
+                    updateAccount(window.location.hash.substring(9));
+                    break;
+                case '#status':
+                    showOnly('#status')
+                    updateStatus(window.location.hash.substring(8))
+                    break;
 
+                default:
+                    break;
+            }
+        }
+        function updateSearch(term) {
+            s('#search input').value = term
+            s('#search input').focus()
+            // s('#search input').change()
+        }
+        s('#search input').onchange = function () {
+            window.location.hash = '#search/' + this.value
+            console.log(this)
+            ajax('GET', window.localStorage.getItem('instance') + "/api/v2/search?q=" + this.value, null, function () {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    console.log(JSON.parse(this.response))
+                    sa('#search .status, #search .account, #search .hashtags').forEach(e => { e.remove() })
+                    JSON.parse(this.response).accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${e.id}"><img class="avatar" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
+                    JSON.parse(this.response).hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tag/${e.name}">#${e.name}</a></div>`)) })
+                    JSON.parse(this.response).statuses.forEach(e => { s('#search').append(n(displayStatus(e))) })
+                }
+            })
         }
         function showOnly(div) {
             sa('body > div').forEach(e => { e.style.display = 'none' })
@@ -670,42 +735,57 @@
             sa('nav a').forEach(e => { e.classList.remove('active') })
             if (s(`[href^="${window.location.hash}"]`)) s(`[href^="${window.location.hash}"]`).classList.add('active')
         }
-        function updateTimeline(which) {
+        function updateTimeline(which, trend = false) {
+            if (which == 'timelines/trend') {
+                trend = true
+                feed = 'timelines/home'
+            }
+            else feed = which
             if (which != whichTimeline) {
                 whichTimeline = which
                 s('#timeline').textContent = ''
-                ajax("GET", window.localStorage.getItem('instance') + '/api/v1/' + which + '?limit=40', null, function (e) {
+                ajax("GET", window.localStorage.getItem('instance') + '/api/v1/' + feed + '?limit=40', null, function (e) {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(this.response).forEach(el => {
-                            s('#timeline').append(n(displayStatus(el)))
-                            if (s('[in_reply_to_id="s' + el.id + '"]')) { // put parent up in the timeline if there's a reply
-                                s('[in_reply_to_id="s' + el.id + '"]').parentNode.insertBefore(s('#s' + el.id), s('[in_reply_to_id="s' + el.id + '"]'))
+                            if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
+                                s('#timeline').append(n(displayStatus(el)))
+                                if (s('[in_reply_to_id="s' + el.id + '"]')) { // put parent up in the timeline if there's a reply
+                                    s('[in_reply_to_id="s' + el.id + '"]').parentNode.insertBefore(s('#s' + el.id), s('[in_reply_to_id="s' + el.id + '"]'))
+                                }
+                                maxId = Math.min(maxId, el.id)  //  remmeber oldest toot for scrolling
+                                sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
+                                    s('#s' + el.id).appendChild(c)
+                                })
                             }
-                            maxId = Math.min(maxId, el.id)  //  remmeber oldest toot for scrolling
-                            sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
-                                s('#s' + el.id).appendChild(c)
-                            })
                         });
                         tweak();
                     }
                 })
             }
         }
-        function lookForNewNotif(){
+        function lookForNewNotif() {
             ajax('GET', window.localStorage.getItem('instance') + '/api/v1/notifications', null, function () {
-                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        newestNotif = JSON.parse(this.response)[0].id
-                        // console.log('notifs: newestNotif:'+newestNotif+' localstorage:'+window.localStorage.getItem('lastnotif'))
-                        if (newestNotif>window.localStorage.getItem('lastnotif')) {
-                            // console.log('update!')
-                            s('[href="#notifications"]').classList.add('new')
-                        }
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    newestNotif = JSON.parse(this.response)[0].id
+                    // console.log('notifs: newestNotif:'+newestNotif+' localstorage:'+window.localStorage.getItem('lastnotif'))
+                    if (newestNotif > window.localStorage.getItem('lastnotif')) {
+                        // console.log('update!')
+                        s('[href="#notifications"]').classList.add('new')
                     }
-                })
-                // setInterval(lookForNewNotif, 5000)
+                }
+            })
+            // setInterval(lookForNewNotif, 5000)
         }
         setInterval(lookForNewNotif, 5000)
-
+        function getAccount() {
+            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/accounts/verify_credentials', null, function () {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    currentAccountId = JSON.parse(this.response).id
+                }
+            })
+        }
+        currentAccountId = ''
+        getAccount()
         function updateNotifications(which) {
             if (which != whichTimeline) {
                 whichTimeline = which
@@ -714,7 +794,7 @@
                 ajax('GET', window.localStorage.getItem('instance') + '/api/v1/' + which, null, function () {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(this.response).forEach(e => {
-                            console.log(e)
+                            // console.log(e)
                             if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', 1) //init
                             window.localStorage.setItem('lastnotif', Math.max(parseInt(window.localStorage.getItem('lastnotif')), parseInt(e.id)))
                             switch (e.type) {
@@ -856,8 +936,20 @@
                     })
                 }
             })
+            sa('.actions .del').forEach(e => {
+                e.onclick = function () {
+                    id = this.parentNode.parentNode.getAttribute('id').substring(1);
+                    ajax('DELETE', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}`, null, function (e) {
+                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                            whichTimeline = ''
+                            display()
+                        }
+                    })
+                }
+            })
+
             sa('a.hashtag').forEach(e => { e.removeAttribute('target') })
-            sa('.actions .rep').forEach(e => {
+            sa('.actions .rep, .actions .quo').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
                     s('#in_reply_to_id').setAttribute('value', id)
@@ -869,6 +961,10 @@
                     start = s('#write textarea').selectionStart - this.getAttribute('mentions').length
                     s('#write textarea').value += `
 ${this.getAttribute('tags')}`
+                    if(this.classList.contains('quo')) {
+                        s('#write textarea').value += `
+${this.getAttribute('href')}`
+                    }
                     s('#write textarea').style.height = Math.max(s('#write textarea').scrollHeight, 50) + 'px';
                     s('#write textarea').selectionStart = start - 1
                     s('#write textarea').selectionEnd = end - 1
@@ -882,7 +978,8 @@ ${this.getAttribute('tags')}`
                     fd.append('choices[]', own_votes)
                     ajax('POST', window.localStorage.getItem('instance') + `/api/v1/polls/${poll_id}/votes`, fd, function () {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            window.location.hash = '#home'
+                            whichTimeline = ''
+                            display()
                         }
                     })
                 }
@@ -914,11 +1011,15 @@ ${this.getAttribute('tags')}`
             <div class="reply_to"></div>
             <div class="author"><a href="#account/${e.account.id}"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
             <div class="actions">
+                ${currentAccountId == e.account.id ? '<span class="edit"><svg><use href="#pen" /></svg></span>' : ''}
+                ${currentAccountId == e.account.id ? '<span class="del"><svg><use href="#cancel" /></svg></span>' : ''}
                 <span class="link"><a href="#status/${e.id}"><svg><use href="#tree" /></svg></a></span> 
                 <span class="rep" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" 
                 tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#rep" /></svg>(${e.replies_count})</span>
+                <span class="quo" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" href="${e.url}"
+                tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#quote" /></svg></span>
                 <span class="reb"><svg><use href="#reb" /></svg>(${e.reblogs_count})</span> 
-                <span class="fav"><svg><use href="#star" /></svg></span>
+                <span class="fav"><svg><use href="#star" /></svg>(${e.favourites_count})</span>
             </div>
             <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/'))}</div>
             ${e.poll && !e.poll.voted && !e.poll.expired ? '<div class="poll">' + e.poll.options.map(function (o, i) { return `<div><input type="${e.poll.multiple ? 'checkbox' : 'radio'}" name="option_${e.poll.id}[]" id="option_${e.poll.id}_${i}"/><label for="option_${e.poll.id}_${i}">${o.title}</label></div>` }).join('') + `<div><button class="vote" id="poll_${e.poll.id}">Vote!</button></div><div>${e.poll.votes_count} voters</div></div>` : ''}
@@ -1157,6 +1258,7 @@ ${this.getAttribute('tags')}`
                 toot(toots, 0, s('#in_reply_to_id').getAttribute('value'))
             }
         }
+        sa('nav a').forEach(a=>{ a.onclick = function() {if(this.classList.contains('active')) window.scrollTo({ top: 0, behavior: 'smooth' });}})
         function checkUpload(id) {
             return new Promise((resolve, reject) => {
                 ajax('GET', window.localStorage.getItem('instance') + '/api/v1/media/' + id, null, function () {
@@ -1180,8 +1282,7 @@ ${this.getAttribute('tags')}`
             sa('.media_attachments>div').forEach(d => { d.style.display = 'none' })  //hide media attachments 
             s('#account').after(s('#write'))//move #write back to its place
             whichTimeline = ''
-            window.location.hash = window.location.hash == '#home' ? '' : '#home' //back to home page. 
-
+            display()
         }
         function DataURIToBlob(dataURI) {
             const splitDataURI = dataURI.split(',')
@@ -1197,32 +1298,38 @@ ${this.getAttribute('tags')}`
 
         window.onscroll = function (ev) {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                trend = (window.location.hash == '#trend')
+                feed = trend ? 'timelines/home' : whichTimeline
                 if (waitingFor > maxId) {
-                    ajax('GET', window.localStorage.getItem('instance') + '/api/v1/' + whichTimeline + '?limit=40&max_id=' + maxId, null, function () {
+                    ajax('GET', window.localStorage.getItem('instance') + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, null, function () {
                         if (this.readyState == 4 && this.status == 200) {
                             JSON.parse(this.response).forEach(el => {
-                                s('#timeline').append(n(displayStatus(el)))
-                                maxId = Math.min(maxId, el.id)
-                                sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
-                                    s('#s' + el.id).appendChild(c)
-                                })
+                                if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
+                                    s('#timeline').append(n(displayStatus(el)))
+                                    maxId = Math.min(maxId, el.id)
+                                    sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
+                                        s('#s' + el.id).appendChild(c)
+                                    })
+                                }
                             })
                         }
                     })
                     waitingFor = maxId
                 }
             }
+            // if (document.body.scrollTop === 0) {
+            //     console.log('top')
+            //     // whichTimeline = ''
+            // }
         }
+
         /* TODOS
             CW support
             remote instances public/home timeline and interaction with local account
-            search
             compose a poll
             keyboard nav
-            delete toot
             edit toot
             PWA
-            notifications periodic polling
         */
     </script>
 </body>
