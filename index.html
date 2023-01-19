@@ -130,7 +130,7 @@
         }
 
         button,
-        label.button {
+        label.button, select {
             border: none;
             color: #eee;
             background-color: var(--highlight);
@@ -142,6 +142,7 @@
             border-radius: .5em;
             cursor: pointer;
         }
+        select {vertical-align: middle;height: 32px;}
 
         input[type="file"] {
             display: none;
@@ -564,6 +565,8 @@
                 </div>
             </div>
         </div>
+        <select id="visibility"><option value="public">Public</option><option value="unlisted">Unlisted</option><option value="private">Private</option><option value="direct">Mentions</option></select>
+        <select id="lang"><option value="fr">FR</option><option value="en">EN</option></select>
         <button id="bplus"><svg>
                 <use href="#plus" />
             </svg></button>
@@ -580,19 +583,29 @@
         <button id="loginb">Se connecter</button>
     </div>
     <script>
+        //login dance
+        account = 0
         code = new URLSearchParams(window.location.search).get('code')
-        if (code) {
+        if (code) {//we got a code back from a user consenting to login
             fd = new FormData();
-            fd.append('client_id', window.localStorage.getItem(window.localStorage.getItem('instance') + '_client_id'))
-            fd.append('client_secret', window.localStorage.getItem(window.localStorage.getItem('instance') + '_client_secret'))
+            clients = JSON.parse(window.localStorage.getItem('clients'))
+            console.log(clients)
+            inst = window.localStorage.getItem('instance')
+            fd.append('client_id', clients[inst].client_id)
+            fd.append('client_secret', clients[inst].client_secret)
             fd.append('grant_type', 'authorization_code')
             fd.append('redirect_uri', window.location.protocol + '//' + window.location.host + window.location.pathname)
             fd.append('code', code)
             fd.append('scope', 'read write')
-            ajax('POST', window.localStorage.getItem('instance') + "/oauth/token", fd,
+            ajax('POST', inst + "/oauth/token", fd,
                 function (e) {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        window.localStorage.setItem('at', JSON.parse(this.response).access_token)
+                        console.log(JSON.parse(this.response))
+                        // window.localStorage.setItem('at', JSON.parse(this.response).access_token)
+                        accounts = JSON.parse(window.localStorage.getItem('accounts') || '[]')
+                        accounts.push({ instance: inst, at: JSON.parse(this.response).access_token })
+                        window.localStorage.setItem('accounts', JSON.stringify(accounts))
+                        window.localStorage.removeItem('instance')
                         window.location.href = window.location.pathname
                     }
                 }
@@ -602,8 +615,8 @@
             inst = s('#instance').value
             if (inst.substring(0, 8) != 'https://') inst = 'https://' + inst
 
-            if (!window.localStorage.getItem(inst + '_client_id')) {
-
+            clients = window.localStorage.getItem('clients') || {}
+            if (!clients[inst]) { // we first need a client_id/client_secret to connect to this instance
                 fd = new FormData()
                 fd.append('client_name', 'Toob')
                 fd.append('redirect_uris', window.location.protocol + '//' + window.location.host + window.location.pathname)
@@ -613,27 +626,17 @@
                 ajax('POST', inst + "/api/v1/apps", fd, function () {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         data = JSON.parse(this.response)
-
-                        window.localStorage.setItem(inst + '_client_id', data.client_id)
-                        window.localStorage.setItem(inst + '_client_secret', data.client_secret)
+                        clients = {}
+                        clients[inst] = { 'client_id': data.client_id, 'client_secret': data.client_secret }
+                        window.localStorage.setItem('clients', JSON.stringify(clients))
                         window.localStorage.setItem('instance', inst)
-                        window.location.href = `${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst + '_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
+                        window.location.href = `${inst}/oauth/authorize?client_id=${data.client_id}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
                     }
                 })
-                // method: 'POST',
-                // data: {
-                //     client_name: "Toob",
-                //     redirect_uris: window.location.protocol + '//' + window.location.host + window.location.pathname,
-                //     scopes: "read write",
-                //     website: "https://github.com/teddyber/toob"
-                // },
-                // success: function (data) {
             }
-            // })
-            // }
             else {
                 window.localStorage.setItem('instance', inst)
-                window.location.href = `${inst}/oauth/authorize?client_id=${window.localStorage.getItem(inst + '_client_id')}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
+                window.location.href = `${inst}/oauth/authorize?client_id=${JSON.parse(window.localStorage.getItem('clients'))[inst].client_id}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
             }
         }
 
@@ -648,7 +651,7 @@
         });
 
         if (window.location.hash == '') {
-            if (window.localStorage.getItem('instance'))
+            if (getInstance())
                 window.location.hash = '#home';
             else
                 window.location.hash = '#login';
@@ -658,12 +661,18 @@
         function sa(p) { return document.querySelectorAll(p); }// Select All nodes from Pattern
         function n(h) { return document.createRange().createContextualFragment(h) } // create Node from Html
 
+        function getInstance() {
+            return JSON.parse(window.localStorage.getItem('accounts') || '{}')[account] ? JSON.parse(window.localStorage.getItem('accounts') || '{}')[account].instance : null
+        }
         function display() {
             s('body').append(s('#write'))
             hash = window.location.hash.split('/')[0]
             switch (hash) {
                 case '#logout':
-                    window.localStorage.removeItem('at')
+                    accounts = JSON.parse(window.localStorage.getItem('accounts'))
+                    delete accounts[account]
+                    window.localStorage.setItem('accounts', JSON.stringify(accounts))
+                    // window.localStorage.removeItem('at')
                     window.localStorage.removeItem('instance')
                     window.location.href = window.location.pathname;
                     break;
@@ -718,10 +727,8 @@
         }
         s('#search input').onchange = function () {
             window.location.hash = '#search/' + this.value
-            console.log(this)
-            ajax('GET', window.localStorage.getItem('instance') + "/api/v2/search?q=" + this.value, null, function () {
+            ajax('GET', getInstance() + "/api/v2/search?q=" + this.value, null, function () {
                 if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    console.log(JSON.parse(this.response))
                     sa('#search .status, #search .account, #search .hashtags').forEach(e => { e.remove() })
                     JSON.parse(this.response).accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${e.id}"><img class="avatar" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
                     JSON.parse(this.response).hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tag/${e.name}">#${e.name}</a></div>`)) })
@@ -744,7 +751,7 @@
             if (which != whichTimeline) {
                 whichTimeline = which
                 s('#timeline').textContent = ''
-                ajax("GET", window.localStorage.getItem('instance') + '/api/v1/' + feed + '?limit=40', null, function (e) {
+                ajax("GET", getInstance() + '/api/v1/' + feed + '?limit=40', null, function (e) {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(this.response).forEach(el => {
                             if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
@@ -764,12 +771,10 @@
             }
         }
         function lookForNewNotif() {
-            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/notifications', null, function () {
+            ajax('GET', getInstance() + '/api/v1/notifications', null, function () {
                 if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                     newestNotif = JSON.parse(this.response)[0].id
-                    // console.log('notifs: newestNotif:'+newestNotif+' localstorage:'+window.localStorage.getItem('lastnotif'))
                     if (newestNotif > window.localStorage.getItem('lastnotif')) {
-                        // console.log('update!')
                         s('[href="#notifications"]').classList.add('new')
                     }
                 }
@@ -778,7 +783,7 @@
         }
         setInterval(lookForNewNotif, 5000)
         function getAccount() {
-            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/accounts/verify_credentials', null, function () {
+            ajax('GET', getInstance() + '/api/v1/accounts/verify_credentials', null, function () {
                 if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                     currentAccountId = JSON.parse(this.response).id
                 }
@@ -791,7 +796,7 @@
                 whichTimeline = which
                 s('[href="#notifications"]').classList.remove('new')
                 s('#timeline').textContent = ''
-                ajax('GET', window.localStorage.getItem('instance') + '/api/v1/' + which, null, function () {
+                ajax('GET', getInstance() + '/api/v1/' + which, null, function () {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(this.response).forEach(e => {
                             // console.log(e)
@@ -843,10 +848,10 @@
             if (id == lastStatusId) return;
             lastStatusId = id;
             s('#status').innerHTML = '';
-            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/statuses/' + id, new FormData(), function (e) {
+            ajax('GET', getInstance() + '/api/v1/statuses/' + id, new FormData(), function (e) {
                 if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                     current = JSON.parse(this.response)
-                    ajax('GET', window.localStorage.getItem('instance') + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : id) + '/context', new FormData(), function (e) {
+                    ajax('GET', getInstance() + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : id) + '/context', new FormData(), function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             i = 0;
                             data = JSON.parse(this.response)
@@ -871,7 +876,7 @@
             if (id == lastAccountId) return;
             lastAccountId = id;
             s('#account').innerHTML = '';
-            ajax('GET', window.localStorage.getItem('instance') + '/api/v1/accounts/' + id, null, function (e) {
+            ajax('GET', getInstance() + '/api/v1/accounts/' + id, null, function (e) {
                 if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                     data = JSON.parse(this.response)
                     html = `
@@ -887,13 +892,13 @@
                     `
                     s('#account').innerHTML = html
                     s('#follow').onclick = function () {
-                        ajax('POST', window.localStorage.getItem('instance') + '/api/v1/accounts/' + id + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
+                        ajax('POST', getInstance() + '/api/v1/accounts/' + id + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
                             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                                 s('#follow').innerText = s('#follow').innerText == 'Follow' ? 'Unfollow' : 'Follow'
                             }
                         })
                     }
-                    ajax('GET', window.localStorage.getItem('instance') + `/api/v1/accounts/relationships?id[]=${id}`, null, function (e) {
+                    ajax('GET', getInstance() + `/api/v1/accounts/relationships?id[]=${id}`, null, function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             s('#follow').innerText = JSON.parse(this.response)[0].following ? 'Unfollow' : 'Follow'
                         }
@@ -901,7 +906,7 @@
                 }
             })
 
-            ajax('GET', window.localStorage.getItem('instance') + `/api/v1/accounts/${id}/statuses?limit=40`, null, function (e) {
+            ajax('GET', getInstance() + `/api/v1/accounts/${id}/statuses?limit=40`, null, function (e) {
                 if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                     JSON.parse(this.response).forEach(e => {
                         s('#account').append(n(displayStatus(e)))
@@ -917,7 +922,7 @@
                     st = this.parentNode.parentNode
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
                     prefix = this.parentNode.parentNode.classList.contains('fav') ? 'un' : '';
-                    ajax('POST', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}/${prefix}favourite`, null, function (e) {
+                    ajax('POST', getInstance() + `/api/v1/statuses/${id}/${prefix}favourite`, null, function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             prefix == 'un' ? st.classList.remove('fav') : st.classList.add('fav')
                         }
@@ -929,7 +934,7 @@
                     st = this.parentNode.parentNode
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
                     prefix = this.parentNode.parentNode.classList.contains('reb') ? 'un' : '';
-                    ajax('POST', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
+                    ajax('POST', getInstance() + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             prefix == 'un' ? st.classList.remove('reb') : st.classList.add('reb')
                         }
@@ -939,7 +944,7 @@
             sa('.actions .del').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
-                    ajax('DELETE', window.localStorage.getItem('instance') + `/api/v1/statuses/${id}`, null, function (e) {
+                    ajax('DELETE', getInstance() + `/api/v1/statuses/${id}`, null, function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             whichTimeline = ''
                             display()
@@ -961,7 +966,7 @@
                     start = s('#write textarea').selectionStart - this.getAttribute('mentions').length
                     s('#write textarea').value += `
 ${this.getAttribute('tags')}`
-                    if(this.classList.contains('quo')) {
+                    if (this.classList.contains('quo')) {
                         s('#write textarea').value += `
 ${this.getAttribute('href')}`
                     }
@@ -976,7 +981,7 @@ ${this.getAttribute('href')}`
                     own_votes = Array.from(sa('[name="option_' + poll_id + '[]"]:checked')).map(function (i) { return i.getAttribute('id').split('_')[2] })
                     fd = new FormData()
                     fd.append('choices[]', own_votes)
-                    ajax('POST', window.localStorage.getItem('instance') + `/api/v1/polls/${poll_id}/votes`, fd, function () {
+                    ajax('POST', getInstance() + `/api/v1/polls/${poll_id}/votes`, fd, function () {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             whichTimeline = ''
                             display()
@@ -989,14 +994,15 @@ ${this.getAttribute('href')}`
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = success;
             xhttp.open(method, url, true);
-            xhttp.setRequestHeader('Authorization', 'Bearer ' + window.localStorage.getItem('at'))
+            at = JSON.parse(window.localStorage.getItem('accounts') || '[]')[account] ? JSON.parse(window.localStorage.getItem('accounts') || '[]')[account].at : null
+            if (at) xhttp.setRequestHeader('Authorization', 'Bearer ' + at)
             if (params)
                 xhttp.send(params);
             else
                 xhttp.send()
         }
         function displayStatus(el, cssClass = '', id_prefix = 's') {
-            // console.log(el)
+            console.log(el)
             if (el.reblog) {
                 boost = `<a href="#account/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1065,26 +1071,11 @@ ${this.getAttribute('href')}`
                                                     <button class="cancel"><svg><use href="#cancel" /></svg></button>
                                                     </div>
                                                     <div class="media_attachments">
-                                                        <div><img class="media" /><textarea class="desc" placeholder="Image description"></textarea>
+                                                        ${`<div><img class="media" /><textarea class="desc" placeholder="Image description"></textarea>
                                                             <button class="piccancel"><svg>
                                                                     <use href="#cancel" />
                                                                 </svg></button>
-                                                        </div>
-                                                        <div><img class="media" /><textarea class="desc" placeholder="Image description"></textarea>
-                                                            <button class="piccancel"><svg>
-                                                                    <use href="#cancel" />
-                                                                </svg></button>
-                                                        </div>
-                                                        <div><img class="media" /><textarea class="desc" placeholder="Image description"></textarea>
-                                                            <button class="piccancel"><svg>
-                                                                    <use href="#cancel" />
-                                                                </svg></button>
-                                                        </div>
-                                                        <div><img class="media" /><textarea class="desc" placeholder="Image description"></textarea>
-                                                            <button class="piccancel"><svg>
-                                                                    <use href="#cancel" />
-                                                                </svg></button>
-                                                        </div>
+                                                        </div>`.repeat(4)}
                                                     </div>
                                                    </div>`), s('#bplus'))
             tweakFileInput()
@@ -1206,7 +1197,7 @@ ${this.getAttribute('href')}`
                 const fd = new FormData();
                 fd.append('file', file, 'test.png')
                 fd.append('description', toot.querySelector(`.media_attachments div:nth-child(${i + 1}) textarea`).value)
-                ajax('POST', window.localStorage.getItem('instance') + '/api/v2/media', fd, async function () {
+                ajax('POST', getInstance() + '/api/v2/media', fd, async function () {
                     if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
                         id = await checkUpload(JSON.parse(this.response).id).then(r => { return r })
                         resolve(JSON.parse(this.response))
@@ -1230,12 +1221,13 @@ ${this.getAttribute('href')}`
             const results = await Promise.all(uploads) //uploads and wait for each to be ready
             fd = new FormData();
             fd.append('status', toots[i].querySelector('.post textarea').value)
-            fd.append('visibility', 'public')
-            // fd.append('language', 'fr')
+            console.log(s('#visibility').value.toLowerCase())
+            fd.append('visibility', s('#visibility').value.toLowerCase())
+            fd.append('language', s('#lang').value)
             results.forEach(r => { fd.append('media_ids[]', r) }) // attach all medias
             if (in_reply_to_id && in_reply_to_id != '') fd.append('in_reply_to_id', in_reply_to_id)
 
-            ajax('POST', window.localStorage.getItem('instance') + '/api/v1/statuses', fd, function () {
+            ajax('POST', getInstance() + '/api/v1/statuses', fd, function () {
                 if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
                     toots[i].style.display = 'none'
                     toot(toots, i + 1, JSON.parse(this.response).id) // toot next one
@@ -1258,10 +1250,10 @@ ${this.getAttribute('href')}`
                 toot(toots, 0, s('#in_reply_to_id').getAttribute('value'))
             }
         }
-        sa('nav a').forEach(a=>{ a.onclick = function() {if(this.classList.contains('active')) window.scrollTo({ top: 0, behavior: 'smooth' });}})
+        sa('nav a').forEach(a => { a.onclick = function () { if (this.classList.contains('active')) window.scrollTo({ top: 0, behavior: 'smooth' }); } })
         function checkUpload(id) {
             return new Promise((resolve, reject) => {
-                ajax('GET', window.localStorage.getItem('instance') + '/api/v1/media/' + id, null, function () {
+                ajax('GET', getInstance() + '/api/v1/media/' + id, null, function () {
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         resolve(id);// finished
                     }
@@ -1301,7 +1293,7 @@ ${this.getAttribute('href')}`
                 trend = (window.location.hash == '#trend')
                 feed = trend ? 'timelines/home' : whichTimeline
                 if (waitingFor > maxId) {
-                    ajax('GET', window.localStorage.getItem('instance') + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, null, function () {
+                    ajax('GET', getInstance() + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, null, function () {
                         if (this.readyState == 4 && this.status == 200) {
                             JSON.parse(this.response).forEach(el => {
                                 if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
@@ -1317,10 +1309,6 @@ ${this.getAttribute('href')}`
                     waitingFor = maxId
                 }
             }
-            // if (document.body.scrollTop === 0) {
-            //     console.log('top')
-            //     // whichTimeline = ''
-            // }
         }
 
         /* TODOS
