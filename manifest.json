@@ -1,0 +1,26 @@
+{
+    "name": "Toob",
+    "short_name": "Toob",
+    "description": "A Mastodon client",
+    "start_url": "./",
+    "id": "./",
+    "scope": "./",
+    "prefer_related_applications": false,
+    "background": "#FFFFFF",
+    "theme_color": "#3088D4",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "toob-512.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "any"
+        },
+        {
+            "src": "toob-192.png",
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "any"
+        }
+    ]
+}
