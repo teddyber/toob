@@ -353,7 +353,8 @@
         }
 
         nav svg,
-        .actions svg {
+        .actions svg,
+        #modal svg {
             width: 24px;
             height: 24px;
             display: inline-block;
@@ -382,6 +383,44 @@
 
         .gras {
             font-weight: bold;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
+
+        /* Modal Content/Box */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -569,6 +608,16 @@
         <input type="text" id="instance" placeholder="https://piaille.fr" />
         <button id="loginb">Se connecter</button>
     </div>
+    <div id="modal">
+        <div class="modal-content">
+            <span class="close"><svg>
+                    <use href="#cancel" />
+                </svg></span>
+            <p>Some text in the Modal..</p>
+            <button class="OK">OK</button>
+        </div>
+
+    </div>
     <script>
         navigator.serviceWorker.register('service-worker.js', { scope: '.' })
             .then(function (registration) {
@@ -729,6 +778,13 @@
                 }
             })
         }
+        function showModal(text, confirm) { 
+            s('#modal p').innerHTML = text
+            s('#modal').style.display = 'block'
+            s('#modal button.OK').onclick = function() {confirm();s('#modal').style.display = 'none'}
+        }
+        s('.close').onclick = function () { s('#modal').style.display = 'none' }
+        s('#modal').onclick = function () { s('#modal').style.display = 'none' }
         function showOnly(div) {
             sa('body > div').forEach(e => { e.style.display = 'none' })
             s(div).style.display = 'block'
@@ -872,6 +928,7 @@
             ajax('GET', getInstance() + '/api/v1/accounts/' + id, null, function (e) {
                 if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                     data = JSON.parse(this.response)
+                    console.log(data)
                     html = `
                     <img class="header" src="${data.header}"/>
                     <img class="avatar" src="${data.avatar}"/>
@@ -893,7 +950,10 @@
                     }
                     ajax('GET', getInstance() + `/api/v1/accounts/relationships?id[]=${id}`, null, function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            s('#follow').innerText = JSON.parse(this.response)[0].following ? 'Unfollow' : 'Follow'
+                            r = JSON.parse(this.response)
+                            console.log(r)
+                            s('#follow').innerText = r[0].following ? 'Unfollow' : 'Follow'
+                            if (r[0].followed_by) { s('.follows').append(' including you') }
                         }
                     })
                 }
@@ -909,7 +969,7 @@
             })
         }
         function tweak() {
-            //activate links$
+            //activate links
             sa('.actions .fav').forEach(e => {
                 e.onclick = function () {
                     st = this.parentNode.parentNode
@@ -937,11 +997,14 @@
             sa('.actions .del').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
-                    ajax('DELETE', getInstance() + `/api/v1/statuses/${id}`, null, function (e) {
-                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            whichTimeline = ''
-                            display()
-                        }
+
+                    confirm = showModal('Confirmer la suppression?', function () {
+                        ajax('DELETE', getInstance() + `/api/v1/statuses/${id}`, null, function (e) {
+                            if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                                whichTimeline = ''
+                                display()
+                            }
+                        })
                     })
                 }
             })
@@ -995,7 +1058,7 @@ ${this.getAttribute('href')}`
                 xhttp.send()
         }
         function displayStatus(el, cssClass = '', id_prefix = 's') {
-            console.log(el)
+            // console.log(el)
             if (el.reblog) {
                 boost = `<a href="#account/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1035,7 +1098,6 @@ ${this.getAttribute('href')}`
                 <div class="desc">${e.card.description}</div>
             </a></div>`) : ''}
         </div>`
-            //(e.poll.voted||e.poll.expired)
         }
         function replaceMentions(array, text) {
             array.forEach(m => {
@@ -1174,7 +1236,6 @@ ${this.getAttribute('href')}`
                     if ((ev.inputType == 'insertText' || ev.inputType == 'insertFromPaste' || ev.inputType == 'insertCompositionText') && ev.data.substring(0, 4) == 'http' && (url = new URL(ev.data))) {
                         attach = parseInt(e.parentNode.parentNode.getAttribute('attach'))
                         e.parentNode.parentNode.querySelector(`.media_attachments div:nth-child(${attach + 1}) img.media`).src = ev.data
-                        // s('#log').append(n(`<div>${'ici là3'}</div>`))
                     }
                 }
             })
@@ -1214,7 +1275,6 @@ ${this.getAttribute('href')}`
             const results = await Promise.all(uploads) //uploads and wait for each to be ready
             fd = new FormData();
             fd.append('status', toots[i].querySelector('.post textarea').value)
-            console.log(s('#visibility').value.toLowerCase())
             fd.append('visibility', s('#visibility').value.toLowerCase())
             fd.append('language', s('#lang').value)
             results.forEach(r => { fd.append('media_ids[]', r) }) // attach all medias
@@ -1252,7 +1312,6 @@ ${this.getAttribute('href')}`
                     }
                     if (this.readyState == XMLHttpRequest.DONE && this.status == 206) {
                         sleep(1000).then(v => { resolve(checkUpload(id)) })
-                        // resolve(checkUpload(id)) // not finished, once more
                     }
                 })
             })
