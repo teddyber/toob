@@ -8,7 +8,7 @@ foreach ($http_response_header as $header) {
         }
     }
 }
-if ($r['Content-Length: '] < 2000000 && substr($r['Content-Type: '], 0, 5) == 'image') {
+if ($r['Content-Length: '] < 5000000 && substr($r['Content-Type: '], 0, 5) == 'image') {
     header('Content-Type: ' . $r['Content-Type: ']);
     echo base64_encode(file_get_contents($_GET['url'], false, null, 0, $r['Content-Length: ']));
 }

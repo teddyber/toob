@@ -38,31 +38,41 @@
 
         body>div {
             display: none;
-            margin-top: 70px;
+            margin-top: 38px;
+            margin-left: 36px;
         }
 
-        nav {
+        #topnav {
             position: fixed;
             z-index: 10;
             display: block;
-            width: 100%;
-            max-width: 800;
+            width: calc(800px - 32px);
+            margin-left: 35px;
+            max-width: calc(100% - 36px);
             top: 0px;
             background-color: var(--bg);
             box-shadow: 0 3px 3px var(--color);
         }
 
-        nav h1 {
-            margin-left: 1em;
-            word-spacing: 1em;
+        #sidenav {
+            position: fixed;
+            top: 0px;
+            width: 32px;
+            height: 100%;
+            background-color: var(--bg);
+            box-shadow: 3px 0px 2px var(--color);
         }
 
-        nav a svg,
+        #sidenav svg {
+            margin-top: .5em;
+        }
+
+        #sidenav a svg,
         .link a svg {
             color: var(--color);
         }
 
-        nav a.active svg {
+        #sidenav a.active svg {
             color: var(--highlight);
         }
 
@@ -80,7 +90,7 @@
             }
         }
 
-        nav a.new svg {
+        #sidenav a.new svg {
             animation-name: new;
             animation-duration: 2s;
             animation-iteration-count: infinite;
@@ -289,9 +299,6 @@
         }
 
         .editthread .post {
-            /* display: grid;
-            grid-template-columns: auto 48px;
-            grid-template-rows: 50% 50% auto auto; */
             display: flex;
             align-items: center;
             clear: both;
@@ -303,65 +310,55 @@
         }
 
         .editthread textarea {
-            /* grid-column: 1 / 2;
-            grid-row: 1 / 4; */
             font-family: inherit;
             min-height: 300px;
             width: calc(100% - 100px);
         }
 
         .editthread button {
-            /* grid-column: 2 / 3;
-            grid-row: 2 / 3; */
             height: 32px;
             max-height: 32px;
         }
 
         .editthread label {
-            /* grid-column: 2 / 3;
-            grid-row: 1 / 2; */
             height: 24px;
             max-height: 24px;
         }
 
         .media_attachments {
-            /* grid-row: 4/5; */
-            /* display: grid; */
             clear: both;
         }
 
         .media_attachments>div {
-            /* grid-column: 1/4; */
             display: none;
-            /* grid-template-columns: calc(50% - 20px) calc(50% - 20px) 40px; */
         }
 
         .media_attachments>div>img {
-            /* grid-column: 1 / 2; */
             width: calc(50% - 30px)
-                /* width: 100%; */
         }
 
         .media_attachments>div>textarea {
-            /* grid-column: 2 / 3; */
             width: calc(50% - 30px)
         }
 
         .media_attachments>div>button {
-            /* grid-column: 3 / 4; */
             height: 40px
         }
 
-        nav svg,
-        .actions svg,
+        #sidenav svg,
         #modal svg {
             width: 24px;
             height: 24px;
             display: inline-block;
         }
 
+        .actions svg {
+            width: 18px;
+            height: 18px;
+        }
+
         .actions>span {
-            height: 24px;
+            height: 18px;
             display: inline-block;
         }
 
@@ -376,9 +373,7 @@
 
         #write button,
         #write label {
-            /* text-align: center; */
             vertical-align: middle;
-            /* height: 24px; */
         }
 
         .gras {
@@ -395,12 +390,9 @@
             height: 100%;
             overflow: auto;
             background-color: rgb(0, 0, 0);
-            /* Fallback color */
             background-color: rgba(0, 0, 0, 0.4);
-            /* Black w/ opacity */
         }
 
-        /* Modal Content/Box */
         .modal-content {
             background-color: #fefefe;
             margin: 15% auto;
@@ -409,8 +401,7 @@
             width: 80%;
         }
 
-        /* The Close Button */
-        .close {
+        #modal .close {
             color: #aaa;
             float: right;
             font-weight: bold;
@@ -422,112 +413,146 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        #accounts img {
+            height: 32px;
+            margin-left: .3em;
+        }
+
+        #accounts img.active {
+            border: var(--highlight) solid 2px
+        }
+
+        nav h1 a {
+            position: relative;
+            display: inline-block;
+        }
+
+        nav h1 a svg {
+            display: block;
+        }
+
+        nav h1 a img {
+            width: 70%;
+            position: absolute;
+            top: 24px;
+            left: 12px
+        }
     </style>
 </head>
 
 <body>
     <svg>
         <defs>
-            <symbol id="home" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
+            <symbol id="home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </symbol>
-            <symbol id="public" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="public" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </symbol>
-            <symbol id="pen" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="pen" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
                 <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
                 <path d="M2 2l7.586 7.586"></path>
                 <circle cx="11" cy="11" r="2"></circle>
             </symbol>
-            <symbol id="bell" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="bell" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </symbol>
-            <symbol id="logout" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="logout" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
             </symbol>
-            <symbol id="tree" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="tree" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <circle cx="18" cy="18" r="3"></circle>
                 <circle cx="6" cy="6" r="3"></circle>
                 <path d="M6 21V9a9 9 0 0 0 9 9"></path>
             </symbol>
-            <symbol id="rep" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="rep" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <polyline points="9 10 4 15 9 20"></polyline>
                 <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
             </symbol>
-            <symbol id="reb" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="reb" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <polyline points="17 1 21 5 17 9"></polyline>
                 <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
                 <polyline points="7 23 3 19 7 15"></polyline>
                 <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
             </symbol>
-            <symbol id="star" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="star" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <polygon
                     points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
                 </polygon>
             </symbol>
-            <symbol id="cancel" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="cancel" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="9" y1="9" x2="15" y2="15"></line>
                 <line x1="15" y1="9" x2="9" y2="15"></line>
             </symbol>
-            <symbol id="send" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="send" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
             </symbol>
-            <symbol id="plus" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="plus" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="16"></line>
                 <line x1="8" y1="12" x2="16" y2="12"></line>
             </symbol>
-            <symbol id="camera" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="camera" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                 <circle cx="12" cy="13" r="4"></circle>
             </symbol>
-            <symbol id="searchi" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="searchi" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </symbol>
-            <symbol id="trendi" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="trendi" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
                 <polyline points="17 6 23 6 23 12"></polyline>
             </symbol>
-            <symbol id="quote" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
-                fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+            <symbol id="quote" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
                 <line x1="10" y1="8" x2="10" y2="12"></line>
                 <line x1="14" y1="8" x2="14" y2="12"></line>
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </symbol>
+            <symbol id="i-adduser" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <line x1="20" y1="8" x2="20" y2="14"></line>
+                <line x1="23" y1="11" x2="17" y2="11"></line>
+            </symbol>
         </defs>
     </svg>
-    <nav id="nav">
+    <nav id="sidenav">
         <h1>
             <a href="#home"><svg>
                     <use href="#home" />
-                </svg></a>
-            <a href="#public"><svg>
+                </svg><img
+                    src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"></a>
+            <a href="#public"><img
+                    src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"><svg>
                     <use href="#public" />
                 </svg></a>
             <a href="#write"><svg>
@@ -536,15 +561,22 @@
             <a href="#notifications"><svg>
                     <use href="#bell" />
                 </svg></a>
-            <a href="#trend"><svg>
+            <!-- <a href="#trend"><svg>
                     <use href="#trendi" />
-                </svg></a>
+                </svg></a> -->
             <a href="#search"><svg>
                     <use href="#searchi" />
+                </svg></a>
+            <a href="#adduser"><svg>
+                    <use href="#i-adduser" />
                 </svg></a>
             <a href="#logout"><svg>
                     <use href="#logout" />
                 </svg></a>
+        </h1>
+    </nav>
+    <nav id="topnav">
+        <span id="accounts"></span>
         </h1>
     </nav>
     <div id="timeline"></div>
@@ -626,12 +658,12 @@
                 console.error('Error during service worker registration:', e);
             });
         //login dance
-        account = 0
+        account = window.localStorage.getItem('activeAccount')
         code = new URLSearchParams(window.location.search).get('code')
         if (code) {//we got a code back from a user consenting to login
             fd = new FormData();
             clients = JSON.parse(window.localStorage.getItem('clients'))
-            console.log(clients)
+            // console.log(clients)
             inst = window.localStorage.getItem('instance')
             fd.append('client_id', clients[inst].client_id)
             fd.append('client_secret', clients[inst].client_secret)
@@ -639,42 +671,61 @@
             fd.append('redirect_uri', window.location.protocol + '//' + window.location.host + window.location.pathname)
             fd.append('code', code)
             fd.append('scope', 'read write')
-            ajax('POST', inst + "/oauth/token", fd,
-                function (e) {
-                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        console.log(JSON.parse(this.response))
-                        // window.localStorage.setItem('at', JSON.parse(this.response).access_token)
-                        accounts = JSON.parse(window.localStorage.getItem('accounts') || '[]')
-                        accounts.push({ instance: inst, at: JSON.parse(this.response).access_token })
-                        window.localStorage.setItem('accounts', JSON.stringify(accounts))
-                        window.localStorage.removeItem('instance')
-                        window.location.href = window.location.pathname
-                    }
+            majax(inst + "/oauth/token", {
+                method: 'POST',
+                data: {
+                    client_id: clients[inst].client_id, client_secret: clients[inst].client_secret, grant_type: 'authorization_code',
+                    redirect_uri: window.location.protocol + '//' + window.location.host + window.location.pathname,
+                    code: code, scope: 'read write'
+                },
+                success: function (data) {
+                    // console.log(JSON.parse(this.response))
+                    // window.localStorage.setItem('at', JSON.parse(this.response).access_token)
+                    accounts = JSON.parse(window.localStorage.getItem('accounts') || '[]')
+                    accounts.push({ instance: inst, at: JSON.parse(data).access_token })
+                    window.localStorage.setItem('accounts', JSON.stringify(accounts))
+                    window.localStorage.removeItem('instance')
+                    window.location.href = window.location.pathname
                 }
+            }
             )
+            // ojax('POST', inst + "/oauth/token", fd,
+            //     function (e) {
+            //         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            //         }
+            //     }
+            // )
         }
         s('#loginb').onclick = function () {
             inst = s('#instance').value
             if (inst.substring(0, 8) != 'https://') inst = 'https://' + inst
 
-            clients = window.localStorage.getItem('clients') || {}
+            clients = JSON.parse(window.localStorage.getItem('clients')) || {}
             if (!clients[inst]) { // we first need a client_id/client_secret to connect to this instance
-                fd = new FormData()
-                fd.append('client_name', 'Toob')
-                fd.append('redirect_uris', window.location.protocol + '//' + window.location.host + window.location.pathname)
-                fd.append('scopes', 'read write')
-                fd.append('website', "https://github.com/teddyber/toob")
+                // fd = new FormData()
+                // fd.append('client_name', 'Toob')
+                // fd.append('redirect_uris', window.location.protocol + '//' + window.location.host + window.location.pathname)
+                // fd.append('scopes', 'read write')
+                // fd.append('website', "https://github.com/teddyber/toob")
 
-                ajax('POST', inst + "/api/v1/apps", fd, function () {
-                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        data = JSON.parse(this.response)
-                        clients = {}
+                majax(inst + "/api/v1/apps", {
+                    method: 'POST',
+                    data: {
+                        client_name: 'Toob', redirect_uris: window.location.protocol + '//' + window.location.host + window.location.pathname,
+                        scopes: 'read write', website: "https://github.com/teddyber/toob"
+                    }, success: function (data) {
+                        data = JSON.parse(data)
+                        // clients = {}
                         clients[inst] = { 'client_id': data.client_id, 'client_secret': data.client_secret }
                         window.localStorage.setItem('clients', JSON.stringify(clients))
                         window.localStorage.setItem('instance', inst)
                         window.location.href = `${inst}/oauth/authorize?client_id=${data.client_id}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
                     }
                 })
+                // ojax('POST', inst + "/api/v1/apps", fd, function () {
+                //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                //     }
+                // })
             }
             else {
                 window.localStorage.setItem('instance', inst)
@@ -692,18 +743,12 @@
             display();
         });
 
-        if (window.location.hash == '') {
-            if (getInstance())
-                window.location.hash = '#home';
-            else
-                window.location.hash = '#login';
-        } else
-            display()
+
         function s(p) { return document.querySelector(p); }// Select node from Pattern
         function sa(p) { return document.querySelectorAll(p); }// Select All nodes from Pattern
         function n(h) { return document.createRange().createContextualFragment(h) } // create Node from Html
 
-        function getInstance() {
+        function getInstance(account) {
             return JSON.parse(window.localStorage.getItem('accounts') || '{}')[account] ? JSON.parse(window.localStorage.getItem('accounts') || '{}')[account].instance : null
         }
         function display() {
@@ -717,6 +762,9 @@
                     // window.localStorage.removeItem('at')
                     window.localStorage.removeItem('instance')
                     window.location.href = window.location.pathname;
+                    break;
+                case '#adduser':
+                    showOnly('#login')
                     break;
                 case '#login':
                     showOnly('#login')
@@ -769,19 +817,24 @@
         }
         s('#search input').onchange = function () {
             window.location.hash = '#search/' + this.value
-            ajax('GET', getInstance() + "/api/v2/search?q=" + this.value, null, function () {
-                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + this.value, {
+                success: function (data) {
+                    data = JSON.parse(data)
                     sa('#search .status, #search .account, #search .hashtags').forEach(e => { e.remove() })
-                    JSON.parse(this.response).accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${e.id}"><img class="avatar" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
-                    JSON.parse(this.response).hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tag/${e.name}">#${e.name}</a></div>`)) })
-                    JSON.parse(this.response).statuses.forEach(e => { s('#search').append(n(displayStatus(e))) })
+                    data.accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${e.id}"><img class="avatar" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
+                    data.hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tag/${e.name}">#${e.name}</a></div>`)) })
+                    data.statuses.forEach(e => { s('#search').append(n(displayStatus(e, account))) })
                 }
             })
+            // ojax('GET', getInstance(account) + "/api/v2/search?resolve=true&q=" + this.value, null, function () {
+            //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            //     }
+            // })
         }
-        function showModal(text, confirm) { 
+        function showModal(text, confirm) {
             s('#modal p').innerHTML = text
             s('#modal').style.display = 'block'
-            s('#modal button.OK').onclick = function() {confirm();s('#modal').style.display = 'none'}
+            s('#modal button.OK').onclick = function () { confirm(); s('#modal').style.display = 'none' }
         }
         s('.close').onclick = function () { s('#modal').style.display = 'none' }
         s('#modal').onclick = function () { s('#modal').style.display = 'none' }
@@ -790,6 +843,9 @@
             s(div).style.display = 'block'
             sa('nav a').forEach(e => { e.classList.remove('active') })
             if (s(`[href^="${window.location.hash}"]`)) s(`[href^="${window.location.hash}"]`).classList.add('active')
+        }
+        function getAT(account) {
+            return JSON.parse(window.localStorage.getItem('accounts') || '[]')[account] ? JSON.parse(window.localStorage.getItem('accounts') || '[]')[account].at : null
         }
         function updateTimeline(which, trend = false) {
             if (which == 'timelines/trend') {
@@ -800,11 +856,12 @@
             if (which != whichTimeline) {
                 whichTimeline = which
                 s('#timeline').textContent = ''
-                ajax("GET", getInstance() + '/api/v1/' + feed + '?limit=40', null, function (e) {
-                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        JSON.parse(this.response).forEach(el => {
+                majax(getInstance(account) + '/api/v1/' + feed + '?limit=40', {
+                    headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                    success: function (data) {
+                        JSON.parse(data).forEach(el => {
                             if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
-                                s('#timeline').append(n(displayStatus(el)))
+                                s('#timeline').append(n(displayStatus(el, account)))
                                 if (s('[in_reply_to_id="s' + el.id + '"]')) { // put parent up in the timeline if there's a reply
                                     s('[in_reply_to_id="s' + el.id + '"]').parentNode.insertBefore(s('#s' + el.id), s('[in_reply_to_id="s' + el.id + '"]'))
                                 }
@@ -820,34 +877,94 @@
             }
         }
         function lookForNewNotif() {
-            ajax('GET', getInstance() + '/api/v1/notifications', null, function () {
-                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    newestNotif = JSON.parse(this.response)[0].id
+            majax(getInstance(account) + '/api/v1/notifications', {
+                headers: {
+                    'Authorization': 'Bearer ' + getAT(account)
+                }, success: function (data) {
+                    // ojax('GET', getInstance() + '/api/v1/notifications', null, function () {
+                    // if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    newestNotif = JSON.parse(data)[0].id
                     if (newestNotif > window.localStorage.getItem('lastnotif')) {
                         s('[href="#notifications"]').classList.add('new')
                     }
+                    // }
                 }
             })
             // setInterval(lookForNewNotif, 5000)
         }
         setInterval(lookForNewNotif, 5000)
-        function getAccount() {
-            ajax('GET', getInstance() + '/api/v1/accounts/verify_credentials', null, function () {
-                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    currentAccountId = JSON.parse(this.response).id
+        function getAccount(account) {
+            return new Promise(resolve => {
+                // ojax('GET', getInstance() + '/api/v1/accounts/verify_credentials', null, function () {
+                // if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                majax(getInstance(account) + '/api/v1/accounts/verify_credentials', {
+                    headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                    success: function (data) {
+                        resolve(JSON.parse(data))
+                    }
+                })
+            })
+        }
+        function getAccounts() {
+            return new Promise(resolve => {
+                accts = JSON.parse(window.localStorage.getItem('accounts'))
+                r = []
+                // rem = account
+                for (i = 0; i < accts.length; i++) {
+                    // account = i
+                    r.push(getAccount(i).then(r => { return r }))
+                }
+                // account = rem
+                resolve(Promise.all(r))
+            })
+        }
+        accounts = ''
+        a = getAccounts().then(a => {
+            accounts = a
+            if (window.location.hash == '') {
+                if (getInstance(account))
+                    window.location.hash = '#home';
+                else
+                    window.location.hash = '#login';
+            } else {
+                display()
+            }
+            displayAccounts()
+            return a
+        })
+        function displayAccounts() {
+            i = 0
+            accounts.forEach(a => {
+                // console.log(a)
+                s('#accounts').append(n(`<span><img acct="${i}" class="${i == account ? 'active' : ''}" src="${a.avatar}"/></span>`))
+                i++
+            })
+            sa('#accounts img').forEach(i => {
+                i.onclick = function () {
+                    sa('#accounts img').forEach(i => {
+                        i.classList.remove('active')
+                    })
+                    // console.log(this.getAttribute('acct'));
+                    account = this.getAttribute('acct');
+                    window.localStorage.setItem('activeAccount', account)
+                    this.classList.add('active')
+                    whichTimeline = ''
+                    display()
                 }
             })
         }
-        currentAccountId = ''
-        getAccount()
         function updateNotifications(which) {
             if (which != whichTimeline) {
                 whichTimeline = which
                 s('[href="#notifications"]').classList.remove('new')
                 s('#timeline').textContent = ''
-                ajax('GET', getInstance() + '/api/v1/' + which, null, function () {
-                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        JSON.parse(this.response).forEach(e => {
+                majax(getInstance(account) + '/api/v1/' + which, {
+                    headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                    success: function (data) {
+
+                        // ojax('GET', getInstance(account) + '/api/v1/' + which, null, function () {
+                        // if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        JSON.parse(data).forEach(e => {
                             // console.log(e)
                             if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', 1) //init
                             window.localStorage.setItem('lastnotif', Math.max(parseInt(window.localStorage.getItem('lastnotif')), parseInt(e.id)))
@@ -864,60 +981,80 @@
                                             <img class="avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> reblogged your status!</p>
-                                ${displayStatus(e.status)}</div>`))
+                                ${displayStatus(e.status, account)}</div>`))
+                                    break;
+                                case 'update':
+                                    s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
+                                        </a> updated their status!</p>
+                                ${displayStatus(e.status, account)}</div>`))
                                     break;
                                 case 'favourite':
                                     s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
                                             <img class="avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> favourited your status!</p>
-                                ${displayStatus(e.status)}</div>`))
+                                ${displayStatus(e.status, account)}</div>`))
                                     break;
                                 case 'mention':
                                     s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
                                             <img class="avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> mentioned you!</p>
-                                ${displayStatus(e.status)}</div>`))
+                                ${displayStatus(e.status, account)}</div>`))
                                     break;
                                 case 'poll':
                                     s('#timeline').append(n(`<div class="notif"><p>A poll you participated in ended!</p>
-                                ${displayStatus(e.status)}</div>`))
+                                ${displayStatus(e.status, account)}</div>`))
                                     break;
                                 default:
                                     console.log(e)
                                     break;
                             }
                         })
+                        // }
                     }
                 })
             }
         }
         function updateStatus(id) {
+            [acct, statusId] = id.split('/')
+            console.log(acct)
+            console.log(statusId)
             if (id == lastStatusId) return;
             lastStatusId = id;
             s('#status').innerHTML = '';
-            ajax('GET', getInstance() + '/api/v1/statuses/' + id, new FormData(), function (e) {
-                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    current = JSON.parse(this.response)
-                    ajax('GET', getInstance() + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : id) + '/context', new FormData(), function (e) {
-                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            majax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
+                headers: { 'Authorization': 'Bearer ' + getAT(acct) },
+                success: function (data) {
+                    // ojax('GET', getInstance(account) + '/api/v1/statuses/' + id, new FormData(), function (e) {
+                    //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    current = JSON.parse(data)
+                    majax(getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', {
+                        headers: { 'Authorization': 'Bearer ' + getAT(acct) },
+                        success: function (data) {
+                            // ojax('GET', getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', new FormData(), function (e) {
+                            //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             i = 0;
-                            data = JSON.parse(this.response)
+                            // data = JSON.parse(this.response)
+                            data = JSON.parse(data)
                             data.ancestors.forEach(element => {
-                                s('#status').append(n(displayStatus(element, (i == 0 ? 'top' : 'ancestor'), 't')));
+                                s('#status').append(n(displayStatus(element, acct, (i == 0 ? 'top' : 'ancestor'), 't')));
                                 i++
                             });
                             c = current.reblog ? current.reblog : current
-                            s('#status').append(n(displayStatus(c, 'focus' + (i == 0 ? ' top' : ''), 't')));
+                            s('#status').append(n(displayStatus(c, acct, 'focus' + (i == 0 ? ' top' : ''), 't')));
 
                             data.descendants.forEach(element => {
-                                s('#t' + element.in_reply_to_id).append(n(displayStatus(element, 'thread', 't')));
+                                s('#t' + element.in_reply_to_id).append(n(displayStatus(element, acct, 'thread', 't')));
                             });
                             tweak();
+                            //     }
+                            // })
                         }
-                    })
-
+                    }
+                    )
                 }
             })
         }
@@ -925,9 +1062,9 @@
             if (id == lastAccountId) return;
             lastAccountId = id;
             s('#account').innerHTML = '';
-            ajax('GET', getInstance() + '/api/v1/accounts/' + id, null, function (e) {
-                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    data = JSON.parse(this.response)
+            majax(getInstance(account) + '/api/v1/accounts/' + id, {
+                success: function (data) {
+                    data = JSON.parse(data)
                     console.log(data)
                     html = `
                     <img class="header" src="${data.header}"/>
@@ -942,31 +1079,45 @@
                     `
                     s('#account').innerHTML = html
                     s('#follow').onclick = function () {
-                        ajax('POST', getInstance() + '/api/v1/accounts/' + id + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
+                        ajax('POST', getInstance(account) + '/api/v1/accounts/' + id + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
                             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                                 s('#follow').innerText = s('#follow').innerText == 'Follow' ? 'Unfollow' : 'Follow'
                             }
                         })
                     }
-                    ajax('GET', getInstance() + `/api/v1/accounts/relationships?id[]=${id}`, null, function (e) {
-                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            r = JSON.parse(this.response)
-                            console.log(r)
+                    majax(getInstance(account) + `/api/v1/accounts/relationships?id[]=${id}`, {
+                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                        success: function (data) {
+                            r = JSON.parse(data)
+                            // console.log(r)
                             s('#follow').innerText = r[0].following ? 'Unfollow' : 'Follow'
                             if (r[0].followed_by) { s('.follows').append(' including you') }
+
                         }
                     })
+                    // ojax('GET', getInstance(account) + `/api/v1/accounts/relationships?id[]=${id}`, null, function (e) {
+                    //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    //     }
+                    // })
                 }
             })
+            // ojax('GET', getInstance(account) + '/api/v1/accounts/' + id, null, function (e) {
+            //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
 
-            ajax('GET', getInstance() + `/api/v1/accounts/${id}/statuses?limit=40`, null, function (e) {
-                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    JSON.parse(this.response).forEach(e => {
-                        s('#account').append(n(displayStatus(e)))
+            //     }
+            // })
+            majax(getInstance(account) + `/api/v1/accounts/${id}/statuses?limit=40`, {
+                success: function (data) {
+                    JSON.parse(data).forEach(e => {
+                        s('#account').append(n(displayStatus(e, account)))
                     })
                     tweak();
                 }
             })
+            // ojax('GET', getInstance(account) + `/api/v1/accounts/${id}/statuses?limit=40`, null, function (e) {
+            //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            //     }
+            // })
         }
         function tweak() {
             //activate links
@@ -975,7 +1126,7 @@
                     st = this.parentNode.parentNode
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
                     prefix = this.parentNode.parentNode.classList.contains('fav') ? 'un' : '';
-                    ajax('POST', getInstance() + `/api/v1/statuses/${id}/${prefix}favourite`, null, function (e) {
+                    ajax('POST', getInstance(account) + `/api/v1/statuses/${id}/${prefix}favourite`, null, function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             prefix == 'un' ? st.classList.remove('fav') : st.classList.add('fav')
                         }
@@ -987,7 +1138,7 @@
                     st = this.parentNode.parentNode
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
                     prefix = this.parentNode.parentNode.classList.contains('reb') ? 'un' : '';
-                    ajax('POST', getInstance() + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
+                    ajax('POST', getInstance(account) + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             prefix == 'un' ? st.classList.remove('reb') : st.classList.add('reb')
                         }
@@ -999,7 +1150,7 @@
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
 
                     confirm = showModal('Confirmer la suppression?', function () {
-                        ajax('DELETE', getInstance() + `/api/v1/statuses/${id}`, null, function (e) {
+                        ajax('DELETE', getInstance(account) + `/api/v1/statuses/${id}`, null, function (e) {
                             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                                 whichTimeline = ''
                                 display()
@@ -1037,7 +1188,7 @@ ${this.getAttribute('href')}`
                     own_votes = Array.from(sa('[name="option_' + poll_id + '[]"]:checked')).map(function (i) { return i.getAttribute('id').split('_')[2] })
                     fd = new FormData()
                     fd.append('choices[]', own_votes)
-                    ajax('POST', getInstance() + `/api/v1/polls/${poll_id}/votes`, fd, function () {
+                    ajax('POST', getInstance(account) + `/api/v1/polls/${poll_id}/votes`, fd, function () {
                         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                             whichTimeline = ''
                             display()
@@ -1057,7 +1208,32 @@ ${this.getAttribute('href')}`
             else
                 xhttp.send()
         }
-        function displayStatus(el, cssClass = '', id_prefix = 's') {
+        function majax(url, params) {
+            xhr = new XMLHttpRequest()
+            xhr.onreadystatechange = function () {
+                if (params.success && this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    params.success(this.response, this)
+                }
+                if (params.wait && this.readyState == XMLHttpRequest.DONE && this.status == 206) {
+                    params.wait(this.response, this)
+                }
+            }
+            xhr.open(params.method || 'GET', url, true)
+            if (params.headers) {
+                Object.keys(params.headers).forEach(k => {
+                    xhr.setRequestHeader(k, params.headers[k])
+                })
+            }
+            fd = null
+            if (params.data) {
+                fd = new FormData()
+                Object.keys(params.data).forEach(k => {
+                    Array.isArray(params.data[k]) ? params.data[k].forEach(v => { fd.append(k, v) }) : fd.append(k, params.data[k])
+                })
+            }
+            xhr.send(fd || null)
+        }
+        function displayStatus(el, account, cssClass = '', id_prefix = 's') {
             // console.log(el)
             if (el.reblog) {
                 boost = `<a href="#account/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
@@ -1073,9 +1249,9 @@ ${this.getAttribute('href')}`
             <div class="reply_to"></div>
             <div class="author"><a href="#account/${e.account.id}"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
             <div class="actions">
-                ${currentAccountId == e.account.id ? '<span class="edit"><svg><use href="#pen" /></svg></span>' : ''}
-                ${currentAccountId == e.account.id ? '<span class="del"><svg><use href="#cancel" /></svg></span>' : ''}
-                <span class="link"><a href="#status/${e.id}"><svg><use href="#tree" /></svg></a></span> 
+                ${accounts[account].id == e.account.id ? '<span class="edit"><svg><use href="#pen" /></svg></span>' : ''}
+                ${accounts[account].id == e.account.id ? '<span class="del"><svg><use href="#cancel" /></svg></span>' : ''}
+                <span class="link"><a href="#status/${account}/${e.id}"><svg><use href="#tree" /></svg></a></span> 
                 <span class="rep" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" 
                 tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#rep" /></svg>(${e.replies_count})</span>
                 <span class="quo" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" href="${e.url}"
@@ -1174,15 +1350,19 @@ ${this.getAttribute('href')}`
                         textarea = this.parentNode.parentNode.parentNode.querySelector('textarea')
                         t = this
                         src = this.src
-                        ajax('GET', 'pj.php?url=' + this.src, null, function () {
-                            if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        majax('pj.php?url=' + this.src, {
+                            success: function (data, xhr) {
                                 textarea.value = textarea.value.replace(src, '') // remove URL from textarea
-                                t.src = 'data:' + this.getResponseHeader('content-type') + ';base64, ' + this.response
+                                t.src = 'data:' + xhr.getResponseHeader('content-type') + ';base64, ' + data
                                 t.parentNode.style.display = 'block'
                                 editthread = t.parentNode.parentNode.parentNode //img>div>.media_attachments>.editthread
                                 editthread.setAttribute('attach', parseInt(editthread.getAttribute('attach')) + 1)
                             }
                         })
+                        // ojax('GET', 'pj.php?url=' + this.src, null, function () {
+                        //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        //     }
+                        // })
                     }
                 }
             })
@@ -1248,15 +1428,22 @@ ${this.getAttribute('href')}`
         const uploadFile = (toot, i) => { //uploads and then checks upload is finished
             return new Promise((resolve, reject) => {
                 const file = DataURIToBlob(toot.querySelector(`.media_attachments div:nth-child(${i + 1}) img`).getAttribute('src'))
-                const fd = new FormData();
-                fd.append('file', file, 'test.png')
-                fd.append('description', toot.querySelector(`.media_attachments div:nth-child(${i + 1}) textarea`).value)
-                ajax('POST', getInstance() + '/api/v2/media', fd, async function () {
-                    if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
-                        id = await checkUpload(JSON.parse(this.response).id).then(r => { return r })
-                        resolve(JSON.parse(this.response))
+                // const fd = new FormData();
+                // fd.append('file', file, 'test.png')
+                // fd.append('description', toot.querySelector(`.media_attachments div:nth-child(${i + 1}) textarea`).value)
+                majax(getInstance(account) + '/api/v2/media', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                    data: { file: file, description: toot.querySelector(`.media_attachments div:nth-child(${i + 1}) textarea`).value },
+                    success: async function (data) {
+                        id = await checkUpload(JSON.parse(data).id).then(r => { return r })
+                        resolve(JSON.parse(data))
                     }
                 })
+                // ojax('POST', getInstance(account) + '/api/v2/media', fd, async function () {
+                //     if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
+                //     }
+                // })
             })
         }
         async function toot(toots, i, in_reply_to_id = '') { // toots multiple toots in a row
@@ -1280,12 +1467,19 @@ ${this.getAttribute('href')}`
             results.forEach(r => { fd.append('media_ids[]', r) }) // attach all medias
             if (in_reply_to_id && in_reply_to_id != '') fd.append('in_reply_to_id', in_reply_to_id)
 
-            ajax('POST', getInstance() + '/api/v1/statuses', fd, function () {
-                if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
+            majax(getInstance(account) + '/api/v1/statuses', {
+                method: 'POST',
+                data: { status: toots[i].querySelector('.post textarea').value, visibility: s('#visibility').value.toLowerCase(), language: s('#lang').value, 'media_ids[]': results },
+                headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                success: function (data) {
                     toots[i].style.display = 'none'
-                    toot(toots, i + 1, JSON.parse(this.response).id) // toot next one
+                    toot(toots, i + 1, JSON.parse(data).id) // toot next one
                 }
             })
+            // ojax('POST', getInstance(account) + '/api/v1/statuses', fd, function () {
+            //     if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
+            //     }
+            // })
         }
         s('#toob').onclick = function () {
             toots = sa('.editthread')
@@ -1306,14 +1500,22 @@ ${this.getAttribute('href')}`
         sa('nav a').forEach(a => { a.onclick = function () { if (this.classList.contains('active')) window.scrollTo({ top: 0, behavior: 'smooth' }); } })
         function checkUpload(id) {
             return new Promise((resolve, reject) => {
-                ajax('GET', getInstance() + '/api/v1/media/' + id, null, function () {
-                    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                majax(getInstance(account) + '/api/v1/media/' + id, {
+                    headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                    success: function (data) {
                         resolve(id);// finished
-                    }
-                    if (this.readyState == XMLHttpRequest.DONE && this.status == 206) {
+                    },
+                    wait: function (data) {
+                        console.log('ici')
                         sleep(1000).then(v => { resolve(checkUpload(id)) })
                     }
                 })
+                // ojax('GET', getInstance(account) + '/api/v1/media/' + id, null, function () {
+                //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                //     }
+                //     if (this.readyState == XMLHttpRequest.DONE && this.status == 206) {
+                //     }
+                // })
             })
         }
         function cleanUpWrite() {
@@ -1345,19 +1547,24 @@ ${this.getAttribute('href')}`
                 trend = (window.location.hash == '#trend')
                 feed = trend ? 'timelines/home' : whichTimeline
                 if (waitingFor > maxId) {
-                    ajax('GET', getInstance() + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, null, function () {
-                        if (this.readyState == 4 && this.status == 200) {
-                            JSON.parse(this.response).forEach(el => {
+                    majax(getInstance(account) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
+                        headers: { 'Authorization': 'Bearer ' + getAT(account) }, success: function (data) {
+                            JSON.parse(data).forEach(el => {
                                 if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
-                                    s('#timeline').append(n(displayStatus(el)))
+                                    s('#timeline').append(n(displayStatus(el, account)))
                                     maxId = Math.min(maxId, el.id)
                                     sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
                                         s('#s' + el.id).appendChild(c)
                                     })
                                 }
                             })
+                            tweak();
                         }
                     })
+                    // ojax('GET', getInstance(account) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, null, function () {
+                    //     if (this.readyState == 4 && this.status == 200) {
+                    //     }
+                    // })
                     waitingFor = maxId
                 }
             }
@@ -1369,7 +1576,7 @@ ${this.getAttribute('href')}`
             compose a poll
             keyboard nav
             edit toot
-            PWA
+            modal colors
         */
     </script>
 </body>
