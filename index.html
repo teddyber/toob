@@ -61,6 +61,8 @@
             height: 100%;
             background-color: var(--bg);
             box-shadow: 3px 0px 2px var(--color);
+            overflow-y: scroll;
+            scrollbar-width: none;
         }
 
         #sidenav svg {
@@ -414,8 +416,10 @@
             cursor: pointer;
         }
 
-        #accounts img {
+        #accounts img,
+        #topnav svg {
             height: 32px;
+            width: 32px;
             margin-left: .3em;
         }
 
@@ -547,19 +551,23 @@
     </svg>
     <nav id="sidenav">
         <h1>
-            <a href="#home"><svg>
-                    <use href="#home" />
-                </svg><img
-                    src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"></a>
-            <a href="#public"><img
-                    src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"><svg>
-                    <use href="#public" />
-                </svg></a>
+            <!-- <a href="#home/0"><svg>
+                <use href="#home" />
+            </svg>
+            <img src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"/>
+        </a>
+        <a href="#home/1"><svg>
+            <use href="#home" />
+        </svg>
+        <img src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"/>
+    </a>
+    <a href="#home/2"><svg>
+        <use href="#home" />
+    </svg>
+    <img src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"/>
+</a> -->
             <a href="#write"><svg>
                     <use href="#pen" />
-                </svg></a>
-            <a href="#notifications"><svg>
-                    <use href="#bell" />
                 </svg></a>
             <!-- <a href="#trend"><svg>
                     <use href="#trendi" />
@@ -567,16 +575,16 @@
             <a href="#search"><svg>
                     <use href="#searchi" />
                 </svg></a>
-            <a href="#adduser"><svg>
-                    <use href="#i-adduser" />
-                </svg></a>
-            <a href="#logout"><svg>
+            <!-- <a href="#logout"><svg>
                     <use href="#logout" />
-                </svg></a>
+                </svg></a> -->
         </h1>
     </nav>
     <nav id="topnav">
         <span id="accounts"></span>
+        <a href="#adduser"><svg>
+                <use href="#i-adduser" />
+            </svg></a>
         </h1>
     </nav>
     <div id="timeline"></div>
@@ -586,7 +594,7 @@
     <div id="write">
         <div class="editthread" attach="0">
             <div class="post">
-                <input type="hidden" id="in_reply_to_id" />
+                <input type="text" id="in_reply_to_id" />
                 <textarea desc="text" placeholder="What's on your mind?"></textarea>
                 <label class="button"><input type="file" accept="image/*" /><svg>
                         <use href="#camera" />
@@ -771,7 +779,7 @@
                     break;
                 case '#home':
                     showOnly('#timeline')
-                    updateTimeline('timelines/home');
+                    updateTimeline('timelines/home', window.location.hash.split('/')[1]);
                     break;
                 case '#trend':
                     showOnly('#timeline')
@@ -779,7 +787,7 @@
                     break;
                 case '#notifications':
                     showOnly('#timeline')
-                    updateNotifications('notifications');
+                    updateNotifications('notifications', window.location.hash.split('/')[1]);
                     break;
                 case '#write':
                     showOnly('#write')
@@ -795,7 +803,7 @@
                     break;
                 case '#tags':
                     showOnly('#timeline')
-                    updateTimeline('timelines/tag/' + window.location.hash.substring(6));
+                    updateTimeline('timelines/tag/' + window.location.hash.split('/')[1], window.location.hash.split('/')[2]);
                     break;
                 case '#account':
                     showOnly('#account')
@@ -847,14 +855,18 @@
         function getAT(account) {
             return JSON.parse(window.localStorage.getItem('accounts') || '[]')[account] ? JSON.parse(window.localStorage.getItem('accounts') || '[]')[account].at : null
         }
-        function updateTimeline(which, trend = false) {
+        function updateTimeline(which, account = 0) {
+            trend = false
             if (which == 'timelines/trend') {
                 trend = true
                 feed = 'timelines/home'
             }
             else feed = which
             if (which != whichTimeline) {
-                whichTimeline = which
+                whichTimeline = which + '/' + account
+                maxId = 999999999999999999
+                waitingFor = 999999999999999999
+
                 s('#timeline').textContent = ''
                 majax(getInstance(account) + '/api/v1/' + feed + '?limit=40', {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
@@ -863,11 +875,12 @@
                             if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
                                 s('#timeline').append(n(displayStatus(el, account)))
                                 if (s('[in_reply_to_id="s' + el.id + '"]')) { // put parent up in the timeline if there's a reply
-                                    s('[in_reply_to_id="s' + el.id + '"]').parentNode.insertBefore(s('#s' + el.id), s('[in_reply_to_id="s' + el.id + '"]'))
+                                    console.log('ici')
+                                    s('[in_reply_to_id="s' + account + '-' + el.id + '"]').parentNode.insertBefore(s('#s' + account + '-' + el.id), s('[in_reply_to_id="s' + account + '-' + el.id + '"]'))
                                 }
                                 maxId = Math.min(maxId, el.id)  //  remmeber oldest toot for scrolling
-                                sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
-                                    s('#s' + el.id).appendChild(c)
+                                sa('[in_reply_to_id="s' + account + '-' + el.id + '"]').forEach(c => {
+                                    s('#s' + account + '-' + el.id).appendChild(c)
                                 })
                             }
                         });
@@ -922,14 +935,15 @@
         a = getAccounts().then(a => {
             accounts = a
             if (window.location.hash == '') {
-                if (getInstance(account))
-                    window.location.hash = '#home';
+                if (accounts.length > 0)
+                    window.location.hash = `#home/${account}`;
                 else
                     window.location.hash = '#login';
             } else {
                 display()
             }
             displayAccounts()
+            displaySideNav()
             return a
         })
         function displayAccounts() {
@@ -953,10 +967,19 @@
                 }
             })
         }
-        function updateNotifications(which) {
+        function displaySideNav() {
+            i = 0
+            accounts.forEach(a => {
+                // console.log(a)
+                s('#sidenav h1').append(n(`<a href="#home/${i}"><svg><use href="#home" /></svg><img src="${a.avatar}"/></a>`))
+                s('#sidenav h1').append(n(`<a href="#public/${i}"><svg><use href="#public" /></svg><img src="${a.avatar}"/></a>`))
+                s('#sidenav h1').append(n(`<a href="#notifications/${i}"><svg><use href="#bell" /></svg><img src="${a.avatar}"/></a>`))
+                i++
+            })
+        }
+        function updateNotifications(which, account = 0) {
             if (which != whichTimeline) {
-                whichTimeline = which
-                s('[href="#notifications"]').classList.remove('new')
+                whichTimeline = which + '/' + account
                 s('#timeline').textContent = ''
                 majax(getInstance(account) + '/api/v1/' + which, {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
@@ -1016,47 +1039,64 @@
                         // }
                     }
                 })
+                sa('[href^="#notifications"]').forEach(e => { e.classList.remove('new') })
             }
         }
         function updateStatus(id) {
-            [acct, statusId] = id.split('/')
-            console.log(acct)
-            console.log(statusId)
-            if (id == lastStatusId) return;
-            lastStatusId = id;
-            s('#status').innerHTML = '';
-            majax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
-                headers: { 'Authorization': 'Bearer ' + getAT(acct) },
-                success: function (data) {
-                    // ojax('GET', getInstance(account) + '/api/v1/statuses/' + id, new FormData(), function (e) {
-                    //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    current = JSON.parse(data)
-                    majax(getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', {
-                        headers: { 'Authorization': 'Bearer ' + getAT(acct) },
-                        success: function (data) {
-                            // ojax('GET', getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', new FormData(), function (e) {
-                            //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            i = 0;
-                            // data = JSON.parse(this.response)
-                            data = JSON.parse(data)
-                            data.ancestors.forEach(element => {
-                                s('#status').append(n(displayStatus(element, acct, (i == 0 ? 'top' : 'ancestor'), 't')));
-                                i++
-                            });
-                            c = current.reblog ? current.reblog : current
-                            s('#status').append(n(displayStatus(c, acct, 'focus' + (i == 0 ? ' top' : ''), 't')));
+            var [acct, statusId] = id.split('/')
+            console.log([acct, statusId])
+            if (acct != account) {//we want to display the toot as seen from the currentAccount
+                majax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
+                    headers: { 'Authorization': 'Bearer ' + getAT(acct) },
+                    success: function (data) {
+                        console.log(JSON.parse(data).uri)
+                        majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + JSON.parse(data).uri, {
+                            headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                            success: function (data) {
+                                updateStatus(account + '/' + JSON.parse(data).statuses[0].id)
+                            }
+                        })
 
-                            data.descendants.forEach(element => {
-                                s('#t' + element.in_reply_to_id).append(n(displayStatus(element, acct, 'thread', 't')));
-                            });
-                            tweak();
-                            //     }
-                            // })
-                        }
+                        // updateStatus()
                     }
-                    )
-                }
-            })
+                })
+            } else {
+                if (id == lastStatusId) return;
+                lastStatusId = id;
+                s('#status').innerHTML = '';
+                majax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
+                    headers: { 'Authorization': 'Bearer ' + getAT(acct) },
+                    success: function (data) {
+                        // ojax('GET', getInstance(account) + '/api/v1/statuses/' + id, new FormData(), function (e) {
+                        //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        current = JSON.parse(data)
+                        majax(getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', {
+                            headers: { 'Authorization': 'Bearer ' + getAT(acct) },
+                            success: function (data) {
+                                // ojax('GET', getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', new FormData(), function (e) {
+                                //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                                i = 0;
+                                // data = JSON.parse(this.response)
+                                data = JSON.parse(data)
+                                data.ancestors.forEach(element => {
+                                    s('#status').append(n(displayStatus(element, acct, (i == 0 ? 'top' : 'ancestor'), 't')));
+                                    i++
+                                });
+                                c = current.reblog ? current.reblog : current
+                                s('#status').append(n(displayStatus(c, acct, 'focus' + (i == 0 ? ' top' : ''), 't')));
+
+                                data.descendants.forEach(element => {
+                                    s('#t' + acct + '-' + element.in_reply_to_id).append(n(displayStatus(element, acct, 'thread', 't')));
+                                });
+                                tweak();
+                                //     }
+                                // })
+                            }
+                        }
+                        )
+                    }
+                })
+            }
         }
         function updateAccount(id) {
             if (id == lastAccountId) return;
@@ -1119,32 +1159,74 @@
             //     }
             // })
         }
+        function fav(statusId, statusUri, from, unfav = false) {
+            console.log([statusId, statusUri, from, unfav])
+            var [acct, id] = statusId.split('-');
+            if (acct != from) {
+                console.log('tesst')
+                majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + statusUri, {
+                    headers: { 'Authorization': 'Bearer ' + getAT(from) },
+                    success: function (data) {
+                        data = JSON.parse(data)
+                        console.log(data)
+                        fav(from + '-' + data.statuses[0].id, statusUri, from, unfav)
+                    }
+                })
+            } else {
+                console.log('ici')
+                majax(getInstance(from) + `/api/v1/statuses/${id}/${unfav ? 'un' : ''}favourite`, {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(from) },
+                    success: function (data) {
+                        unfav ? s(`[uri="${statusUri}"`).classList.remove('fav') : s(`[uri="${statusUri}"`).classList.add('fav')
+                    }
+                })
+            }
+        }
+        function reb(statusId, statusUri, from, unreb = false) {
+            var [acct, id] = statusId.split('-');
+            if (acct != from) {
+                majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + statusUri, {
+                    headers: { 'Authorization': 'Bearer ' + getAT(from) },
+                    success: function (data) {
+                        data = JSON.parse(data)
+                        reb(from + '-' + data.statuses[0].id, statusUri, from, unreb)
+                    }
+                })
+            } else {
+                majax(getInstance(from) + `/api/v1/statuses/${id}/${unreb ? 'un' : ''}reblog`, {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(from) },
+                    success: function (data) {
+                        unreb ? s(`[uri="${statusUri}"`).classList.remove('reb') : s(`[uri="${statusUri}"`).classList.add('reb')
+                    }
+                })
+            }
+        }
         function tweak() {
             //activate links
             sa('.actions .fav').forEach(e => {
                 e.onclick = function () {
                     st = this.parentNode.parentNode
-                    id = this.parentNode.parentNode.getAttribute('id').substring(1);
-                    prefix = this.parentNode.parentNode.classList.contains('fav') ? 'un' : '';
-                    ajax('POST', getInstance(account) + `/api/v1/statuses/${id}/${prefix}favourite`, null, function (e) {
-                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            prefix == 'un' ? st.classList.remove('fav') : st.classList.add('fav')
-                        }
-                    })
+                    fav(st.getAttribute('id'), st.getAttribute('uri'), account, st.classList.contains('fav'))
                 }
             })
             sa('.actions .reb').forEach(e => {
                 e.onclick = function () {
                     st = this.parentNode.parentNode
-                    id = this.parentNode.parentNode.getAttribute('id').substring(1);
-                    prefix = this.parentNode.parentNode.classList.contains('reb') ? 'un' : '';
-                    ajax('POST', getInstance(account) + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
-                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            prefix == 'un' ? st.classList.remove('reb') : st.classList.add('reb')
-                        }
-                    })
+                    reb(st.getAttribute('id'), st.getAttribute('uri'), account, st.classList.contains('reb'))
                 }
             })
+            // sa('.actions .reb').forEach(e => {
+            //     e.onclick = function () {
+            //         st = this.parentNode.parentNode
+            //         id = this.parentNode.parentNode.getAttribute('id').substring(1);
+            //         prefix = this.parentNode.parentNode.classList.contains('reb') ? 'un' : '';
+            //         ojax('POST', getInstance(account) + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
+            //             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            //                 prefix == 'un' ? st.classList.remove('reb') : st.classList.add('reb')
+            //             }
+            //         })
+            //     }
+            // })
             sa('.actions .del').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
@@ -1164,7 +1246,20 @@
             sa('.actions .rep, .actions .quo').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
-                    s('#in_reply_to_id').setAttribute('value', id)
+                    if (id.split('-')[0] != account) {
+                        majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + this.parentNode.parentNode.getAttribute('uri'), {
+                            headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                            success: function (data) {
+                                data = JSON.parse(data)
+                                s('#in_reply_to_id').setAttribute('value', data.statuses[0].id)
+
+                                // reb(from + '-' + data.statuses[0].id, statusUri, from, unreb)
+                            }
+                        })
+                    }
+                    else {
+                        s('#in_reply_to_id').setAttribute('value', id)
+                    }
                     this.parentNode.parentNode.append(s('#write'))
                     s('#write').style.display = 'block'
                     s('#write textarea').value = '@' + this.getAttribute('author') + ' ' + this.getAttribute('mentions') + ' '
@@ -1188,14 +1283,23 @@ ${this.getAttribute('href')}`
                     own_votes = Array.from(sa('[name="option_' + poll_id + '[]"]:checked')).map(function (i) { return i.getAttribute('id').split('_')[2] })
                     fd = new FormData()
                     fd.append('choices[]', own_votes)
-                    ajax('POST', getInstance(account) + `/api/v1/polls/${poll_id}/votes`, fd, function () {
-                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    majax(getInstance(account) + `/api/v1/polls/${poll_id}/votes`), {
+                        method: 'POST', headers: '',
+                        data: { 'choices[]': own_votes },
+                        success: function (data) {
                             whichTimeline = ''
                             display()
                         }
-                    })
+                    }
+                    // ojax('POST', getInstance(account) + `/api/v1/polls/${poll_id}/votes`, fd, function () {
+                    //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    //     }
+                    // })
                 }
             })
+        }
+        function vote(statusId, statusUri, from, ownvotes) {
+            var [acct, id] = statusId.split('-')
         }
         function ajax(method, url, params, success) {
             var xhttp = new XMLHttpRequest();
@@ -1233,8 +1337,12 @@ ${this.getAttribute('href')}`
             }
             xhr.send(fd || null)
         }
-        function displayStatus(el, account, cssClass = '', id_prefix = 's') {
-            // console.log(el)
+        function convertHTTPtoUri(http){
+            var [h,n,i,a] = http.split('/')
+            return a.substring(1)+'@'+i
+        }
+        function displayStatus(el, acct, cssClass = '', id_prefix = 's') {
+            console.log(el)
             if (el.reblog) {
                 boost = `<a href="#account/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1244,22 +1352,22 @@ ${this.getAttribute('href')}`
             }
             // e.card ? console.log(e.card) : '';
             // e.poll ? console.log(e.poll) : ''
-            return `<div id="${id_prefix}${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="s${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
+            return `<div uri="${e.uri}" id="${id_prefix}${acct}-${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="${id_prefix}${acct}-${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
             <div class="boost">${boost}</div>
             <div class="reply_to"></div>
             <div class="author"><a href="#account/${e.account.id}"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
             <div class="actions">
-                ${accounts[account].id == e.account.id ? '<span class="edit"><svg><use href="#pen" /></svg></span>' : ''}
-                ${accounts[account].id == e.account.id ? '<span class="del"><svg><use href="#cancel" /></svg></span>' : ''}
-                <span class="link"><a href="#status/${account}/${e.id}"><svg><use href="#tree" /></svg></a></span> 
-                <span class="rep" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" 
+                ${accounts[acct].id == e.account.id ? '<span class="edit"><svg><use href="#pen" /></svg></span>' : ''}
+                ${accounts[acct].id == e.account.id ? '<span class="del"><svg><use href="#cancel" /></svg></span>' : ''}
+                <span class="link"><a href="#status/${acct}/${e.id}"><svg><use href="#tree" /></svg></a></span> 
+                <span class="rep" author="${e.account.acct.indexOf('@')!=-1?e.account.acct:convertHTTPtoUri(e.account.url)}" mentions="${e.mentions.map(function (m) { return `@${m.acct.indexOf('@')!=-1?m.acct:convertHTTPtoUri(m.url)}` }).join(' ')}" 
                 tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#rep" /></svg>(${e.replies_count})</span>
                 <span class="quo" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" href="${e.url}"
                 tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#quote" /></svg></span>
                 <span class="reb"><svg><use href="#reb" /></svg>(${e.reblogs_count})</span> 
                 <span class="fav"><svg><use href="#star" /></svg>(${e.favourites_count})</span>
             </div>
-            <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\//g, 'href="#tags/'))}</div>
+            <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\/(\w+)/g, `href="#tags/$1/${acct}`), acct)}</div>
             ${e.poll && !e.poll.voted && !e.poll.expired ? '<div class="poll">' + e.poll.options.map(function (o, i) { return `<div><input type="${e.poll.multiple ? 'checkbox' : 'radio'}" name="option_${e.poll.id}[]" id="option_${e.poll.id}_${i}"/><label for="option_${e.poll.id}_${i}">${o.title}</label></div>` }).join('') + `<div><button class="vote" id="poll_${e.poll.id}">Vote!</button></div><div>${e.poll.votes_count} voters</div></div>` : ''}
             ${e.poll && (e.poll.voted || e.poll.expired) ? '<div class="poll">' + e.poll.options.map(function (o, i) { return `<div  class="${e.poll.own_votes.includes(i) ? 'gras' : ''}">${o.title} : ${Math.round(o.votes_count / e.poll.voters_count * 100)}%</div><div style="height:6px;width:${o.votes_count / e.poll.voters_count * 100}%;background-color:var(--highlight)"></div>` }).join('') + `</div><div>${e.poll.votes_count} voters</div>` : ''}
             <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
@@ -1275,9 +1383,9 @@ ${this.getAttribute('href')}`
             </a></div>`) : ''}
         </div>`
         }
-        function replaceMentions(array, text) {
+        function replaceMentions(array, text, acct) {
             array.forEach(m => {
-                text = text.replaceAll(`href="${m.url}"`, `href="#account/${m.id}"`).replaceAll('target="_blank"', '')
+                text = text.replaceAll(`href="${m.url}"`, `href="#account/${acct}/${m.id}"`).replaceAll('target="_blank"', '')
             })
             return text
         }
@@ -1506,7 +1614,6 @@ ${this.getAttribute('href')}`
                         resolve(id);// finished
                     },
                     wait: function (data) {
-                        console.log('ici')
                         sleep(1000).then(v => { resolve(checkUpload(id)) })
                     }
                 })
@@ -1544,14 +1651,34 @@ ${this.getAttribute('href')}`
 
         window.onscroll = function (ev) {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-                trend = (window.location.hash == '#trend')
-                feed = trend ? 'timelines/home' : whichTimeline
+                wt = whichTimeline.split('/')
+                switch (wt[1]) {
+                    case 'home':
+                        feed = wt[0] + '/' + wt[1]
+                        acct = wt[2]
+                        break;
+                    case 'public':
+                        feed = wt[0] + '/' + wt[1]
+                        acct = wt[2]
+                        break;
+                    case 'tag':
+                        feed = wt[0] + '/' + wt[1] + '/' + wt[2]
+                        acct = wt[3]
+                        break;
+
+                    default:
+                        break;
+                }
+                console.log(whichTimeline)
+                trend = (timeline == '#trend')
+                // feed = trend ? 'timelines/home' : wt[0]+'/'+wt[1]
                 if (waitingFor > maxId) {
-                    majax(getInstance(account) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
-                        headers: { 'Authorization': 'Bearer ' + getAT(account) }, success: function (data) {
+                    console.log(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId)
+                    majax(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
+                        headers: { 'Authorization': 'Bearer ' + getAT(acct) }, success: function (data) {
                             JSON.parse(data).forEach(el => {
                                 if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
-                                    s('#timeline').append(n(displayStatus(el, account)))
+                                    s('#timeline').append(n(displayStatus(el, acct)))
                                     maxId = Math.min(maxId, el.id)
                                     sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
                                         s('#s' + el.id).appendChild(c)
@@ -1577,6 +1704,7 @@ ${this.getAttribute('href')}`
             keyboard nav
             edit toot
             modal colors
+            column title in topnav
         */
     </script>
 </body>
