@@ -65,6 +65,10 @@
             scrollbar-width: none;
         }
 
+        #sidenav::-webkit-scrollbar {
+            display: none;
+        }
+
         #sidenav svg {
             margin-top: .5em;
         }
@@ -266,8 +270,12 @@
             border: 1px solid var(--color);
         }
 
-        .status.fav>div>.fav,
-        .status.reb>div>.reb {
+        .focus>.text {
+            font-size: larger;
+        }
+
+        .status.fav>div.actions>.fav,
+        .status.reb>div.actions>.reb {
             background-color: var(--highlight);
             color: var(--bg);
             border: var(--highlight);
@@ -348,6 +356,7 @@
         }
 
         #sidenav svg,
+        #sidenav img,
         #modal svg {
             width: 24px;
             height: 24px;
@@ -423,7 +432,7 @@
             margin-left: .3em;
         }
 
-        #accounts img.active {
+        #sidenav img.active {
             border: var(--highlight) solid 2px
         }
 
@@ -441,6 +450,17 @@
             position: absolute;
             top: 24px;
             left: 12px
+        }
+
+        .card.quo a::before {
+            display: block;
+            content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='%233088D4' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");;
+            color: var(--highlight);
+            /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E"); */
+            background-size: 28px 28px;
+            height: 28px;
+            width: 28px;
+            float: right;
         }
     </style>
 </head>
@@ -551,33 +571,12 @@
     </svg>
     <nav id="sidenav">
         <h1>
-            <!-- <a href="#home/0"><svg>
-                <use href="#home" />
-            </svg>
-            <img src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"/>
-        </a>
-        <a href="#home/1"><svg>
-            <use href="#home" />
-        </svg>
-        <img src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"/>
-    </a>
-    <a href="#home/2"><svg>
-        <use href="#home" />
-    </svg>
-    <img src="https://static.piaille.fr/accounts/avatars/109/285/191/576/839/720/original/4e7b3cac2ea00e1c.jpg"/>
-</a> -->
             <a href="#write"><svg>
                     <use href="#pen" />
                 </svg></a>
-            <!-- <a href="#trend"><svg>
-                    <use href="#trendi" />
-                </svg></a> -->
             <a href="#search"><svg>
                     <use href="#searchi" />
                 </svg></a>
-            <!-- <a href="#logout"><svg>
-                    <use href="#logout" />
-                </svg></a> -->
         </h1>
     </nav>
     <nav id="topnav">
@@ -594,7 +593,7 @@
     <div id="write">
         <div class="editthread" attach="0">
             <div class="post">
-                <input type="text" id="in_reply_to_id" />
+                <input type="hidden" id="in_reply_to_id" />
                 <textarea desc="text" placeholder="What's on your mind?"></textarea>
                 <label class="button"><input type="file" accept="image/*" /><svg>
                         <use href="#camera" />
@@ -697,12 +696,6 @@
                 }
             }
             )
-            // ojax('POST', inst + "/oauth/token", fd,
-            //     function (e) {
-            //         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-            //         }
-            //     }
-            // )
         }
         s('#loginb').onclick = function () {
             inst = s('#instance').value
@@ -710,11 +703,6 @@
 
             clients = JSON.parse(window.localStorage.getItem('clients')) || {}
             if (!clients[inst]) { // we first need a client_id/client_secret to connect to this instance
-                // fd = new FormData()
-                // fd.append('client_name', 'Toob')
-                // fd.append('redirect_uris', window.location.protocol + '//' + window.location.host + window.location.pathname)
-                // fd.append('scopes', 'read write')
-                // fd.append('website', "https://github.com/teddyber/toob")
 
                 majax(inst + "/api/v1/apps", {
                     method: 'POST',
@@ -730,10 +718,6 @@
                         window.location.href = `${inst}/oauth/authorize?client_id=${data.client_id}&scope=read+write&redirect_uri=${window.location.protocol + '//' + window.location.host + window.location.pathname}&response_type=code`
                     }
                 })
-                // ojax('POST', inst + "/api/v1/apps", fd, function () {
-                //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                //     }
-                // })
             }
             else {
                 window.localStorage.setItem('instance', inst)
@@ -767,7 +751,6 @@
                     accounts = JSON.parse(window.localStorage.getItem('accounts'))
                     delete accounts[account]
                     window.localStorage.setItem('accounts', JSON.stringify(accounts))
-                    // window.localStorage.removeItem('at')
                     window.localStorage.removeItem('instance')
                     window.location.href = window.location.pathname;
                     break;
@@ -826,18 +809,16 @@
         s('#search input').onchange = function () {
             window.location.hash = '#search/' + this.value
             majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + this.value, {
+                headers: { 'Authorization': 'Bearer ' + getAT(account) },
                 success: function (data) {
                     data = JSON.parse(data)
                     sa('#search .status, #search .account, #search .hashtags').forEach(e => { e.remove() })
                     data.accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${e.id}"><img class="avatar" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
                     data.hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tag/${e.name}">#${e.name}</a></div>`)) })
                     data.statuses.forEach(e => { s('#search').append(n(displayStatus(e, account))) })
+                    tweak();
                 }
             })
-            // ojax('GET', getInstance(account) + "/api/v2/search?resolve=true&q=" + this.value, null, function () {
-            //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-            //     }
-            // })
         }
         function showModal(text, confirm) {
             s('#modal p').innerHTML = text
@@ -849,7 +830,7 @@
         function showOnly(div) {
             sa('body > div').forEach(e => { e.style.display = 'none' })
             s(div).style.display = 'block'
-            sa('nav a').forEach(e => { e.classList.remove('active') })
+            sa('#sidenav a').forEach(e => { e.classList.remove('active') })
             if (s(`[href^="${window.location.hash}"]`)) s(`[href^="${window.location.hash}"]`).classList.add('active')
         }
         function getAT(account) {
@@ -862,7 +843,7 @@
                 feed = 'timelines/home'
             }
             else feed = which
-            if (which != whichTimeline) {
+            if (which + '/' + account != whichTimeline) {
                 whichTimeline = which + '/' + account
                 maxId = 999999999999999999
                 waitingFor = 999999999999999999
@@ -903,13 +884,10 @@
                     // }
                 }
             })
-            // setInterval(lookForNewNotif, 5000)
         }
-        setInterval(lookForNewNotif, 5000)
+        // setInterval(lookForNewNotif, 5000)
         function getAccount(account) {
             return new Promise(resolve => {
-                // ojax('GET', getInstance() + '/api/v1/accounts/verify_credentials', null, function () {
-                // if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                 majax(getInstance(account) + '/api/v1/accounts/verify_credentials', {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
@@ -922,12 +900,9 @@
             return new Promise(resolve => {
                 accts = JSON.parse(window.localStorage.getItem('accounts'))
                 r = []
-                // rem = account
                 for (i = 0; i < accts.length; i++) {
-                    // account = i
                     r.push(getAccount(i).then(r => { return r }))
                 }
-                // account = rem
                 resolve(Promise.all(r))
             })
         }
@@ -942,20 +917,23 @@
             } else {
                 display()
             }
-            displayAccounts()
             displaySideNav()
             return a
         })
-        function displayAccounts() {
+        function displaySideNav() {
             i = 0
             accounts.forEach(a => {
                 // console.log(a)
-                s('#accounts').append(n(`<span><img acct="${i}" class="${i == account ? 'active' : ''}" src="${a.avatar}"/></span>`))
+                s('#sidenav h1').append(n(`<hr/><span><img acct="${i}" class="${i == account ? 'active' : ''}" src="${a.avatar}"/></span>`))
+                s('#sidenav h1').append(n(`<a href="#home/${i}"><svg><use href="#home" /></svg></a>`))
+                s('#sidenav h1').append(n(`<a href="#public/${i}"><svg><use href="#public" /></svg></a>`))
+                s('#sidenav h1').append(n(`<a href="#notifications/${i}"><svg><use href="#bell" /></svg></a>`))
                 i++
             })
-            sa('#accounts img').forEach(i => {
+            sa('#sidenav a').forEach(a => { a.onclick = function () { if (this.classList.contains('active')) window.scrollTo({ top: 0, behavior: 'smooth' }); } })
+            sa('#sidenav img').forEach(i => {
                 i.onclick = function () {
-                    sa('#accounts img').forEach(i => {
+                    sa('#sidenav img').forEach(i => {
                         i.classList.remove('active')
                     })
                     // console.log(this.getAttribute('acct'));
@@ -967,84 +945,80 @@
                 }
             })
         }
-        function displaySideNav() {
-            i = 0
-            accounts.forEach(a => {
-                // console.log(a)
-                s('#sidenav h1').append(n(`<a href="#home/${i}"><svg><use href="#home" /></svg><img src="${a.avatar}"/></a>`))
-                s('#sidenav h1').append(n(`<a href="#public/${i}"><svg><use href="#public" /></svg><img src="${a.avatar}"/></a>`))
-                s('#sidenav h1').append(n(`<a href="#notifications/${i}"><svg><use href="#bell" /></svg><img src="${a.avatar}"/></a>`))
-                i++
-            })
-        }
         function updateNotifications(which, account = 0) {
-            if (which != whichTimeline) {
+            if (which + '/' + account != whichTimeline) {
                 whichTimeline = which + '/' + account
                 s('#timeline').textContent = ''
                 majax(getInstance(account) + '/api/v1/' + which, {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
 
-                        // ojax('GET', getInstance(account) + '/api/v1/' + which, null, function () {
-                        // if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         JSON.parse(data).forEach(e => {
-                            // console.log(e)
                             if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', 1) //init
-                            window.localStorage.setItem('lastnotif', Math.max(parseInt(window.localStorage.getItem('lastnotif')), parseInt(e.id)))
-                            switch (e.type) {
-                                case 'follow':
-                                    s('#timeline').append(n(`<div class="notif"><p>
-                                        <a href="#account/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
-                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
-                                        </a> followed you!</p></div>`))
-                                    break;
-                                case 'reblog':
-                                    s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
-                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
-                                        </a> reblogged your status!</p>
-                                ${displayStatus(e.status, account)}</div>`))
-                                    break;
-                                case 'update':
-                                    s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
-                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
-                                        </a> updated their status!</p>
-                                ${displayStatus(e.status, account)}</div>`))
-                                    break;
-                                case 'favourite':
-                                    s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
-                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
-                                        </a> favourited your status!</p>
-                                ${displayStatus(e.status, account)}</div>`))
-                                    break;
-                                case 'mention':
-                                    s('#timeline').append(n(`<div class="notif"><p><a href="#account/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
-                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
-                                        </a> mentioned you!</p>
-                                ${displayStatus(e.status, account)}</div>`))
-                                    break;
-                                case 'poll':
-                                    s('#timeline').append(n(`<div class="notif"><p>A poll you participated in ended!</p>
-                                ${displayStatus(e.status, account)}</div>`))
-                                    break;
-                                default:
-                                    console.log(e)
-                                    break;
-                            }
+                            s('#timeline').append(n(displayNotification(e, account)))
                         })
-                        // }
+                        tweak()
                     }
                 })
                 sa('[href^="#notifications"]').forEach(e => { e.classList.remove('new') })
             }
         }
+        function displayNotification(e, acct) {
+            // console.log(e)
+            window.localStorage.setItem('lastnotif', Math.max(parseInt(window.localStorage.getItem('lastnotif')), parseInt(e.id)))
+            maxId = Math.min(maxId, e.id)  //  remember oldest toot for scrolling
+            switch (e.type) {
+                case 'follow':
+                    return `<div class="notif"><p>
+                                        <a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
+                                        </a> followed you!</p></div>`
+                    break;
+                case 'reblog':
+                    if (!s(`#reb${e.status.id}`)) {
+                        return `<div class="notif" id="reb${e.status.id}"><p><a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
+                                        </a> ${e.status.reblogs_count > 1 ? `and ${e.status.reblogs_count - 1} others` : ''} reblogged your status!</p>
+                                ${displayStatus(e.status, acct)}</div>`
+                    }
+                    break;
+                case 'update':
+                    return `<div class="notif"><p><a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
+                                        </a> updated their status!</p>
+                                ${displayStatus(e.status, acct)}</div>`
+                    break;
+                case 'favourite':
+                    if (!s(`#fav${e.status.id}`)) {
+                        return `<div class="notif" id="fav${e.status.id}"><p><a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
+                                    </a> ${e.status.favourites_count > 1 ? `and ${e.status.favourites_count - 1} others` : ''} favourited your status!</p>
+                                ${displayStatus(e.status, acct)}</div>`
+                    }
+                    break;
+                case 'mention':
+                    return `<div class="notif"><p><a href="#account/${e.account.id}">
+                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
+                                        </a> mentioned you!</p>
+                                ${displayStatus(e.status, acct)}</div>`
+                    break;
+                case 'poll':
+                    return `<div class="notif"><p>A poll you participated in ended!</p>
+                                ${displayStatus(e.status, acct)}</div>`
+                    break;
+                default:
+                    console.log(e)
+                    break;
+            }
+            return ''
+        }
         function updateStatus(id) {
             var [acct, statusId] = id.split('/')
-            console.log([acct, statusId])
             if (acct != account) {//we want to display the toot as seen from the currentAccount
                 majax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
@@ -1056,8 +1030,6 @@
                                 updateStatus(account + '/' + JSON.parse(data).statuses[0].id)
                             }
                         })
-
-                        // updateStatus()
                     }
                 })
             } else {
@@ -1067,16 +1039,11 @@
                 majax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                     success: function (data) {
-                        // ojax('GET', getInstance(account) + '/api/v1/statuses/' + id, new FormData(), function (e) {
-                        //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         current = JSON.parse(data)
                         majax(getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', {
                             headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                             success: function (data) {
-                                // ojax('GET', getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', new FormData(), function (e) {
-                                //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                                 i = 0;
-                                // data = JSON.parse(this.response)
                                 data = JSON.parse(data)
                                 data.ancestors.forEach(element => {
                                     s('#status').append(n(displayStatus(element, acct, (i == 0 ? 'top' : 'ancestor'), 't')));
@@ -1089,8 +1056,6 @@
                                     s('#t' + acct + '-' + element.in_reply_to_id).append(n(displayStatus(element, acct, 'thread', 't')));
                                 });
                                 tweak();
-                                //     }
-                                // })
                             }
                         }
                         )
@@ -1102,7 +1067,7 @@
             if (id == lastAccountId) return;
             lastAccountId = id;
             s('#account').innerHTML = '';
-            majax(getInstance(account) + '/api/v1/accounts/' + id, {
+            majax(getInstance(account) + '/api/v1/accounts/' + id.split('/')[1], {
                 success: function (data) {
                     data = JSON.parse(data)
                     console.log(data)
@@ -1119,34 +1084,24 @@
                     `
                     s('#account').innerHTML = html
                     s('#follow').onclick = function () {
-                        ajax('POST', getInstance(account) + '/api/v1/accounts/' + id + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
+                        ajax('POST', getInstance(account) + '/api/v1/accounts/' + id.split('/')[1] + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
                             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                                 s('#follow').innerText = s('#follow').innerText == 'Follow' ? 'Unfollow' : 'Follow'
                             }
                         })
                     }
-                    majax(getInstance(account) + `/api/v1/accounts/relationships?id[]=${id}`, {
+                    majax(getInstance(account) + `/api/v1/accounts/relationships?id[]=${id.split('/')[1]}`, {
                         headers: { 'Authorization': 'Bearer ' + getAT(account) },
                         success: function (data) {
                             r = JSON.parse(data)
-                            // console.log(r)
                             s('#follow').innerText = r[0].following ? 'Unfollow' : 'Follow'
                             if (r[0].followed_by) { s('.follows').append(' including you') }
 
                         }
                     })
-                    // ojax('GET', getInstance(account) + `/api/v1/accounts/relationships?id[]=${id}`, null, function (e) {
-                    //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    //     }
-                    // })
                 }
             })
-            // ojax('GET', getInstance(account) + '/api/v1/accounts/' + id, null, function (e) {
-            //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-
-            //     }
-            // })
-            majax(getInstance(account) + `/api/v1/accounts/${id}/statuses?limit=40`, {
+            majax(getInstance(account) + `/api/v1/accounts/${id.split('/')[1]}/statuses?limit=40`, {
                 success: function (data) {
                     JSON.parse(data).forEach(e => {
                         s('#account').append(n(displayStatus(e, account)))
@@ -1154,14 +1109,9 @@
                     tweak();
                 }
             })
-            // ojax('GET', getInstance(account) + `/api/v1/accounts/${id}/statuses?limit=40`, null, function (e) {
-            //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-            //     }
-            // })
         }
         function fav(statusId, statusUri, from, unfav = false) {
-            console.log([statusId, statusUri, from, unfav])
-            var [acct, id] = statusId.split('-');
+            var [acct, id] = statusId.substring(1).split('-');
             if (acct != from) {
                 console.log('tesst')
                 majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + statusUri, {
@@ -1169,7 +1119,7 @@
                     success: function (data) {
                         data = JSON.parse(data)
                         console.log(data)
-                        fav(from + '-' + data.statuses[0].id, statusUri, from, unfav)
+                        fav('s' + from + '-' + data.statuses[0].id, statusUri, from, unfav)
                     }
                 })
             } else {
@@ -1183,13 +1133,13 @@
             }
         }
         function reb(statusId, statusUri, from, unreb = false) {
-            var [acct, id] = statusId.split('-');
+            var [acct, id] = statusId.substring(1).split('-');
             if (acct != from) {
                 majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + statusUri, {
                     headers: { 'Authorization': 'Bearer ' + getAT(from) },
                     success: function (data) {
                         data = JSON.parse(data)
-                        reb(from + '-' + data.statuses[0].id, statusUri, from, unreb)
+                        reb('s' + from + '-' + data.statuses[0].id, statusUri, from, unreb)
                     }
                 })
             } else {
@@ -1215,18 +1165,6 @@
                     reb(st.getAttribute('id'), st.getAttribute('uri'), account, st.classList.contains('reb'))
                 }
             })
-            // sa('.actions .reb').forEach(e => {
-            //     e.onclick = function () {
-            //         st = this.parentNode.parentNode
-            //         id = this.parentNode.parentNode.getAttribute('id').substring(1);
-            //         prefix = this.parentNode.parentNode.classList.contains('reb') ? 'un' : '';
-            //         ojax('POST', getInstance(account) + `/api/v1/statuses/${id}/${prefix}reblog`, null, function (e) {
-            //             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-            //                 prefix == 'un' ? st.classList.remove('reb') : st.classList.add('reb')
-            //             }
-            //         })
-            //     }
-            // })
             sa('.actions .del').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
@@ -1252,13 +1190,11 @@
                             success: function (data) {
                                 data = JSON.parse(data)
                                 s('#in_reply_to_id').setAttribute('value', data.statuses[0].id)
-
-                                // reb(from + '-' + data.statuses[0].id, statusUri, from, unreb)
                             }
                         })
                     }
                     else {
-                        s('#in_reply_to_id').setAttribute('value', id)
+                        s('#in_reply_to_id').setAttribute('value', id.substring(2))
                     }
                     this.parentNode.parentNode.append(s('#write'))
                     s('#write').style.display = 'block'
@@ -1283,19 +1219,31 @@ ${this.getAttribute('href')}`
                     own_votes = Array.from(sa('[name="option_' + poll_id + '[]"]:checked')).map(function (i) { return i.getAttribute('id').split('_')[2] })
                     fd = new FormData()
                     fd.append('choices[]', own_votes)
-                    majax(getInstance(account) + `/api/v1/polls/${poll_id}/votes`), {
+                    majax(getInstance(account) + `/api/v1/polls/${poll_id}/votes`, {
                         method: 'POST', headers: '',
+                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
                         data: { 'choices[]': own_votes },
                         success: function (data) {
                             whichTimeline = ''
                             display()
                         }
-                    }
-                    // ojax('POST', getInstance(account) + `/api/v1/polls/${poll_id}/votes`, fd, function () {
-                    //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    //     }
-                    // })
+                    })
                 }
+            })
+            sa('div.card a').forEach(a => {
+                // console.log(a.getAttribute('href'))
+                // if (a.getAttribute('href').match(/^https:\/\/[\w\.]+\/@\w+\/\d+$/)) {
+                majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
+                    headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                    success: function (data) {
+                        data = JSON.parse(data)
+                        if (data.statuses[0]) {
+                            a.setAttribute('href', '#status/' + account + '/' + data.statuses[0].id)
+                            a.parentNode.classList.add('quo')
+                        }
+                    }
+                })
+                // }
             })
         }
         function vote(statusId, statusUri, from, ownvotes) {
@@ -1337,12 +1285,12 @@ ${this.getAttribute('href')}`
             }
             xhr.send(fd || null)
         }
-        function convertHTTPtoUri(http){
-            var [h,n,i,a] = http.split('/')
-            return a.substring(1)+'@'+i
+        function convertHTTPtoUri(http) {
+            var [h, n, i, a] = http.split('/')
+            return a.substring(1) + '@' + i
         }
         function displayStatus(el, acct, cssClass = '', id_prefix = 's') {
-            console.log(el)
+            // console.log(el)
             if (el.reblog) {
                 boost = `<a href="#account/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1357,13 +1305,13 @@ ${this.getAttribute('href')}`
             <div class="reply_to"></div>
             <div class="author"><a href="#account/${e.account.id}"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
             <div class="actions">
-                ${accounts[acct].id == e.account.id ? '<span class="edit"><svg><use href="#pen" /></svg></span>' : ''}
-                ${accounts[acct].id == e.account.id ? '<span class="del"><svg><use href="#cancel" /></svg></span>' : ''}
-                <span class="link"><a href="#status/${acct}/${e.id}"><svg><use href="#tree" /></svg></a></span> 
-                <span class="rep" author="${e.account.acct.indexOf('@')!=-1?e.account.acct:convertHTTPtoUri(e.account.url)}" mentions="${e.mentions.map(function (m) { return `@${m.acct.indexOf('@')!=-1?m.acct:convertHTTPtoUri(m.url)}` }).join(' ')}" 
-                tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#rep" /></svg>(${e.replies_count})</span>
+                ${accounts[acct].id == e.account.id ? '<span class="edit"><svg><use href="#pen"/></svg></span>' : ''}
+                ${accounts[acct].id == e.account.id ? '<span class="del"><svg><use href="#cancel"/></svg></span>' : ''}
+                <span class="link"><a href="#status/${acct}/${e.id}"><svg><use href="#tree"/></svg></a></span> 
+                <span class="rep" author="${e.account.acct.indexOf('@') != -1 ? e.account.acct : convertHTTPtoUri(e.account.url)}" mentions="${e.mentions.map(function (m) { return `@${m.acct.indexOf('@') != -1 ? m.acct : convertHTTPtoUri(m.url)}` }).join(' ')}" 
+                tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#rep"/></svg>(${e.replies_count})</span>
                 <span class="quo" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" href="${e.url}"
-                tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#quote" /></svg></span>
+                tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#quote"/></svg></span>
                 <span class="reb"><svg><use href="#reb" /></svg>(${e.reblogs_count})</span> 
                 <span class="fav"><svg><use href="#star" /></svg>(${e.favourites_count})</span>
             </div>
@@ -1467,10 +1415,6 @@ ${this.getAttribute('href')}`
                                 editthread.setAttribute('attach', parseInt(editthread.getAttribute('attach')) + 1)
                             }
                         })
-                        // ojax('GET', 'pj.php?url=' + this.src, null, function () {
-                        //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        //     }
-                        // })
                     }
                 }
             })
@@ -1536,9 +1480,6 @@ ${this.getAttribute('href')}`
         const uploadFile = (toot, i) => { //uploads and then checks upload is finished
             return new Promise((resolve, reject) => {
                 const file = DataURIToBlob(toot.querySelector(`.media_attachments div:nth-child(${i + 1}) img`).getAttribute('src'))
-                // const fd = new FormData();
-                // fd.append('file', file, 'test.png')
-                // fd.append('description', toot.querySelector(`.media_attachments div:nth-child(${i + 1}) textarea`).value)
                 majax(getInstance(account) + '/api/v2/media', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
@@ -1548,10 +1489,6 @@ ${this.getAttribute('href')}`
                         resolve(JSON.parse(data))
                     }
                 })
-                // ojax('POST', getInstance(account) + '/api/v2/media', fd, async function () {
-                //     if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
-                //     }
-                // })
             })
         }
         async function toot(toots, i, in_reply_to_id = '') { // toots multiple toots in a row
@@ -1573,21 +1510,18 @@ ${this.getAttribute('href')}`
             fd.append('visibility', s('#visibility').value.toLowerCase())
             fd.append('language', s('#lang').value)
             results.forEach(r => { fd.append('media_ids[]', r) }) // attach all medias
-            if (in_reply_to_id && in_reply_to_id != '') fd.append('in_reply_to_id', in_reply_to_id)
+            dataToSend = { status: toots[i].querySelector('.post textarea').value, visibility: s('#visibility').value.toLowerCase(), language: s('#lang').value, 'media_ids[]': results }
+            if (in_reply_to_id && in_reply_to_id != '') dataToSend.in_reply_to_id = in_reply_to_id
 
             majax(getInstance(account) + '/api/v1/statuses', {
                 method: 'POST',
-                data: { status: toots[i].querySelector('.post textarea').value, visibility: s('#visibility').value.toLowerCase(), language: s('#lang').value, 'media_ids[]': results },
+                data: dataToSend,
                 headers: { 'Authorization': 'Bearer ' + getAT(account) },
                 success: function (data) {
                     toots[i].style.display = 'none'
                     toot(toots, i + 1, JSON.parse(data).id) // toot next one
                 }
             })
-            // ojax('POST', getInstance(account) + '/api/v1/statuses', fd, function () {
-            //     if (this.readyState == XMLHttpRequest.DONE && (this.status == 200 || this.status == 202)) {
-            //     }
-            // })
         }
         s('#toob').onclick = function () {
             toots = sa('.editthread')
@@ -1605,7 +1539,6 @@ ${this.getAttribute('href')}`
                 toot(toots, 0, s('#in_reply_to_id').getAttribute('value'))
             }
         }
-        sa('nav a').forEach(a => { a.onclick = function () { if (this.classList.contains('active')) window.scrollTo({ top: 0, behavior: 'smooth' }); } })
         function checkUpload(id) {
             return new Promise((resolve, reject) => {
                 majax(getInstance(account) + '/api/v1/media/' + id, {
@@ -1617,12 +1550,6 @@ ${this.getAttribute('href')}`
                         sleep(1000).then(v => { resolve(checkUpload(id)) })
                     }
                 })
-                // ojax('GET', getInstance(account) + '/api/v1/media/' + id, null, function () {
-                //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                //     }
-                //     if (this.readyState == XMLHttpRequest.DONE && this.status == 206) {
-                //     }
-                // })
             })
         }
         function cleanUpWrite() {
@@ -1650,48 +1577,48 @@ ${this.getAttribute('href')}`
         }
 
         window.onscroll = function (ev) {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-                wt = whichTimeline.split('/')
-                switch (wt[1]) {
-                    case 'home':
-                        feed = wt[0] + '/' + wt[1]
-                        acct = wt[2]
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                h = window.location.hash.split('/')
+
+                switch (h[0]) {
+                    case '#home':
+                        feed = 'timelines/home'
+                        acct = h[1]
                         break;
-                    case 'public':
-                        feed = wt[0] + '/' + wt[1]
-                        acct = wt[2]
+                    case '#notifications':
+                        feed = 'notifications'
+                        acct = h[1]
                         break;
-                    case 'tag':
-                        feed = wt[0] + '/' + wt[1] + '/' + wt[2]
-                        acct = wt[3]
+                    case '#public':
+                        feed = 'timelines/public'
+                        acct = h[1]
+                        break;
+                    case '#tags':
+                        feed = 'timelines/tag/' + h[1]
+                        acct = h[2]
                         break;
 
                     default:
                         break;
                 }
-                console.log(whichTimeline)
+                if (!acct) return;
                 trend = (timeline == '#trend')
                 // feed = trend ? 'timelines/home' : wt[0]+'/'+wt[1]
                 if (waitingFor > maxId) {
-                    console.log(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId)
                     majax(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
                         headers: { 'Authorization': 'Bearer ' + getAT(acct) }, success: function (data) {
                             JSON.parse(data).forEach(el => {
                                 if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
-                                    s('#timeline').append(n(displayStatus(el, acct)))
+                                    s('#timeline').append(n(h[0] == '#notifications' ? displayNotification(el, acct) : displayStatus(el, acct)))
                                     maxId = Math.min(maxId, el.id)
-                                    sa('[in_reply_to_id="s' + el.id + '"]').forEach(c => {
-                                        s('#s' + el.id).appendChild(c)
+                                    sa('[in_reply_to_id="s' + acct + '-' + el.id + '"]').forEach(c => {
+                                        s('#s' + acct + '-' + el.id).appendChild(c)
                                     })
                                 }
                             })
                             tweak();
                         }
                     })
-                    // ojax('GET', getInstance(account) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, null, function () {
-                    //     if (this.readyState == 4 && this.status == 200) {
-                    //     }
-                    // })
                     waitingFor = maxId
                 }
             }
@@ -1705,6 +1632,7 @@ ${this.getAttribute('href')}`
             edit toot
             modal colors
             column title in topnav
+            notifications
         */
     </script>
 </body>
