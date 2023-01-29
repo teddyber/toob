@@ -89,3 +89,17 @@ self.addEventListener("fetch", (event) => {
   // will be handled by the browser as if there were no service
   // worker involvement.
 });
+self.addEventListener('notificationclick', (e) => {
+  const clickedNotification = e.notification;
+  clickedNotification.close();
+  console.log(e.notification.data.url)
+  e.waitUntil(clients.matchAll().then((clientsArr) => {
+    // If a Window tab matching the targeted URL already exists, focus that;
+    const hadWindowToFocus = clientsArr.some((windowClient) => windowClient.url.startsWith(e.notification.data.prefix) ? (windowClient.focus() && windowClient.navigate(e.notification.data.url), true) : false);
+    // Otherwise, open a new tab to the applicable URL and focus it.
+    if (!hadWindowToFocus) clients.openWindow(e.notification.data.url).then((windowClient) => windowClient ? windowClient.focus() : null);
+  }));
+  // Do something as the result of the notification click
+  // const promiseChain = doSomething();
+  // event.waitUntil(promiseChain);
+});

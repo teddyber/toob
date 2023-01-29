@@ -10,7 +10,7 @@
         :root {
             /* --color: #333;
             --bg: #eee; */
-            --highlight: #3088D4;
+            --highlight: #36b;/* #3088D4 */
         }
 
         @media (prefers-color-scheme: light) {
@@ -53,7 +53,10 @@
             background-color: var(--bg);
             box-shadow: 0 3px 3px var(--color);
         }
-        #topnav h4 {margin: .4em;}
+
+        #topnav h4 {
+            margin: .4em;
+        }
 
         #sidenav {
             position: fixed;
@@ -157,7 +160,9 @@
         }
 
         .author img,
-        .avatar {
+        #topnav .avatar,
+        .notif .avatar,
+        #search .avatar {
             max-width: 20;
         }
 
@@ -283,7 +288,7 @@
         .status.reb>div.actions>.reb {
             background-color: var(--highlight);
             color: var(--bg);
-            border: var(--highlight);
+            border: var(--highlight) solid 1px;
         }
 
         #write>textarea {
@@ -309,8 +314,14 @@
             width: 100%;
         }
 
-        #account .avatar {
+        #account .avatar,
+        #settings img {
             width: 100;
+        }
+
+        #settings button svg {
+            width: 24px;
+            height: 24px;
         }
 
         .editthread .post {
@@ -457,16 +468,24 @@
             left: 12px
         }
 
-        .card.quo a::before {
+        .status.quo::before {
             display: block;
-            content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='%233088D4' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
-            ;
+            stroke: var(--highlight);
+            content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='%23eee' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
             color: var(--highlight);
             /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E"); */
             background-size: 28px 28px;
             height: 28px;
             width: 28px;
-            float: right;
+            float: left;
+        }
+
+        .status.quo {
+            border: var(--highlight) solid;
+            border-radius: .3em;
+            padding: .1em;
+            width: 95%;
+            margin: auto;
         }
     </style>
 </head>
@@ -573,6 +592,13 @@
                 <line x1="20" y1="8" x2="20" y2="14"></line>
                 <line x1="23" y1="11" x2="17" y2="11"></line>
             </symbol>
+            <symbol id="gear" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                </path>
+            </symbol>
         </defs>
     </svg>
     <nav id="sidenav">
@@ -583,10 +609,14 @@
             <a href="#search"><svg>
                     <use href="#searchi" />
                 </svg></a>
-        </h1><hr/>
+        </h1>
+        <hr />
         <a href="#adduser"><svg>
-            <use href="#i-adduser" />
-        </svg></a>
+                <use href="#i-adduser" />
+            </svg></a>
+        <a href="#settings"><svg>
+                <use href="#gear" />
+            </svg></a>
     </nav>
     <nav id="topnav">
         <h4 id="title"></h4>
@@ -651,6 +681,10 @@
     <div id="login">
         <input type="text" id="instance" placeholder="https://piaille.fr" />
         <button id="loginb">Se connecter</button>
+    </div>
+    <div id="settings">
+        <div id="colors">
+        </div>
     </div>
     <div id="modal">
         <div class="modal-content">
@@ -759,16 +793,18 @@
                     window.localStorage.removeItem('instance')
                     window.location.href = window.location.pathname;
                     break;
+                case '#settings':
+                    showOnly('#settings')
+                    break;
                 case '#adduser':
                     showOnly('#login')
                     break;
                 case '#login':
                     showOnly('#login')
                     s('#title').innerHTML = `<svg><use href="#adduser" /></svg> Login`
-                     break;
+                    break;
                 case '#home':
                     showOnly('#timeline')
-                    console.log(accounts)
                     s('#title').innerHTML = `<svg><use href="#home" /></svg> ${accounts[window.location.hash.split('/')[1]].display_name} (@${accounts[window.location.hash.split('/')[1]].acct}@${accounts[window.location.hash.split('/')[1]].url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')})`
                     updateTimeline('timelines/home', window.location.hash.split('/')[1]);
                     break;
@@ -784,7 +820,7 @@
                 case '#write':
                     showOnly('#write')
                     s('#title').innerHTML = `<svg><use href="#pen" /></svg> Write with ${accounts[account].display_name} (@${accounts[account].acct}@${accounts[account].url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')})`
-                     s('#write div.editthread:last-of-type textarea').focus()
+                    s('#write div.editthread:last-of-type textarea').focus()
                     break;
                 case '#public':
                     showOnly('#timeline')
@@ -827,7 +863,7 @@
                     data = JSON.parse(data)
                     sa('#search .status, #search .account, #search .hashtags').forEach(e => { e.remove() })
                     data.accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${account}/${e.id}"><img class="avatar" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
-                    data.hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tag/${e.name}">#${e.name}</a></div>`)) })
+                    data.hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tags/${e.name}/${account}">#${e.name}</a></div>`)) })
                     data.statuses.forEach(e => { s('#search').append(n(displayStatus(e, account))) })
                     tweak();
                 }
@@ -884,27 +920,64 @@
             }
         }
         function lookForNewNotif() {
+            // const notification = new Notification('test', { body: 'test', icon: 'https://media.infosec.exchange/infosecmedia/accounts/avatars/109/314/664/232/734/570/original/6c56cbb57c9d2661.jpg', tag: 'test' });
+
             if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1])) //init
 
-            for(i=0;i<accounts.length;i++){
-
-            majax(getInstance(i) + '/api/v1/notifications', {
-                headers: {
-                    'Authorization': 'Bearer ' + getAT(i)
-                }, 
-                indexValue: i,
-                success: function (data, xhr) {
-                    // ojax('GET', getInstance() + '/api/v1/notifications', null, function () {
-                    // if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    newestNotif = JSON.parse(data)[0].id
-                    if (newestNotif > JSON.parse(window.localStorage.getItem('lastnotif'))[xhr.indexValue]) {
-                        s(`[href="#notifications/${xhr.indexValue}"]`).classList.add('new')
+            for (i = 0; i < accounts.length; i++) {
+                majax(getInstance(i) + '/api/v1/notifications', {
+                    headers: {
+                        'Authorization': 'Bearer ' + getAT(i)
+                    },
+                    indexValue: i,
+                    success: function (data, xhr) {
+                        // ojax('GET', getInstance() + '/api/v1/notifications', null, function () {
+                        // if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        e = JSON.parse(data)[0]
+                        newestNotif = e.id
+                        // alert(newestNotif > parseInt(JSON.parse(window.localStorage.getItem('lastnotif'))[xhr.indexValue]))
+                        if (newestNotif > parseInt(JSON.parse(window.localStorage.getItem('lastnotif'))[xhr.indexValue])) {
+                            s(`[href="#notifications/${xhr.indexValue}"]`).classList.add('new')
+                            const img = `${e.account.avatar}`;
+                            text = e.type
+                            if (e.type == 'follow') {
+                                title = `${e.account.display_name} (${e.account.acct}) followed you!`;
+                                text = `${e.account.note.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
+                            }
+                            if (e.type == 'favourite') {
+                                title = `${e.account.display_name} (${e.account.acct}) favourited your status!`;
+                                text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
+                            }
+                            if (e.type == 'reblog') {
+                                title = `${e.account.display_name} (${e.account.acct}) reblogged your status!`;
+                                text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
+                            }
+                            if (e.type == 'mention') {
+                                title = `${e.account.display_name} (${e.account.acct}) mentionned you!`;
+                                text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
+                            }
+                            if (e.type == 'poll') {
+                                title = `A poll you participated in just ended!`;
+                                text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
+                            }
+                            console.log(window.location.protocol + '//' + window.location.host + window.location.pathname)
+                            navigator.serviceWorker.ready.then((registration) => {
+                                registration.showNotification(title, {
+                                    body: text,
+                                    icon: img,
+                                    badge: 'toob-96.png',
+                                    data: { url: './#notifications/' + xhr.indexValue, prefix: window.location.protocol + '//' + window.location.host + window.location.pathname },
+                                    tag: e.id,
+                                });
+                            });
+                        }
+                        // }
                     }
-                    // }
-                }
-            })
+                })
+            }
         }
-        }
+        // window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1]))
+        // window.localStorage.removeItem('lastnotif')
         setInterval(lookForNewNotif, 5000)
         function getAccount(account) {
             return new Promise(resolve => {
@@ -938,8 +1011,45 @@
                 display()
             }
             displaySideNav()
+            displaySettings()
             return a
         })
+        function displaySettings() {
+            document.querySelector(':root').style.setProperty('--highlight', window.localStorage.getItem('color'))
+            colors = ['#817', '#a35', '#c66', '#e94', '#ed0', '#9d5', '#4d8', '#2cb', '#0bc', '#09c', '#36b', '#639']
+            colors.forEach(c => {
+                s('#colors').append(n(`<button style="background-color: ${c};"><svg><use href="#cancel" /></svg></button>`))
+                sa('#colors button').forEach(b => {
+                    b.onclick = function () {
+                        // console.log(this.style['background-color'])
+                        document.querySelector(':root').style.setProperty('--highlight', this.style['background-color'])
+                        window.localStorage.setItem('color', this.style['background-color'])
+                    }
+                })
+            })
+            i = 0;
+            accounts.forEach(a => {
+                s('#settings').append(n(`<div><span><img src="${a.avatar}"/> ${a.display_name}
+                    <button class="logout" acct="${i}"><svg><use href="#cancel"/></svg></button>
+                    <button class="resetnotif" acct="${i}"><svg><use href="#bell"/></svg></button>
+                    </div>`))
+                i++
+            })
+            sa('.logout').forEach(b => {
+                b.onclick = function () {
+                    accounts = JSON.parse(window.localStorage.getItem('accounts'))
+                    accounts.splice(this.getAttribute('acct'), 1)
+                    window.localStorage.setItem('accounts', JSON.stringify(accounts))
+                }
+            })
+            sa('.resetnotif').forEach(b => {
+                b.onclick = function () {
+                    ln = JSON.parse(window.localStorage.getItem('lastnotif'))
+                    ln[this.getAttribute('acct')] = 1
+                    window.localStorage.setItem('lastnotif', JSON.stringify(ln))
+                }
+            })
+        }
         function displaySideNav() {
             i = 0
             accounts.forEach(a => {
@@ -966,6 +1076,13 @@
             })
         }
         function updateNotifications(which, account = 0) {
+            // alert(Notification.permission)
+            if (Notification.permission == 'default') {
+                // alert('ici')
+                Notification.requestPermission().then((result) => {
+                    // alert(result);
+                });
+            }
             if (which + '/' + account != whichTimeline) {
                 whichTimeline = which + '/' + account
                 s('#timeline').textContent = ''
@@ -980,12 +1097,12 @@
                         tweak()
                     }
                 })
-                sa('[href^="#notifications"]').forEach(e => { e.classList.remove('new') })
+                sa(`[href^="#notifications/${account}"]`).forEach(e => { e.classList.remove('new') })
             }
         }
         function displayNotification(e, acct) {
             // console.log(e)
-            lastNotifs=JSON.parse(window.localStorage.getItem('lastnotif'))
+            lastNotifs = JSON.parse(window.localStorage.getItem('lastnotif'))
             lastNotifs[acct] = Math.max(parseInt(lastNotifs[acct]), parseInt(e.id))
             // console.log(lastNotifs)
             window.localStorage.setItem('lastnotif', JSON.stringify(lastNotifs))
@@ -1003,7 +1120,7 @@
                         return `<div class="notif" id="reb${e.status.id}"><p><a href="#account/${acct}/${e.account.id}">
                                             <img class="avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
-                                        </a> ${e.status.reblogs_count > 1 ? `and ${e.status.reblogs_count - 1} others` : ''} reblogged your status!</p>
+                                        </a> ${e.status.reblogs_count > 1 ? `and ${e.status.reblogs_count - 1} other${e.status.reblogs_count == 1 ? '' : 's'}` : ''} favourited your status!</p>
                                 ${displayStatus(e.status, acct)}</div>`
                     }
                     break;
@@ -1019,7 +1136,7 @@
                         return `<div class="notif" id="fav${e.status.id}"><p><a href="#account/${acct}/${e.account.id}">
                                             <img class="avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
-                                    </a> ${e.status.favourites_count > 1 ? `and ${e.status.favourites_count - 1} others` : ''} favourited your status!</p>
+                                        </a> ${e.status.favourites_count > 1 ? `and ${e.status.favourites_count - 1} other${e.status.favourites_count == 2 ? '' : 's'}` : ''} favourited your status!</p>
                                 ${displayStatus(e.status, acct)}</div>`
                     } else {
                         s(`#fav${e.status.id} p`).prepend(n(`<img class="avatar" src="${e.account.avatar}"/>`))
@@ -1066,7 +1183,7 @@
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                     success: function (data) {
                         current = JSON.parse(data)
-                        s('#title').innerHTML = `Toot by <img class="avatar" src="${current.account.avatar}"/> ${replaceEmojis(current.account.emojis, current.account.display_name)} <!--(@${current.account.acct}${current.account.acct.indexOf('@')==-1?`@${current.account.url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')}`:''})-->`
+                        s('#title').innerHTML = `Toot by <img class="avatar" src="${current.account.avatar}"/> ${replaceEmojis(current.account.emojis, current.account.display_name)}`
                         majax(getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', {
                             headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                             success: function (data) {
@@ -1094,10 +1211,9 @@
             if (id == lastAccountId) return;
             lastAccountId = id;
             s('#account').innerHTML = '';
-            majax(getInstance(account) + '/api/v1/accounts/' + id.split('/')[1], {
+            majax(getInstance(id.split('/')[0]) + '/api/v1/accounts/' + id.split('/')[1], {
                 success: function (data) {
                     data = JSON.parse(data)
-                    console.log(data)
                     html = `
                     <img class="header" src="${data.header}"/>
                     <img class="avatar" src="${data.avatar}"/>
@@ -1110,47 +1226,73 @@
                     <div class="statuses">Statuses ${data.statuses_count}</div>
                     `
                     s('#account').innerHTML = html
-                    s('#title').innerHTML = `<img class="avatar" src="${data.avatar}"/> ${replaceEmojis(data.emojis, data.display_name)} <!--(@${data.acct}${data.acct.indexOf('@')==-1?`@${data.url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')}`:''})-->`
-                    sa('.note .mention').forEach(a=>{
+                    s('#title').innerHTML = `<img class="avatar" src="${data.avatar}"/> ${replaceEmojis(data.emojis, data.display_name)} <!--(@${data.acct}${data.acct.indexOf('@') == -1 ? `@${data.url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')}` : ''})-->`
+                    sa('.note .mention.u-url').forEach(a => {
                         a.removeAttribute('target')
-                        majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
-                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
-                        success: function (data) {
-                            a.setAttribute('href', '#account/'+account+'/'+JSON.parse(data).accounts[0].id)
-                            console.log(JSON.parse(data))
-                        }
-                    })
-                    }) 
-                    s('#follow').onclick = function () {
-                        ajax('POST', getInstance(account) + '/api/v1/accounts/' + id.split('/')[1] + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
-                            if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                                s('#follow').innerText = s('#follow').innerText == 'Follow' ? 'Unfollow' : 'Follow'
+                        majax(getInstance(id.split('/')[0]) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
+                            headers: { 'Authorization': 'Bearer ' + getAT(id.split('/')[0]) },
+                            success: function (data, xhr) {
+                                a.setAttribute('href', '#account/' + id.split('/')[0] + '/' + JSON.parse(data).accounts[0].id)
                             }
                         })
+                    })
+                    s('#follow').onclick = function () {
+                        follow(data.id, data.uri, account, this.innerText == 'Follow')
+                        // ajax('POST', getInstance(id.split('/')[0]) + '/api/v1/accounts/' + id.split('/')[1] + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
+                        //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        //     }
+                        // })
                     }
-                    majax(getInstance(account) + `/api/v1/accounts/relationships?id[]=${id.split('/')[1]}`, {
+                    majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + data.uri, {
                         headers: { 'Authorization': 'Bearer ' + getAT(account) },
                         success: function (data) {
-                            r = JSON.parse(data)
-                            s('#follow').innerText = r[0].following ? 'Unfollow' : 'Follow'
-                            if (r[0].followed_by) { s('.follows').append(' including you') }
+                            i = JSON.parse(data).accounts[0].id
+                            majax(getInstance(account) + `/api/v1/accounts/relationships?id[]=${i}`, {
+                                headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                                success: function (data) {
+                                    r = JSON.parse(data)
+                                    s('#follow').innerText = r[0].following ? 'Unfollow' : 'Follow'
+                                    if (r[0].followed_by) { s('.follows').append(' including you') }
+                                }
+                            })
                         }
                     })
                 }
             })
-            majax(getInstance(account) + `/api/v1/accounts/${id.split('/')[1]}/statuses?limit=40`, {
+            majax(getInstance(id.split('/')[0]) + `/api/v1/accounts/${id.split('/')[1]}/statuses?limit=40`, {
                 success: function (data) {
                     JSON.parse(data).forEach(e => {
-                        s('#account').append(n(displayStatus(e, account)))
+                        s('#account').append(n(displayStatus(e, id.split('/')[0])))
                     })
                     tweak();
                 }
             })
         }
+        function follow(accountId, accountUri, from, unfollow = false) {
+            var [acct, id] = accountId.split('/');
+            if (acct != from) {
+                majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + accountUri, {
+                    headers: { 'Authorization': 'Bearer ' + getAT(from) },
+                    success: function (data) {
+                        data = JSON.parse(data)
+                        console.log(data)
+                        follow(from + '/' + data.accounts[0].id, accountUri, from, unfollow)
+                    }
+                })
+            } else {
+                majax(getInstance(from) + `/api/v1/accounts/${id}/${unfollow ? 'un' : ''}follow`, {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(from) },
+                    success: function (data) {
+                        // unfav ? s(`[uri="${accountUri}"`).classList.remove('fav') : s(`[uri="${accountUri}"`).classList.add('fav')
+                        s('#follow').innerText = s('#follow').innerText == 'Follow' ? 'Unfollow' : 'Follow'
+
+                    }
+                })
+            }
+        }
         function fav(statusId, statusUri, from, unfav = false) {
             var [acct, id] = statusId.substring(1).split('-');
             if (acct != from) {
-                console.log('tesst')
                 majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + statusUri, {
                     headers: { 'Authorization': 'Bearer ' + getAT(from) },
                     success: function (data) {
@@ -1160,7 +1302,6 @@
                     }
                 })
             } else {
-                console.log('ici')
                 majax(getInstance(from) + `/api/v1/statuses/${id}/${unfav ? 'un' : ''}favourite`, {
                     method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(from) },
                     success: function (data) {
@@ -1207,7 +1348,7 @@
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
 
                     confirm = showModal('Confirmer la suppression?', function () {
-                        ajax('DELETE', getInstance(account) + `/api/v1/statuses/${id}`, null, function (e) {
+                        ajax('DELETE', getInstance(account) + `/api/v1/statuses/${id.split('-')[1]}`, null, function (e) {
                             if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                                 whichTimeline = ''
                                 display()
@@ -1267,7 +1408,7 @@ ${this.getAttribute('href')}`
                     })
                 }
             })
-            sa('div.card a').forEach(a => {
+            sa('div.card.toresolve a').forEach(a => {
                 // console.log(a.getAttribute('href'))
                 // if (a.getAttribute('href').match(/^https:\/\/[\w\.]+\/@\w+\/\d+$/)) {
                 majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
@@ -1275,8 +1416,13 @@ ${this.getAttribute('href')}`
                     success: function (data) {
                         data = JSON.parse(data)
                         if (data.statuses[0]) {
-                            a.setAttribute('href', '#status/' + account + '/' + data.statuses[0].id)
-                            a.parentNode.classList.add('quo')
+                            a.parentNode.classList.remove('card')
+                            a.parentNode.classList.remove('toresolve')
+                            a.parentNode.innerHTML = displayStatus(data.statuses[0], account, 'quo')
+                            tweak()
+                            // a.setAttribute('href', '#status/' + account + '/' + data.statuses[0].id)
+                        } else {
+                            a.parentNode.classList.remove('toresolve')
                         }
                     }
                 })
@@ -1299,7 +1445,7 @@ ${this.getAttribute('href')}`
         }
         function majax(url, params) {
             xhr = new XMLHttpRequest()
-           if(params.indexValue !== undefined) {xhr.indexValue = params.indexValue}
+            if (params.indexValue !== undefined) { xhr.indexValue = params.indexValue }
             xhr.onreadystatechange = function () {
                 if (params.success && this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                     params.success(this.response, this)
@@ -1328,7 +1474,7 @@ ${this.getAttribute('href')}`
             return a.substring(1) + '@' + i
         }
         function displayStatus(el, acct, cssClass = '', id_prefix = 's') {
-            // console.log(el)
+            console.log(el)
             if (el.reblog) {
                 boost = `<a href="#account/${acct}/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1353,7 +1499,7 @@ ${this.getAttribute('href')}`
                 <span class="reb"><svg><use href="#reb" /></svg>(${e.reblogs_count})</span> 
                 <span class="fav"><svg><use href="#star" /></svg>(${e.favourites_count})</span>
             </div>
-            <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, e.content).replace(/href=\"https:\/\/[\w.\/]+\/tags\/(\w+)/g, `href="#tags/$1/${acct}`), acct)}</div>
+            <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, parseMd(e.content)).replace(/href=\"https:\/\/[\w.\/]+\/tags\/(\w+)/g, `href="#tags/$1/${acct}`), acct)}</div>
             ${e.poll && !e.poll.voted && !e.poll.expired ? '<div class="poll">' + e.poll.options.map(function (o, i) { return `<div><input type="${e.poll.multiple ? 'checkbox' : 'radio'}" name="option_${e.poll.id}[]" id="option_${e.poll.id}_${i}"/><label for="option_${e.poll.id}_${i}">${o.title}</label></div>` }).join('') + `<div><button class="vote" id="poll_${e.poll.id}">Vote!</button></div><div>${e.poll.votes_count} voters</div></div>` : ''}
             ${e.poll && (e.poll.voted || e.poll.expired) ? '<div class="poll">' + e.poll.options.map(function (o, i) { return `<div  class="${e.poll.own_votes.includes(i) ? 'gras' : ''}">${o.title} : ${Math.round(o.votes_count / e.poll.voters_count * 100)}%</div><div style="height:6px;width:${o.votes_count / e.poll.voters_count * 100}%;background-color:var(--highlight)"></div>` }).join('') + `</div><div>${e.poll.votes_count} voters</div>` : ''}
             <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
@@ -1361,7 +1507,7 @@ ${this.getAttribute('href')}`
                 if (m.type == 'video') return `<video src="${m.url}" poster="${m.preview_url}" controls volume="1" aria-label="${m.description}" title="${m.description}"></video>`
                 if (m.type == 'gifv') return `<video src="${m.url}" poster="${m.preview_url}" autoplay loop volume="1" aria-label="${m.description}" title="${m.description}"></video>`
             }).join('')}</div>
-            ${e.card ? (e.card.type == 'video' ? `<div class="iframe">${e.card.html}</div>` : `<div class="card"><a href="${e.card.url}">
+            ${e.card ? (e.card.type == 'video' ? `<div class="iframe">${e.card.html}</div>` : `<div class="card toresolve"><a href="${e.card.url}">
                 ${e.card.image ? `<img src="${e.card.image}"/>` : ''}
                 <div class="provider">${e.card.provider_name}</div>
                 <div class="title">${e.card.title}</div>
@@ -1661,16 +1807,21 @@ ${this.getAttribute('href')}`
                 }
             }
         }
+        function parseMd(md) {
+            md = md.replace(/[\*\_]{2}([^\*\_]+)[\*\_]{2}/g, '<b>$1</b>');
+            md = md.replace(/[\*\_]{1}([^\*\_]+)[\*\_]{1}/g, '<i>$1</i>');
+            md = md.replace(/[\~]{2}([^\~]+)[\~]{2}/g, '<del>$1</del>');
+            md = md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code>');
+            return md;
+        }
 
         /* TODOS
             CW support
-            remote instances public/home timeline and interaction with local account
+            public vs federated timelines
             compose a poll
             keyboard nav
             edit toot
             modal colors
-            column title in topnav
-            notifications
         */
     </script>
 </body>
