@@ -8,9 +8,8 @@
     <link rel="manifest" href="manifest.json" />
     <style>
         :root {
-            /* --color: #333;
-            --bg: #eee; */
-            --highlight: #36b;/* #3088D4 */
+            --highlight: #36b;
+            /* #3088D4 */
         }
 
         @media (prefers-color-scheme: light) {
@@ -44,7 +43,7 @@
 
         #topnav {
             position: fixed;
-            z-index: 10;
+            z-index: 1;
             display: block;
             width: calc(800px - 32px);
             margin-left: 35px;
@@ -133,6 +132,7 @@
             border: none;
             color: #eee;
             background-color: var(--highlight);
+            border: var(--highlight) 1px solid;
             padding: 4px 8px;
             text-align: center;
             text-decoration: none;
@@ -140,6 +140,11 @@
             font-size: 1.2em;
             border-radius: .5em;
             cursor: pointer;
+        }
+
+        button.outline {
+            background-color: var(--bg);
+            color: var(--highlight)
         }
 
         select {
@@ -159,10 +164,7 @@
             font-size: smaller;
         }
 
-        .author img,
-        #topnav .avatar,
-        .notif .avatar,
-        #search .avatar {
+        .sm-avatar {
             max-width: 20;
         }
 
@@ -314,8 +316,7 @@
             width: 100%;
         }
 
-        #account .avatar,
-        #settings img {
+        #account .avatar {
             width: 100;
         }
 
@@ -410,26 +411,28 @@
         #modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 2;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
+            margin: 0px;
             overflow: auto;
             background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.6);
         }
 
         .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
+            background-color: var(--bg);
+            margin: auto;
+            margin-top: 4em;
             padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
+            border: 1px solid var(--color);
+            width: 60%;
         }
 
         #modal .close {
-            color: #aaa;
+            color: var(--highlight);
             float: right;
             font-weight: bold;
         }
@@ -468,16 +471,18 @@
             left: 12px
         }
 
-        .status.quo::before {
+        .status.quo:before {
             display: block;
             stroke: var(--highlight);
-            content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='%23eee' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
-            color: var(--highlight);
-            /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E"); */
-            background-size: 28px 28px;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='10' y1='8' x2='10' y2='12'%3E%3C/line%3E%3Cline x1='14' y1='8' x2='14' y2='12'%3E%3C/line%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
+            background-color: var(--highlight);
+            mask-size: cover;
+            -webkit-mask-size: cover;
             height: 28px;
             width: 28px;
             float: left;
+            content: '';
         }
 
         .status.quo {
@@ -499,106 +504,114 @@
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </symbol>
             <symbol id="public" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </symbol>
             <symbol id="pen" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
                 <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
                 <path d="M2 2l7.586 7.586"></path>
                 <circle cx="11" cy="11" r="2"></circle>
             </symbol>
             <symbol id="bell" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </symbol>
             <symbol id="logout" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
             </symbol>
             <symbol id="tree" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="18" cy="18" r="3"></circle>
                 <circle cx="6" cy="6" r="3"></circle>
                 <path d="M6 21V9a9 9 0 0 0 9 9"></path>
             </symbol>
             <symbol id="rep" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 10 4 15 9 20"></polyline>
                 <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
             </symbol>
             <symbol id="reb" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="17 1 21 5 17 9"></polyline>
                 <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
                 <polyline points="7 23 3 19 7 15"></polyline>
                 <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
             </symbol>
             <symbol id="star" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <polygon
                     points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
                 </polygon>
             </symbol>
             <symbol id="cancel" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="9" y1="9" x2="15" y2="15"></line>
                 <line x1="15" y1="9" x2="9" y2="15"></line>
             </symbol>
             <symbol id="send" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
             </symbol>
             <symbol id="plus" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="16"></line>
                 <line x1="8" y1="12" x2="16" y2="12"></line>
             </symbol>
             <symbol id="camera" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                 <circle cx="12" cy="13" r="4"></circle>
             </symbol>
             <symbol id="searchi" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </symbol>
             <symbol id="trendi" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
                 <polyline points="17 6 23 6 23 12"></polyline>
             </symbol>
             <symbol id="quote" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <line x1="10" y1="8" x2="10" y2="12"></line>
                 <line x1="14" y1="8" x2="14" y2="12"></line>
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </symbol>
             <symbol id="i-adduser" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="8.5" cy="7" r="4"></circle>
                 <line x1="20" y1="8" x2="20" y2="14"></line>
                 <line x1="23" y1="11" x2="17" y2="11"></line>
             </symbol>
             <symbol id="gear" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path
                     d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                 </path>
             </symbol>
+            <symbol id="globe" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                </path>
+            </symbol>
+            <symbol id="blank" viewBox="0 0 24 24"></symbol>
         </defs>
     </svg>
     <nav id="sidenav">
@@ -694,7 +707,6 @@
             <p>Some text in the Modal..</p>
             <button class="OK">OK</button>
         </div>
-
     </div>
     <script>
         navigator.serviceWorker.register('service-worker.js', { scope: '.' })
@@ -717,7 +729,7 @@
             fd.append('redirect_uri', window.location.protocol + '//' + window.location.host + window.location.pathname)
             fd.append('code', code)
             fd.append('scope', 'read write')
-            majax(inst + "/oauth/token", {
+            ajax(inst + "/oauth/token", {
                 method: 'POST',
                 data: {
                     client_id: clients[inst].client_id, client_secret: clients[inst].client_secret, grant_type: 'authorization_code',
@@ -743,7 +755,7 @@
             clients = JSON.parse(window.localStorage.getItem('clients')) || {}
             if (!clients[inst]) { // we first need a client_id/client_secret to connect to this instance
 
-                majax(inst + "/api/v1/apps", {
+                ajax(inst + "/api/v1/apps", {
                     method: 'POST',
                     data: {
                         client_name: 'Toob', redirect_uris: window.location.protocol + '//' + window.location.host + window.location.pathname,
@@ -822,10 +834,15 @@
                     s('#title').innerHTML = `<svg><use href="#pen" /></svg> Write with ${accounts[account].display_name} (@${accounts[account].acct}@${accounts[account].url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')})`
                     s('#write div.editthread:last-of-type textarea').focus()
                     break;
+                case '#federated':
+                    showOnly('#timeline')
+                    s('#title').innerHTML = `<svg><use href="#public" /></svg> ${accounts[window.location.hash.split('/')[1]].display_name} (@${accounts[window.location.hash.split('/')[1]].acct}@${accounts[window.location.hash.split('/')[1]].url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')})`
+                    updateTimeline('timelines/public', window.location.hash.split('/')[1]);
+                    break;
                 case '#public':
                     showOnly('#timeline')
                     s('#title').innerHTML = `<svg><use href="#public" /></svg> ${accounts[window.location.hash.split('/')[1]].display_name} (@${accounts[window.location.hash.split('/')[1]].acct}@${accounts[window.location.hash.split('/')[1]].url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')})`
-                    updateTimeline('timelines/public');
+                    updateTimeline('timelines/public?local=true', window.location.hash.split('/')[1]);
                     break;
                 case '#search':
                     showOnly('#search')
@@ -853,16 +870,16 @@
         function updateSearch(term) {
             s('#search input').value = term
             s('#search input').focus()
-            // s('#search input').change()
+            s('#search input').onchange()
         }
         s('#search input').onchange = function () {
             window.location.hash = '#search/' + this.value
-            majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + this.value, {
+            ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + this.value, {
                 headers: { 'Authorization': 'Bearer ' + getAT(account) },
                 success: function (data) {
                     data = JSON.parse(data)
                     sa('#search .status, #search .account, #search .hashtags').forEach(e => { e.remove() })
-                    data.accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${account}/${e.id}"><img class="avatar" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
+                    data.accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${account}/${e.id}"><img class="sm-avatar" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
                     data.hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tags/${e.name}/${account}">#${e.name}</a></div>`)) })
                     data.statuses.forEach(e => { s('#search').append(n(displayStatus(e, account))) })
                     tweak();
@@ -898,7 +915,7 @@
                 waitingFor = 999999999999999999
 
                 s('#timeline').textContent = ''
-                majax(getInstance(account) + '/api/v1/' + feed + '?limit=40', {
+                ajax(getInstance(account) + '/api/v1/' + feed + '?limit=40', {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
                         JSON.parse(data).forEach(el => {
@@ -920,19 +937,15 @@
             }
         }
         function lookForNewNotif() {
-            // const notification = new Notification('test', { body: 'test', icon: 'https://media.infosec.exchange/infosecmedia/accounts/avatars/109/314/664/232/734/570/original/6c56cbb57c9d2661.jpg', tag: 'test' });
-
             if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1])) //init
 
             for (i = 0; i < accounts.length; i++) {
-                majax(getInstance(i) + '/api/v1/notifications', {
+                ajax(getInstance(i) + '/api/v1/notifications', {
                     headers: {
                         'Authorization': 'Bearer ' + getAT(i)
                     },
                     indexValue: i,
                     success: function (data, xhr) {
-                        // ojax('GET', getInstance() + '/api/v1/notifications', null, function () {
-                        // if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                         e = JSON.parse(data)[0]
                         newestNotif = e.id
                         // alert(newestNotif > parseInt(JSON.parse(window.localStorage.getItem('lastnotif'))[xhr.indexValue]))
@@ -960,7 +973,10 @@
                                 title = `A poll you participated in just ended!`;
                                 text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
                             }
-                            console.log(window.location.protocol + '//' + window.location.host + window.location.pathname)
+                            if (e.type == 'update') {
+                                title = `${e.account.display_name} (${e.account.acct}) updated their toot!`;
+                                text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
+                            }
                             navigator.serviceWorker.ready.then((registration) => {
                                 registration.showNotification(title, {
                                     body: text,
@@ -971,17 +987,14 @@
                                 });
                             });
                         }
-                        // }
                     }
                 })
             }
         }
-        // window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1]))
-        // window.localStorage.removeItem('lastnotif')
         setInterval(lookForNewNotif, 5000)
         function getAccount(account) {
             return new Promise(resolve => {
-                majax(getInstance(account) + '/api/v1/accounts/verify_credentials', {
+                ajax(getInstance(account) + '/api/v1/accounts/verify_credentials', {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
                         resolve(JSON.parse(data))
@@ -1014,14 +1027,15 @@
             displaySettings()
             return a
         })
+        columns = JSON.parse(window.localStorage.getItem('columns')) || []
         function displaySettings() {
             document.querySelector(':root').style.setProperty('--highlight', window.localStorage.getItem('color'))
             colors = ['#817', '#a35', '#c66', '#e94', '#ed0', '#9d5', '#4d8', '#2cb', '#0bc', '#09c', '#36b', '#639']
+            if (columns.length == 0) { accounts.forEach(a => { columns.push(['home', 'public', 'federated', 'notifications']) }) }
             colors.forEach(c => {
-                s('#colors').append(n(`<button style="background-color: ${c};"><svg><use href="#cancel" /></svg></button>`))
+                s('#colors').append(n(`<button style="background-color: ${c};"><svg><use href="#blank" /></svg></button>`))
                 sa('#colors button').forEach(b => {
                     b.onclick = function () {
-                        // console.log(this.style['background-color'])
                         document.querySelector(':root').style.setProperty('--highlight', this.style['background-color'])
                         window.localStorage.setItem('color', this.style['background-color'])
                     }
@@ -1029,16 +1043,34 @@
             })
             i = 0;
             accounts.forEach(a => {
-                s('#settings').append(n(`<div><span><img src="${a.avatar}"/> ${a.display_name}
-                    <button class="logout" acct="${i}"><svg><use href="#cancel"/></svg></button>
+                s('#settings').append(n(`<div><span><img src="${a.avatar}" class="sm-avatar"/> ${a.display_name}
+                    <button class="logout" acct="${i}"><svg><use href="#logout"/></svg></button>
                     <button class="resetnotif" acct="${i}"><svg><use href="#bell"/></svg></button>
+                    <button class="col outline" acct="${i}" col="home"><svg><use href="#home"/></svg></button>
+                    <button class="col outline" acct="${i}" col="public"><svg><use href="#public"/></svg></button>
+                    <button class="col outline" acct="${i}" col="federated"><svg><use href="#globe"/></svg></button>
+                    <button class="col outline" acct="${i}" col="notifications"><svg><use href="#bell"/></svg></button>
                     </div>`))
+                columns[i].forEach(c => { sa(`[col="${c}"][acct="${i}"]`).forEach(b => { b.classList.remove('outline') }) })
                 i++
+            })
+            sa('button.col').forEach(b => {
+                b.onclick = function () {
+                    col = b.getAttribute('col')
+                    acct = b.getAttribute('acct')
+                    if (b.classList.contains('outline')) {
+                        columns[acct].push(col)
+                        b.classList.remove('outline')
+                    } else {
+                        columns[acct].splice(columns[acct].indexOf(col), 1)
+                        b.classList.add('outline')
+                    }
+                    window.localStorage.setItem('columns', JSON.stringify(columns))
+                }
             })
             sa('.logout').forEach(b => {
                 b.onclick = function () {
-                    accounts = JSON.parse(window.localStorage.getItem('accounts'))
-                    accounts.splice(this.getAttribute('acct'), 1)
+                    accounts = JSON.parse(window.localStorage.getItem('accounts')).splice(this.getAttribute('acct'), 1)
                     window.localStorage.setItem('accounts', JSON.stringify(accounts))
                 }
             })
@@ -1052,12 +1084,14 @@
         }
         function displaySideNav() {
             i = 0
+            columns = JSON.parse(window.localStorage.getItem('columns'))
             accounts.forEach(a => {
                 // console.log(a)
                 s('#sidenav h1').append(n(`<hr/><span><img acct="${i}" class="${i == account ? 'active' : ''}" src="${a.avatar}"/></span>`))
-                s('#sidenav h1').append(n(`<a href="#home/${i}"><svg><use href="#home" /></svg></a>`))
-                s('#sidenav h1').append(n(`<a href="#public/${i}"><svg><use href="#public" /></svg></a>`))
-                s('#sidenav h1').append(n(`<a href="#notifications/${i}"><svg><use href="#bell" /></svg></a>`))
+                if (columns[i].includes('home')) s('#sidenav h1').append(n(`<a href="#home/${i}"><svg><use href="#home" /></svg></a>`))
+                if (columns[i].includes('public')) s('#sidenav h1').append(n(`<a href="#public/${i}"><svg><use href="#public" /></svg></a>`))
+                if (columns[i].includes('federated')) s('#sidenav h1').append(n(`<a href="#federated/${i}"><svg><use href="#globe" /></svg></a>`))
+                if (columns[i].includes('notifications')) s('#sidenav h1').append(n(`<a href="#notifications/${i}"><svg><use href="#bell" /></svg></a>`))
                 i++
             })
             sa('#sidenav a').forEach(a => { a.onclick = function () { if (this.classList.contains('active')) window.scrollTo({ top: 0, behavior: 'smooth' }); } })
@@ -1066,7 +1100,6 @@
                     sa('#sidenav img').forEach(i => {
                         i.classList.remove('active')
                     })
-                    // console.log(this.getAttribute('acct'));
                     account = this.getAttribute('acct');
                     window.localStorage.setItem('activeAccount', account)
                     this.classList.add('active')
@@ -1076,20 +1109,15 @@
             })
         }
         function updateNotifications(which, account = 0) {
-            // alert(Notification.permission)
             if (Notification.permission == 'default') {
-                // alert('ici')
-                Notification.requestPermission().then((result) => {
-                    // alert(result);
-                });
+                Notification.requestPermission()
             }
             if (which + '/' + account != whichTimeline) {
                 whichTimeline = which + '/' + account
                 s('#timeline').textContent = ''
-                majax(getInstance(account) + '/api/v1/' + which, {
+                ajax(getInstance(account) + '/api/v1/' + which, {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
-
                         JSON.parse(data).forEach(e => {
                             if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1])) //init
                             s('#timeline').append(n(displayNotification(e, account)))
@@ -1104,21 +1132,20 @@
             // console.log(e)
             lastNotifs = JSON.parse(window.localStorage.getItem('lastnotif'))
             lastNotifs[acct] = Math.max(parseInt(lastNotifs[acct]), parseInt(e.id))
-            // console.log(lastNotifs)
             window.localStorage.setItem('lastnotif', JSON.stringify(lastNotifs))
             maxId = Math.min(maxId, e.id)  //  remember oldest toot for scrolling
             switch (e.type) {
                 case 'follow':
                     return `<div class="notif"><p>
                                         <a href="#account/${acct}/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            <img class="sm-avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> followed you!</p></div>`
                     break;
                 case 'reblog':
                     if (!s(`#reb${e.status.id}`)) {
                         return `<div class="notif" id="reb${e.status.id}"><p><a href="#account/${acct}/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            <img class="sm-avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> ${e.status.reblogs_count > 1 ? `and ${e.status.reblogs_count - 1} other${e.status.reblogs_count == 1 ? '' : 's'}` : ''} favourited your status!</p>
                                 ${displayStatus(e.status, acct)}</div>`
@@ -1126,7 +1153,7 @@
                     break;
                 case 'update':
                     return `<div class="notif"><p><a href="#account/${acct}/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            <img class="sm-avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> updated their status!</p>
                                 ${displayStatus(e.status, acct)}</div>`
@@ -1134,17 +1161,17 @@
                 case 'favourite':
                     if (!s(`#fav${e.status.id}`)) {
                         return `<div class="notif" id="fav${e.status.id}"><p><a href="#account/${acct}/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            <img class="sm-avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> ${e.status.favourites_count > 1 ? `and ${e.status.favourites_count - 1} other${e.status.favourites_count == 2 ? '' : 's'}` : ''} favourited your status!</p>
                                 ${displayStatus(e.status, acct)}</div>`
                     } else {
-                        s(`#fav${e.status.id} p`).prepend(n(`<img class="avatar" src="${e.account.avatar}"/>`))
+                        s(`#fav${e.status.id} p`).prepend(n(`<img class="sm-avatar" src="${e.account.avatar}"/>`))
                     }
                     break;
                 case 'mention':
                     return `<div class="notif"><p><a href="#account/${acct}/${e.account.id}">
-                                            <img class="avatar" src="${e.account.avatar}"/>
+                                            <img class="sm-avatar" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> mentioned you!</p>
                                 ${displayStatus(e.status, acct)}</div>`
@@ -1162,11 +1189,11 @@
         function updateStatus(id) {
             var [acct, statusId] = id.split('/')
             if (acct != account) {//we want to display the toot as seen from the currentAccount
-                majax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
+                ajax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                     success: function (data) {
                         console.log(JSON.parse(data).uri)
-                        majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + JSON.parse(data).uri, {
+                        ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + JSON.parse(data).uri, {
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
                             success: function (data) {
                                 updateStatus(account + '/' + JSON.parse(data).statuses[0].id)
@@ -1179,12 +1206,12 @@
                 lastStatusId = id;
                 s('#status').innerHTML = '';
 
-                majax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
+                ajax(getInstance(acct) + '/api/v1/statuses/' + statusId, {
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                     success: function (data) {
                         current = JSON.parse(data)
-                        s('#title').innerHTML = `Toot by <img class="avatar" src="${current.account.avatar}"/> ${replaceEmojis(current.account.emojis, current.account.display_name)}`
-                        majax(getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', {
+                        s('#title').innerHTML = `Toot by <img class="sm-avatar" src="${current.account.avatar}"/> ${replaceEmojis(current.account.emojis, current.account.display_name)}`
+                        ajax(getInstance(acct) + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', {
                             headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                             success: function (data) {
                                 i = 0;
@@ -1195,7 +1222,6 @@
                                 });
                                 c = current.reblog ? current.reblog : current
                                 s('#status').append(n(displayStatus(c, acct, 'focus' + (i == 0 ? ' top' : ''), 't')));
-
                                 data.descendants.forEach(element => {
                                     s('#t' + acct + '-' + element.in_reply_to_id).append(n(displayStatus(element, acct, 'thread', 't')));
                                 });
@@ -1211,9 +1237,10 @@
             if (id == lastAccountId) return;
             lastAccountId = id;
             s('#account').innerHTML = '';
-            majax(getInstance(id.split('/')[0]) + '/api/v1/accounts/' + id.split('/')[1], {
+            ajax(getInstance(id.split('/')[0]) + '/api/v1/accounts/' + id.split('/')[1], {
                 success: function (data) {
                     data = JSON.parse(data)
+                    console.log(data)
                     html = `
                     <img class="header" src="${data.header}"/>
                     <img class="avatar" src="${data.avatar}"/>
@@ -1226,10 +1253,10 @@
                     <div class="statuses">Statuses ${data.statuses_count}</div>
                     `
                     s('#account').innerHTML = html
-                    s('#title').innerHTML = `<img class="avatar" src="${data.avatar}"/> ${replaceEmojis(data.emojis, data.display_name)} <!--(@${data.acct}${data.acct.indexOf('@') == -1 ? `@${data.url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')}` : ''})-->`
+                    s('#title').innerHTML = `<img class="sm-avatar" src="${data.avatar}"/> ${replaceEmojis(data.emojis, data.display_name)} <!--(@${data.acct}${data.acct.indexOf('@') == -1 ? `@${data.url.match(/\/\/[\w\.]+\//)[0].replaceAll('/', '')}` : ''})-->`
                     sa('.note .mention.u-url').forEach(a => {
                         a.removeAttribute('target')
-                        majax(getInstance(id.split('/')[0]) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
+                        ajax(getInstance(id.split('/')[0]) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
                             headers: { 'Authorization': 'Bearer ' + getAT(id.split('/')[0]) },
                             success: function (data, xhr) {
                                 a.setAttribute('href', '#account/' + id.split('/')[0] + '/' + JSON.parse(data).accounts[0].id)
@@ -1237,20 +1264,19 @@
                         })
                     })
                     s('#follow').onclick = function () {
-                        follow(data.id, data.uri, account, this.innerText == 'Follow')
-                        // ajax('POST', getInstance(id.split('/')[0]) + '/api/v1/accounts/' + id.split('/')[1] + `/${this.innerText == 'Follow' ? '' : 'un'}follow`, null, function () {
-                        //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                        //     }
-                        // })
+                        statusPostAction(data.id, data.uri, account, this.innerText.toLowerCase())
                     }
-                    majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + data.uri, {
+                    console.log(account)
+                    ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + data.url, {
                         headers: { 'Authorization': 'Bearer ' + getAT(account) },
                         success: function (data) {
                             i = JSON.parse(data).accounts[0].id
-                            majax(getInstance(account) + `/api/v1/accounts/relationships?id[]=${i}`, {
+                            console.log(JSON.parse(data))
+                            ajax(getInstance(account) + `/api/v1/accounts/relationships?id[]=${i}`, {
                                 headers: { 'Authorization': 'Bearer ' + getAT(account) },
                                 success: function (data) {
                                     r = JSON.parse(data)
+                                    console.log(r)
                                     s('#follow').innerText = r[0].following ? 'Unfollow' : 'Follow'
                                     if (r[0].followed_by) { s('.follows').append(' including you') }
                                 }
@@ -1259,7 +1285,7 @@
                     })
                 }
             })
-            majax(getInstance(id.split('/')[0]) + `/api/v1/accounts/${id.split('/')[1]}/statuses?limit=40`, {
+            ajax(getInstance(id.split('/')[0]) + `/api/v1/accounts/${id.split('/')[1]}/statuses?limit=40`, {
                 success: function (data) {
                     JSON.parse(data).forEach(e => {
                         s('#account').append(n(displayStatus(e, id.split('/')[0])))
@@ -1268,63 +1294,30 @@
                 }
             })
         }
-        function follow(accountId, accountUri, from, unfollow = false) {
+        function statusPostAction(accountId, accountUri, from, action) {
             var [acct, id] = accountId.split('/');
+            type = action.endsWith('follow') ? 'accounts' : 'statuses'
             if (acct != from) {
-                majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + accountUri, {
+                ajax(getInstance(from) + "/api/v2/search?resolve=true&q=" + accountUri, {
                     headers: { 'Authorization': 'Bearer ' + getAT(from) },
                     success: function (data) {
                         data = JSON.parse(data)
-                        console.log(data)
-                        follow(from + '/' + data.accounts[0].id, accountUri, from, unfollow)
+                        statusPostAction(from + '/' + (type ? data[type][0].id : data[type][0].id), accountUri, from, action)
                     }
                 })
             } else {
-                majax(getInstance(from) + `/api/v1/accounts/${id}/${unfollow ? 'un' : ''}follow`, {
+                ajax(getInstance(from) + `/api/v1/${type}/${id}/${action}`, {
                     method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(from) },
                     success: function (data) {
-                        // unfav ? s(`[uri="${accountUri}"`).classList.remove('fav') : s(`[uri="${accountUri}"`).classList.add('fav')
-                        s('#follow').innerText = s('#follow').innerText == 'Follow' ? 'Unfollow' : 'Follow'
-
-                    }
-                })
-            }
-        }
-        function fav(statusId, statusUri, from, unfav = false) {
-            var [acct, id] = statusId.substring(1).split('-');
-            if (acct != from) {
-                majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + statusUri, {
-                    headers: { 'Authorization': 'Bearer ' + getAT(from) },
-                    success: function (data) {
-                        data = JSON.parse(data)
-                        console.log(data)
-                        fav('s' + from + '-' + data.statuses[0].id, statusUri, from, unfav)
-                    }
-                })
-            } else {
-                majax(getInstance(from) + `/api/v1/statuses/${id}/${unfav ? 'un' : ''}favourite`, {
-                    method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(from) },
-                    success: function (data) {
-                        unfav ? s(`[uri="${statusUri}"`).classList.remove('fav') : s(`[uri="${statusUri}"`).classList.add('fav')
-                    }
-                })
-            }
-        }
-        function reb(statusId, statusUri, from, unreb = false) {
-            var [acct, id] = statusId.substring(1).split('-');
-            if (acct != from) {
-                majax(getInstance(from) + "/api/v2/search?resolve=true&q=" + statusUri, {
-                    headers: { 'Authorization': 'Bearer ' + getAT(from) },
-                    success: function (data) {
-                        data = JSON.parse(data)
-                        reb('s' + from + '-' + data.statuses[0].id, statusUri, from, unreb)
-                    }
-                })
-            } else {
-                majax(getInstance(from) + `/api/v1/statuses/${id}/${unreb ? 'un' : ''}reblog`, {
-                    method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(from) },
-                    success: function (data) {
-                        unreb ? s(`[uri="${statusUri}"`).classList.remove('reb') : s(`[uri="${statusUri}"`).classList.add('reb')
+                        if (action.endsWith('follow')) { s('#follow').innerText = s('#follow').innerText == 'Follow' ? 'Unfollow' : 'Follow' }
+                        if (action.endsWith('favourite')) {
+                            if (action.startsWith('un')) s(`[uri="${accountUri}"`).classList.remove('fav')
+                            else { s(`[uri="${accountUri}"`).classList.add('fav') }
+                        }
+                        if (action.endsWith('reblog')) {
+                            if (action.startsWith('un')) s(`[uri="${accountUri}"`).classList.remove('reb')
+                            else { s(`[uri="${accountUri}"`).classList.add('reb') }
+                        }
                     }
                 })
             }
@@ -1334,22 +1327,23 @@
             sa('.actions .fav').forEach(e => {
                 e.onclick = function () {
                     st = this.parentNode.parentNode
-                    fav(st.getAttribute('id'), st.getAttribute('uri'), account, st.classList.contains('fav'))
+                    statusPostAction(st.getAttribute('id'), st.getAttribute('uri'), account, st.classList.contains('fav') ? 'unfavourite' : 'favourite')
                 }
             })
             sa('.actions .reb').forEach(e => {
                 e.onclick = function () {
                     st = this.parentNode.parentNode
-                    reb(st.getAttribute('id'), st.getAttribute('uri'), account, st.classList.contains('reb'))
+                    statusPostAction(st.getAttribute('id'), st.getAttribute('uri'), account, st.classList.contains('reb') ? 'unreblog' : 'reblog')
                 }
             })
             sa('.actions .del').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
-
                     confirm = showModal('Confirmer la suppression?', function () {
-                        ajax('DELETE', getInstance(account) + `/api/v1/statuses/${id.split('-')[1]}`, null, function (e) {
-                            if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                        ajax(getInstance(account) + `/api/v1/statuses/${id.split('-')[1]}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                            success: function () {
                                 whichTimeline = ''
                                 display()
                             }
@@ -1357,13 +1351,12 @@
                     })
                 }
             })
-
             sa('a.hashtag').forEach(e => { e.removeAttribute('target') })
             sa('.actions .rep, .actions .quo').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
                     if (id.split('-')[0] != account) {
-                        majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + this.parentNode.parentNode.getAttribute('uri'), {
+                        ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + this.parentNode.parentNode.getAttribute('uri'), {
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
                             success: function (data) {
                                 data = JSON.parse(data)
@@ -1397,7 +1390,7 @@ ${this.getAttribute('href')}`
                     own_votes = Array.from(sa('[name="option_' + poll_id + '[]"]:checked')).map(function (i) { return i.getAttribute('id').split('_')[2] })
                     fd = new FormData()
                     fd.append('choices[]', own_votes)
-                    majax(getInstance(account) + `/api/v1/polls/${poll_id}/votes`, {
+                    ajax(getInstance(account) + `/api/v1/polls/${poll_id}/votes`, {
                         method: 'POST', headers: '',
                         headers: { 'Authorization': 'Bearer ' + getAT(account) },
                         data: { 'choices[]': own_votes },
@@ -1409,9 +1402,8 @@ ${this.getAttribute('href')}`
                 }
             })
             sa('div.card.toresolve a').forEach(a => {
-                // console.log(a.getAttribute('href'))
                 // if (a.getAttribute('href').match(/^https:\/\/[\w\.]+\/@\w+\/\d+$/)) {
-                majax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
+                ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
                         data = JSON.parse(data)
@@ -1420,30 +1412,28 @@ ${this.getAttribute('href')}`
                             a.parentNode.classList.remove('toresolve')
                             a.parentNode.innerHTML = displayStatus(data.statuses[0], account, 'quo')
                             tweak()
-                            // a.setAttribute('href', '#status/' + account + '/' + data.statuses[0].id)
                         } else {
                             a.parentNode.classList.remove('toresolve')
                         }
                     }
                 })
-                // }
             })
         }
         function vote(statusId, statusUri, from, ownvotes) {
             var [acct, id] = statusId.split('-')
         }
-        function ajax(method, url, params, success) {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = success;
-            xhttp.open(method, url, true);
-            at = JSON.parse(window.localStorage.getItem('accounts') || '[]')[account] ? JSON.parse(window.localStorage.getItem('accounts') || '[]')[account].at : null
-            if (at) xhttp.setRequestHeader('Authorization', 'Bearer ' + at)
-            if (params)
-                xhttp.send(params);
-            else
-                xhttp.send()
-        }
-        function majax(url, params) {
+        // function ajax(method, url, params, success) {
+        //     var xhttp = new XMLHttpRequest();
+        //     xhttp.onreadystatechange = success;
+        //     xhttp.open(method, url, true);
+        //     at = JSON.parse(window.localStorage.getItem('accounts') || '[]')[account] ? JSON.parse(window.localStorage.getItem('accounts') || '[]')[account].at : null
+        //     if (at) xhttp.setRequestHeader('Authorization', 'Bearer ' + at)
+        //     if (params)
+        //         xhttp.send(params);
+        //     else
+        //         xhttp.send()
+        // }
+        function ajax(url, params) {
             xhr = new XMLHttpRequest()
             if (params.indexValue !== undefined) { xhr.indexValue = params.indexValue }
             xhr.onreadystatechange = function () {
@@ -1474,7 +1464,7 @@ ${this.getAttribute('href')}`
             return a.substring(1) + '@' + i
         }
         function displayStatus(el, acct, cssClass = '', id_prefix = 's') {
-            console.log(el)
+            // console.log(el)
             if (el.reblog) {
                 boost = `<a href="#account/${acct}/${el.account.id}"><img src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1487,7 +1477,7 @@ ${this.getAttribute('href')}`
             return `<div uri="${e.uri}" id="${id_prefix}${acct}-${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="${id_prefix}${acct}-${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
             <div class="boost">${boost}</div>
             <div class="reply_to"></div>
-            <div class="author"><a href="#account/${acct}/${e.account.id}"><img src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
+            <div class="author"><a href="#account/${acct}/${e.account.id}"><img class="sm-avatar" src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
             <div class="actions">
                 ${accounts[acct].id == e.account.id ? '<span class="edit"><svg><use href="#pen"/></svg></span>' : ''}
                 ${accounts[acct].id == e.account.id ? '<span class="del"><svg><use href="#cancel"/></svg></span>' : ''}
@@ -1590,7 +1580,7 @@ ${this.getAttribute('href')}`
                         textarea = this.parentNode.parentNode.parentNode.querySelector('textarea')
                         t = this
                         src = this.src
-                        majax('pj.php?url=' + this.src, {
+                        ajax('pj.php?url=' + this.src, {
                             success: function (data, xhr) {
                                 textarea.value = textarea.value.replace(src, '') // remove URL from textarea
                                 t.src = 'data:' + xhr.getResponseHeader('content-type') + ';base64, ' + data
@@ -1664,7 +1654,7 @@ ${this.getAttribute('href')}`
         const uploadFile = (toot, i) => { //uploads and then checks upload is finished
             return new Promise((resolve, reject) => {
                 const file = DataURIToBlob(toot.querySelector(`.media_attachments div:nth-child(${i + 1}) img`).getAttribute('src'))
-                majax(getInstance(account) + '/api/v2/media', {
+                ajax(getInstance(account) + '/api/v2/media', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     data: { file: file, description: toot.querySelector(`.media_attachments div:nth-child(${i + 1}) textarea`).value },
@@ -1697,7 +1687,7 @@ ${this.getAttribute('href')}`
             dataToSend = { status: toots[i].querySelector('.post textarea').value, visibility: s('#visibility').value.toLowerCase(), language: s('#lang').value, 'media_ids[]': results }
             if (in_reply_to_id && in_reply_to_id != '') dataToSend.in_reply_to_id = in_reply_to_id
 
-            majax(getInstance(account) + '/api/v1/statuses', {
+            ajax(getInstance(account) + '/api/v1/statuses', {
                 method: 'POST',
                 data: dataToSend,
                 headers: { 'Authorization': 'Bearer ' + getAT(account) },
@@ -1725,7 +1715,7 @@ ${this.getAttribute('href')}`
         }
         function checkUpload(id) {
             return new Promise((resolve, reject) => {
-                majax(getInstance(account) + '/api/v1/media/' + id, {
+                ajax(getInstance(account) + '/api/v1/media/' + id, {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
                         resolve(id);// finished
@@ -1737,7 +1727,7 @@ ${this.getAttribute('href')}`
             })
         }
         function cleanUpWrite() {
-            sa('#write .editthread:not(:first-child)').forEach(t => { t.remove() }) ///remove additional textareas
+            sa('#write .editthread:not(:first-child)').forEach(t => { t.remove() }) //remove additional textareas
             s('#write .editthread').setAttribute('attach', 0)
             s('#write .editthread').style.display = 'block'
             sa('#write img').forEach(i => { i.src = '' }) //reset media attachments
@@ -1774,6 +1764,10 @@ ${this.getAttribute('href')}`
                         acct = h[1]
                         break;
                     case '#public':
+                        feed = 'timelines/public?local=true'
+                        acct = h[1]
+                        break;
+                    case '#federated':
                         feed = 'timelines/public'
                         acct = h[1]
                         break;
@@ -1789,7 +1783,7 @@ ${this.getAttribute('href')}`
                 trend = (timeline == '#trend')
                 // feed = trend ? 'timelines/home' : wt[0]+'/'+wt[1]
                 if (waitingFor > maxId) {
-                    majax(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
+                    ajax(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
                         headers: { 'Authorization': 'Bearer ' + getAT(acct) }, success: function (data) {
                             JSON.parse(data).forEach(el => {
                                 if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
@@ -1817,11 +1811,9 @@ ${this.getAttribute('href')}`
 
         /* TODOS
             CW support
-            public vs federated timelines
             compose a poll
             keyboard nav
             edit toot
-            modal colors
         */
     </script>
 </body>
