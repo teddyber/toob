@@ -857,13 +857,25 @@
                 success: function (data) {
                     accounts = JSON.parse(window.localStorage.getItem('accounts') || '[]')
                     accounts.push({ instance: inst, at: JSON.parse(data).access_token })
-                    window.localStorage.setItem('accounts', JSON.stringify(accounts))
+                    window.localStorage.setItem('accounts', JSON.stringify(accounts))| []
+
+                    columns = JSON.parse(window.localStorage.getItem('columns')) || []
+                    columns.push(['home', 'public', 'federated', 'notifications'])
+                    console.log(columns)
+                    window.localStorage.setItem('columns', JSON.stringify(columns))
+
+                    ln = JSON.parse(window.localStorage.getItem('lastnotif')) || []
+                    ln.push(1)
+                    console.log(ln)
+                    window.localStorage.setItem('lastnotif', JSON.stringify(ln))
+
                     window.localStorage.removeItem('instance')
                     window.location.href = window.location.pathname
                 }
             }
             )
         }
+        s('#instance').onchange = function(){s('#loginb').click()}
         s('#loginb').onclick = function () {
             inst = s('#instance').value
             if (inst.substring(0, 8) != 'https://') inst = 'https://' + inst
@@ -942,6 +954,7 @@
                     break;
                 case '#settings':
                     s('#title').innerHTML = `<svg><use href="#gear" /></svg> Settings`
+                    displaySideNav()
                     showOnly('#settings')
                     break;
                 case '#adduser':
@@ -1174,7 +1187,7 @@
             }
         }
         function lookForNewNotif() {
-            if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1])) //init TODO better
+            // if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1])) //init TODO better
             for (i = 0; i < accounts.length; i++) {
                 lastNotifs = JSON.parse(window.localStorage.getItem('lastnotif'))
                 ajax(getInstance(i) + '/api/v1/notifications?limit=1&since_id=' + lastNotifs[i], {
@@ -1254,7 +1267,7 @@
         }
         function getAccounts() {
             return new Promise(resolve => {
-                accts = JSON.parse(window.localStorage.getItem('accounts'))
+                accts = JSON.parse(window.localStorage.getItem('accounts')) ||  []
                 r = []
                 for (i = 0; i < accts.length; i++) {
                     r.push(getAccount(i).then(r => { return r }))
@@ -1263,9 +1276,10 @@
             })
         }
         accounts = ''
+        columns = JSON.parse(window.localStorage.getItem('columns')) || []
         a = getAccounts().then(a => {
             accounts = a
-            if (window.location.hash == '') {
+            if (window.location.hash == '' || window.location.hash == '#') {
                 if (accounts.length > 0)
                     window.location.hash = `#home/${account}`;
                 else
@@ -1277,8 +1291,8 @@
             displaySettings()
             return a
         })
-        columns = JSON.parse(window.localStorage.getItem('columns')) || []
         function displaySettings() {
+            s('#settings').innerHTML = '<div id="colors"></div>'
             document.querySelector(':root').style.setProperty('--highlight', window.localStorage.getItem('color'))
             colors = ['#817', '#a35', '#c66', '#e94', '#ed0', '#9d5', '#4d8', '#2cb', '#0bc', '#09c', '#36b', '#639']
             if (columns.length == 0) { accounts.forEach(a => { columns.push(['home', 'public', 'federated', 'notifications']) }) }
@@ -1317,12 +1331,22 @@
                         b.classList.add('outline')
                     }
                     window.localStorage.setItem('columns', JSON.stringify(columns))
+                    display();
                 }
             })
             sa('.logout').forEach(b => {
                 b.onclick = function () {
-                    accounts = JSON.parse(window.localStorage.getItem('accounts')).splice(this.getAttribute('acct'), 1)
+                    accounts = JSON.parse(window.localStorage.getItem('accounts'))
+                    columns = JSON.parse(window.localStorage.getItem('columns'))
+                    ln = JSON.parse(window.localStorage.getItem('lastnotif'))
+                    accounts.splice(this.getAttribute('acct'), 1)
+                    columns.splice(this.getAttribute('acct'), 1)
+                    ln.splice(this.getAttribute('acct'), 1)
                     window.localStorage.setItem('accounts', JSON.stringify(accounts))
+                    window.localStorage.setItem('columns', JSON.stringify(columns))
+                    window.localStorage.setItem('lastnotif', JSON.stringify(ln))
+                    window.location.reload()
+                    // display();
                 }
             })
             sa('.resetnotif').forEach(b => {
@@ -1369,7 +1393,7 @@
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
                         JSON.parse(data).forEach(e => {
-                            if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1])) //init
+                            // if (!window.localStorage.getItem('lastnotif')) window.localStorage.setItem('lastnotif', JSON.stringify([1, 1, 1])) //init
                             s('#timeline').append(n(displayNotification(e, account)))
                         })
                         tweak()
@@ -1437,16 +1461,10 @@
             return ''
         }
         function updateRemoteStatus(statusUri, inst) {
+            if (statusUri.match(/^\d\/\d+$/)) updateStatus(statusUri)
             var [h, n, i, u, id] = statusUri.split('/')// match(/https:\/\/[\w\.]+\//)            console.log(inst)
             console.log([h, n, i, u, id])
-
             updateStatus(id, 'https://' + i)
-            // ajax('https://' + inst + "/api/v2/search?q=" + accountUri, {
-            //     success: function (data) {
-            //         updateAccount(JSON.parse(data).accounts[0].id, 'https://' + inst)
-            //     }
-            // })
-
         }
         function updateStatus(id, inst = null) {
             console.log(id, inst)
@@ -1763,13 +1781,13 @@ ${this.getAttribute('href')}`
             return a.substring(1) + '@' + i
         }
         function displayDate(d) {
-            console.log(d)
-            if (d.substring(0, 10) == (new Date()).toISOString().substring(0, 10)) date = d.substring(11, 16)
-            else date = d.substring(8, 10) + '/' + d.substring(5, 7)
+            d = (new Date(d)).toLocaleString('fr') //dd/mm/yyy hh:mm:ss
+            if (d.substring(0, 10) == (new Date()).toLocaleString('fr').substring(0, 10)) date = d.substring(11, 16)
+            else date = d.substring(0, 5)
             return date
         }
         function displayStatus(el, acct, cssClass = '', id_prefix = 's') {
-            console.log(el)
+            // console.log(el)
             if (el.reblog) {
                 boost = `<svg class="sm"><use href="#reb"/></svg><a href="#account/${el.account.url}"><img class="sm" loading="lazy" src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1780,7 +1798,6 @@ ${this.getAttribute('href')}`
             mention = false
             if (e.mentions) e.mentions.forEach(m => { m.id == accounts[account].id ? mention = true : '' })
 
-            console.log(e.created_at, e.edited_at)
             if (e.edited_at) date = displayDate(e.edited_at) + ' <del>' + displayDate(e.created_at)+'</del>'
             else date = displayDate(e.created_at)
 
@@ -2129,7 +2146,7 @@ ${this.getAttribute('href')}`
             }
         }
         function parseMd(md) {
-            console.log(md)
+            // console.log(md)
             md = md.replaceAll('</p><p>', "\n\n")
             md = md.replace('<p>', '')
             md = md.replace('</p>', '\n\n')
@@ -2175,7 +2192,7 @@ ${this.getAttribute('href')}`
             md = md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code>');
             md = md.replaceAll('\n\n', '</p><p>')
             md = md.replaceAll("\n", '<br />')
-console.log(md)
+// console.log(md)
             return '<p>' + md + '</p>';
         }
 
