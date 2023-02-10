@@ -168,6 +168,7 @@
             border-radius: .5em;
             cursor: pointer;
         }
+
         button {
             min-width: 40px;
             min-height: 32px;
@@ -876,12 +877,10 @@
 
                     columns = JSON.parse(window.localStorage.getItem('columns')) || []
                     columns.push(['home', 'public', 'federated', 'notifications'])
-                    console.log(columns)
                     window.localStorage.setItem('columns', JSON.stringify(columns))
 
                     ln = JSON.parse(window.localStorage.getItem('lastnotif')) || []
                     ln.push(1)
-                    console.log(ln)
                     window.localStorage.setItem('lastnotif', JSON.stringify(ln))
 
                     window.localStorage.removeItem('instance')
@@ -1042,7 +1041,6 @@
                     break;
                 case '#status':
                     showOnly('#status')
-                    console.log(window.location.hash.substring(8))
                     updateRemoteStatus(window.location.hash.substring(8))
                     break;
                 default:
@@ -1051,12 +1049,10 @@
         }
         function editStatus(id) {
             var [acct, id] = id.split('/')
-            console.log(acct, id)
             ajax(getInstance(acct) + `/api/v1/statuses/${id}/source`, {
                 headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                 success: function (data) {
                     data = JSON.parse(data)
-                    console.log(data)
                     s('#write .editthread textarea.text').value = data.text
                     s('#toot_id').value = id
                     s('#write .editthread label').style.display = 'none'
@@ -1268,14 +1264,11 @@
                         ajax(getInstance(account) + '/api/v1/followed_tags', {
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
                             success: function (data) {
-                                // console.log(JSON.parse(data))
                                 tags[account] = []
                                 JSON.parse(data).forEach(t => { tags[account].push(t.name.toLowerCase()) })
                             }
                         })
                         resolve(r)
-                        // console.log(JSON.parse(data))
-                        // resolve(JSON.parse(data))
                     }
                 })
             })
@@ -1477,21 +1470,17 @@
         }
         function updateRemoteStatus(statusUri, inst) {
             if (statusUri.match(/^\d\/\d+$/)) updateStatus(statusUri)
-            var [h, n, i, u, id] = statusUri.split('/')// match(/https:\/\/[\w\.]+\//)            console.log(inst)
-            console.log([h, n, i, u, id])
+            var [h, n, i, u, id] = statusUri.split('/')
             updateStatus(id, 'https://' + i)
         }
         function updateStatus(id, inst = null) {
-            console.log(id, inst)
             if (inst == null) { // we want to see the toot as from the current "account"
                 var [acct, statusId] = id.split('/')
                 inst = getInstance(acct)
-                console.log('toto', acct, statusId, inst)
 
             } else { // we want to see the remote status
                 acct = account
                 statusId = id
-                // console.log(inst)
             }
             if (acct != account) {//we want to display the toot as seen from the currentAccount
                 ajax(inst + '/api/v1/statuses/' + statusId, {
@@ -1538,12 +1527,10 @@
             }
         }
         function updateRemoteAccount(accountUri) {
-            inst = accountUri.split('/')[2]// match(/https:\/\/[\w\.]+\//)            console.log(inst)
-            console.log(accountUri)
+            inst = accountUri.split('/')[2]
             ajax('https://' + inst + "/api/v2/search?q=" + accountUri.split('/')[3] + '@' + inst, {
                 // headers: { 'Authorization': 'Bearer ' + getAT(account) },
                 success: function (data) {
-                    console.log(JSON.parse(data))
                     JSON.parse(data).accounts.forEach(a => { if (a.url == accountUri) updateAccount(a.id, 'https://' + inst) })
                     // updateAccount(JSON.parse(data).accounts[0].id, 'https://' + inst)
                 }
@@ -1706,7 +1693,6 @@ ${this.getAttribute('href')}`
             })
             sa('.vote').forEach(e => {
                 e.onclick = function () {
-                    console.log(this.getAttribute('id'))
 
                     var [p, acct, poll_id] = this.getAttribute('id').split('_')
                     own_votes = Array.from(sa('[name="option_' + poll_id + '[]"]:checked')).map(function (i) { return i.getAttribute('id').split('_')[2] })
@@ -1932,59 +1918,28 @@ ${this.getAttribute('href')}`
                 }
             })
             sa('textarea.text').forEach(e => { //div.bla //paste image directly
-                // e.onpaste = function (ev) {
-                //     d = ev.clipboardData || window.clipboardData
-                //     // console.log(d)
-                //     // s('#log').innerHTML += d
-                //     for (i = 0; i < d.items.length; i++) {
-                //         console.log(d.items[i].type.indexOf('text'))
-                //         if (d.items[i].type.indexOf('text') == 0) d.items[i].getAsString(data => {
-                //             if (a = new URL(data)) {
-                //                 console.log(a)
-                //                 // s('#log').innerHTML += a
-
-                //                 e.after(n(`<img id="test" />`))//onload="javascript: s('#log').innerHTML += this.complete && this.naturalHeight"/>`))
-                //                 s('#test').onload = function () {
-                //                     console.log(this.complete && this.naturalHeight)
-                //                     console.log(this.src)
-                //                     // s('#log').innerHTML += src
-
-                //                     // var img = new Image();
-                //                     // img.src = document.getElementById("test").src;
-                //                     // console.log(img)
-                //                     // var canvas = document.getElementById("canvas");
-                //                     // var context = canvas.getContext("2d");
-                //                     // context.drawImage(img, 40, 40);
-                //                 }
-                //                 s('#test').setAttribute('src', data)
-                //                 // ajax('GET', data, null, function () {
-                //                 //     if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                //                 //         console.log(this.response)
-                //                 //     }
-                //                 // })
-                //                 // im = s('#test')
-                //                 // console.log(im.complete && im.naturalHeight)
-                //             }
-                //             i = n(data)
-                //             console.log(i)
-                //             // e.after(n)
-                //         })
-                //         // if(d.items[i].type.indexOf('image')==0)  console.log(d.items[i].getAsFile(data=>{console.log(data)}))
-                //     }
-                // }
-                // e.onkeyup = function(){
-                //     s('#log').append(n(`<div>${'ici'}</div>`))
-
-                // }
+                e.onpaste = function (ev) {
+                    d = ev.clipboardData || window.clipboardData
+                    for (i = 0; i < d.items.length; i++) {
+                        if (d.items[i].type.indexOf('image') == 0) {
+                            var reader = new FileReader();
+                            reader.onload = function (event) {
+                                et = e.closest('.editthread')
+                                attach = parseInt(et.getAttribute('attach'))
+                                et.querySelector(`.media_attachments div:nth-child(${attach + 1}) img.media`).src = event.target.result
+                                et.querySelector(`.media_attachments div:nth-child(${attach + 1})`).style.display = 'block'
+                                et.setAttribute('attach', attach + 1)
+                            };
+                            reader.readAsDataURL(d.items[i].getAsFile());
+                        }
+                    }
+                }
                 e.oninput = function (ev) { //paste or inject GIF URL
                     if ((ev.inputType == 'insertText' || ev.inputType == 'insertFromPaste' || ev.inputType == 'insertCompositionText') && ev.data.substring(0, 4) == 'http' && (url = new URL(ev.data))) {
                         attach = parseInt(e.parentNode.parentNode.getAttribute('attach'))
                         e.parentNode.parentNode.querySelector(`.media_attachments div:nth-child(${attach + 1}) img.media`).src = ev.data
                     }
                     e.parentNode.querySelector('.size').innerText = 500 - e.value.replace(/https?:\/\/\S+/gm, '12345678901234567890123').replace(/([\s^]@[\w]+)@[\w]+\b/gm, '$1').length //TODO base this on instance config + 23 chars per URL, no domain name in @
-                    // console.log(ev)
-                    // if (ev.data=="@"){
-                    // console.log(ev.target.value)
                     if (ev.target.selectionEnd == ev.target.selectionStart) {
                         sub = ev.target.value.substring(0, ev.target.selectionEnd)
                         sub = sub.substring(sub.lastIndexOf(' ') + 1, sub.length)
@@ -1993,43 +1948,42 @@ ${this.getAttribute('href')}`
                                 headers: { 'Authorization': 'Bearer ' + getAT(account) },
                                 success: function (data) {
                                     data = JSON.parse(data)
-                                    if(s('#ac')) s('#ac').remove()
+                                    if (s('#ac')) s('#ac').remove()
                                     ev.target.after(n('<div id="ac"></div>'))
-                                    data.accounts.forEach(a=>{s('#ac').append(n(`<div><img class="vsm" src="${a.avatar}"/><span class="acct">${a.acct}</span> (${a.display_name})</div>`))})
-                                    sa('#ac>div').forEach(d=>{d.onclick = function() {
-                                        ev.target.selectionStart = ev.target.selectionStart - sub.length
-                                        ev.target.value = ev.target.value.substring(0, ev.target.selectionStart)+'@'+this.querySelector('.acct').innerText + ' ' +ev.target.value.substring(ev.target.selectionEnd)
-                                        ev.target.focus()
-                                        s('#ac').remove()
-                                    }})
+                                    data.accounts.forEach(a => { s('#ac').append(n(`<div><img class="vsm" src="${a.avatar}"/><span class="acct">${a.acct}</span> (${a.display_name})</div>`)) })
+                                    sa('#ac>div').forEach(d => {
+                                        d.onclick = function () {
+                                            ev.target.selectionStart = ev.target.selectionStart - sub.length
+                                            ev.target.value = ev.target.value.substring(0, ev.target.selectionStart) + '@' + this.querySelector('.acct').innerText + ' ' + ev.target.value.substring(ev.target.selectionEnd)
+                                            ev.target.focus()
+                                            s('#ac').remove()
+                                        }
+                                    })
                                 }
                             })
                         }
                         if (sub.substring(0, 1) == '#') {
-                            console.log(sub.substring(1))
                             ajax(getInstance(account) + '/api/v2/search?type=hashtags&q=' + sub.substring(1), {
                                 headers: { 'Authorization': 'Bearer ' + getAT(account) },
                                 success: function (data) {
                                     data = JSON.parse(data)
-                                    if(s('#ac')) s('#ac').remove()
+                                    if (s('#ac')) s('#ac').remove()
                                     ev.target.after(n('<div id="ac"></div>'))
-                                    data.hashtags.forEach(a=>{s('#ac').append(n(`<div><span class="acct">${a.name}</span></div>`))})
-                                    sa('#ac>div').forEach(d=>{d.onclick = function() {
-                                        ev.target.selectionStart = ev.target.selectionStart - sub.length
-                                        ev.target.value = ev.target.value.substring(0, ev.target.selectionStart)+'#'+this.querySelector('.acct').innerText + ' ' +ev.target.value.substring(ev.target.selectionEnd)
-                                        ev.target.focus()
-                                        s('#ac').remove()
-                                    }})
+                                    data.hashtags.forEach(a => { s('#ac').append(n(`<div><span class="acct">${a.name}</span></div>`)) })
+                                    sa('#ac>div').forEach(d => {
+                                        d.onclick = function () {
+                                            ev.target.selectionStart = ev.target.selectionStart - sub.length
+                                            ev.target.value = ev.target.value.substring(0, ev.target.selectionStart) + '#' + this.querySelector('.acct').innerText + ' ' + ev.target.value.substring(ev.target.selectionEnd)
+                                            ev.target.focus()
+                                            s('#ac').remove()
+                                        }
+                                    })
                                 }
                             })
                         }
                         if (sub.substring(0, 1) != '#' && sub.substring(0, 1) != '@') s('#ac').remove()
                     }
                 }
-
-                // e.onkeyup = function(e) {
-                //     console.log(e)
-                // }
             })
         }
         tweakFileInput()
@@ -2074,16 +2028,13 @@ ${this.getAttribute('href')}`
             if (toots[i].querySelector('#toot_id') && toots[i].querySelector('#toot_id').value != '') {
                 ajax(getInstance(account) + '/api/v1/statuses/' + toots[i].querySelector('#toot_id').value, {
                     success: function (data) {
-                        console.log(JSON.parse(data))
                         JSON.parse(data).media_attachments.forEach(m => { results.push(m.id) })
                         dataToSend['media_ids[]'] = results
-                        console.log(dataToSend)
                         ajax(getInstance(account) + '/api/v1/statuses/' + toots[i].querySelector('#toot_id').value, {
                             method: 'PUT',
                             data: dataToSend,
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
                             success: function (data) {
-                                console.log(JSON.parse(data))
                                 toots[i].querySelectorAll('textarea').forEach(t => { t.disabled = true })
                                 toot(toots, i + 1, JSON.parse(data).id) // toot next one
                             }
@@ -2211,21 +2162,17 @@ ${this.getAttribute('href')}`
             }
         }
         function parseMd(md) {
-            // console.log(md)
             md = md.replaceAll('</p><p>', "\n\n")
             md = md.replace('<p>', '')
             md = md.replace('</p>', '\n\n')
             md = md.replaceAll('<br />', "\n")
             md = md.replaceAll('<br>', "\n")
             md = md.replaceAll('&gt;', '>')
-            // console.log(md)
 
             //ul
-            md = md.replace(/^\s[\*\-]\n[\*\-]/gm, '<ul>\n*');
+            md = md.replace(/^\s*\n\*/gm, '<ul>\n*');
             md = md.replace(/^([\*\-].+)\s*\n([^\*\-])/gm, '$1\n</ul>\n\n$2');
-            // console.log(md)
             md = md.replace(/^\n?\*(.+)\n/gm, '<li>$1</li>');
-            // console.log(md)
 
             //ol
             md = md.replace(/^\s*\n\d\./gm, '<ol>\n1.');
@@ -2259,15 +2206,12 @@ ${this.getAttribute('href')}`
 
             //code
             md = md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code>');
-            md = md.replaceAll('\n\n', '</p><p>')
-            md = md.replaceAll('\n', '<br />')
-            // console.log(md)
 
             //p
             md = md.replace(/^\s*(\n)?(.+)/gm, function (m) {
                 return /\<(\/)?(h\d|ul|ol|li|blockquote|pre|img)/.test(m) ? m : '<p>' + m + '</p>';
             });
-            return '<p>' + md + '</p>';
+            return md
         }
 
         /* TODOS
