@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Toob</title>
+    <title>Toob - A Mastodon client</title>
     <link rel="icon" type="image/x-icon" href="./toob.svg">
     <link rel="manifest" href="manifest.json" />
     <style>
@@ -39,6 +39,11 @@
         img.sm {
             max-height: 20px;
             max-width: 20px;
+        }
+
+        .vsm {
+            max-height: 16px;
+            max-width: 16px;
         }
 
         .status>div>.sm {
@@ -162,6 +167,10 @@
             font-size: 1.2em;
             border-radius: .5em;
             cursor: pointer;
+        }
+        button {
+            min-width: 40px;
+            min-height: 32px;
         }
 
         button.outline {
@@ -548,6 +557,12 @@
             border-left: 4px solid #CCC;
             padding-left: 8px;
         }
+
+        #ac {
+            position: absolute;
+            background-color: var(--bg);
+            border: 1px solid var(--color)
+        }
     </style>
 </head>
 
@@ -857,7 +872,7 @@
                 success: function (data) {
                     accounts = JSON.parse(window.localStorage.getItem('accounts') || '[]')
                     accounts.push({ instance: inst, at: JSON.parse(data).access_token })
-                    window.localStorage.setItem('accounts', JSON.stringify(accounts))| []
+                    window.localStorage.setItem('accounts', JSON.stringify(accounts)) | []
 
                     columns = JSON.parse(window.localStorage.getItem('columns')) || []
                     columns.push(['home', 'public', 'federated', 'notifications'])
@@ -875,7 +890,7 @@
             }
             )
         }
-        s('#instance').onchange = function(){s('#loginb').click()}
+        s('#instance').onchange = function () { s('#loginb').click() }
         s('#loginb').onclick = function () {
             inst = s('#instance').value
             if (inst.substring(0, 8) != 'https://') inst = 'https://' + inst
@@ -1008,10 +1023,10 @@
                     s('#title').innerHTML = `<svg><use href="#tag" /></svg> #${window.location.hash.split('/')[1]} on ${accounts[window.location.hash.split('/')[2]].url.match(/https?:\/\/[^\/]+\//)} <a class="pin" href="#"><svg><use href="#pin" /></svg></a><a class="follow" href="#"><svg><use href="#plus" /></svg></a>`
                     updateTimeline('timelines/tag/' + window.location.hash.split('/')[1], window.location.hash.split('/')[2]);
                     break;
-                // case '#account':
-                //     showOnly('#account')
-                //     updateAccount(window.location.hash.substring(9));
-                //     break;
+                case '#a':
+                    showOnly('#account')
+                    updateAccount(window.location.hash.substring(3));
+                    break;
                 case '#s':
                     showOnly('#status')
                     updateStatus(window.location.hash.substring(3))
@@ -1267,7 +1282,7 @@
         }
         function getAccounts() {
             return new Promise(resolve => {
-                accts = JSON.parse(window.localStorage.getItem('accounts')) ||  []
+                accts = JSON.parse(window.localStorage.getItem('accounts')) || []
                 r = []
                 for (i = 0; i < accts.length; i++) {
                     r.push(getAccount(i).then(r => { return r }))
@@ -1308,8 +1323,8 @@
             i = 0;
             accounts.forEach(a => {
                 s('#settings').append(n(`<hr/><div><span><img loading="lazy" src="${a.avatar}" class="sm"/> ${a.display_name}
-                    <button class="logout" acct="${i}"><svg><use href="#logout"/></svg></button>
-                    <button class="resetnotif" acct="${i}"><svg><use href="#notifications"/></svg></button>
+                    <button class="logout" acct="${i}"><svg><use href="#logout"/></svg></button> |
+                    <!--<button class="resetnotif" acct="${i}"><svg><use href="#notifications"/></svg></button>-->
                     <button class="col outline" acct="${i}" col="home"><svg><use href="#home"/></svg></button>
                     <button class="col outline" acct="${i}" col="public"><svg><use href="#public"/></svg></button>
                     <button class="col outline" acct="${i}" col="federated"><svg><use href="#federated"/></svg></button>
@@ -1550,7 +1565,7 @@
                     html = `
                     <img class="header" src="${data.header}"/>
                     <img class="avatar" src="${data.avatar}"/>
-                    <button id="follow" acct="${data.id}"></button> <!--<a href="#account/${data.url}"><svg class="sm"><use href="#external"/></svg></a>-->
+                    <button id="follow" acct="${data.id}"></button> <a href="#account/${data.url}"><button><svg class="sm"><use href="#external"/></svg></button></a>
                     <div class="dn">${replaceEmojis(data.emojis, data.display_name)}</div>
                     <div class="acct">${data.acct}</div>
                     <div class="note">${data.note}</div>
@@ -1787,7 +1802,7 @@ ${this.getAttribute('href')}`
             return date
         }
         function displayStatus(el, acct, cssClass = '', id_prefix = 's') {
-            // console.log(el)
+            console.log(el)
             if (el.reblog) {
                 boost = `<svg class="sm"><use href="#reb"/></svg><a href="#account/${el.account.url}"><img class="sm" loading="lazy" src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1798,7 +1813,7 @@ ${this.getAttribute('href')}`
             mention = false
             if (e.mentions) e.mentions.forEach(m => { m.id == accounts[account].id ? mention = true : '' })
 
-            if (e.edited_at) date = displayDate(e.edited_at) + ' <del>' + displayDate(e.created_at)+'</del>'
+            if (e.edited_at) date = displayDate(e.edited_at) + ' <del>' + displayDate(e.created_at) + '</del>'
             else date = displayDate(e.created_at)
 
             // e.card ? console.log(e.card) : '';
@@ -1806,13 +1821,16 @@ ${this.getAttribute('href')}`
             return `<div uri="${e.uri}" id="${id_prefix}${acct}-${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="${id_prefix}${acct}-${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
             <div class="boost">${boost}</div>
             <div class="reply_to">${mention ? '<svg class="sm"><use href="#rep"/></svg>' : ''}</div>
-            <div class="author"><a href="#account/${e.account.url}"><img loading="lazy" class="md" src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a></div>
+            <div class="author">
+                <a href="#a/${acct}/${e.account.id}"><img loading="lazy" class="md" src="${e.account.avatar}"/> ${replaceEmojis(e.account.emojis, e.account.display_name)} <span class="account">(${e.account.acct})</span></a>
+                <a href="#account/${e.account.url}"><svg class="vsm"><use href="#external"/></svg></a>
+            </div>
             <div class="actions">
                 <span class="at">${date}</span>
                 ${accounts[acct].id == e.account.id ? `<span class="edit"><a href="#edit/${acct}/${e.id}"><svg><use href="#pen"/></svg></a></span>` : ''}
                 ${accounts[acct].id == e.account.id ? '<span class="del"><svg><use href="#cancel"/></svg></span>' : ''}
-                <span class="remote"><a href="#status/${e.url}"><svg><use href="#link"/></svg></a></span>
-                <!--<span class="link"><a href="#s/${acct}/${e.id}"><svg><use href="#tree"/></svg></a></span>-->
+                <span class="remote"><a href="#status/${e.url}"><svg><use href="#external"/></svg></a></span>
+                <span class="link"><a href="#s/${acct}/${e.id}"><svg><use href="#link"/></svg></a></span>
                 <span class="rep" author="${e.account.acct.indexOf('@') != -1 ? e.account.acct : convertHTTPtoUri(e.account.url)}" mentions="${e.mentions.map(function (m) { return `@${m.acct.indexOf('@') != -1 ? m.acct : convertHTTPtoUri(m.url)}` }).join(' ')}" 
                 tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#rep"/></svg>(${e.replies_count})</span>
                 <span class="quo" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" href="${e.url}"
@@ -1964,7 +1982,54 @@ ${this.getAttribute('href')}`
                         e.parentNode.parentNode.querySelector(`.media_attachments div:nth-child(${attach + 1}) img.media`).src = ev.data
                     }
                     e.parentNode.querySelector('.size').innerText = 500 - e.value.replace(/https?:\/\/\S+/gm, '12345678901234567890123').replace(/([\s^]@[\w]+)@[\w]+\b/gm, '$1').length //TODO base this on instance config + 23 chars per URL, no domain name in @
+                    // console.log(ev)
+                    // if (ev.data=="@"){
+                    // console.log(ev.target.value)
+                    if (ev.target.selectionEnd == ev.target.selectionStart) {
+                        sub = ev.target.value.substring(0, ev.target.selectionEnd)
+                        sub = sub.substring(sub.lastIndexOf(' ') + 1, sub.length)
+                        if (sub.substring(0, 1) == '@') {
+                            ajax(getInstance(account) + '/api/v2/search?type=accounts&q=' + sub, {
+                                headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                                success: function (data) {
+                                    data = JSON.parse(data)
+                                    if(s('#ac')) s('#ac').remove()
+                                    ev.target.after(n('<div id="ac"></div>'))
+                                    data.accounts.forEach(a=>{s('#ac').append(n(`<div><img class="vsm" src="${a.avatar}"/><span class="acct">${a.acct}</span> (${a.display_name})</div>`))})
+                                    sa('#ac>div').forEach(d=>{d.onclick = function() {
+                                        ev.target.selectionStart = ev.target.selectionStart - sub.length
+                                        ev.target.value = ev.target.value.substring(0, ev.target.selectionStart)+'@'+this.querySelector('.acct').innerText + ' ' +ev.target.value.substring(ev.target.selectionEnd)
+                                        ev.target.focus()
+                                        s('#ac').remove()
+                                    }})
+                                }
+                            })
+                        }
+                        if (sub.substring(0, 1) == '#') {
+                            console.log(sub.substring(1))
+                            ajax(getInstance(account) + '/api/v2/search?type=hashtags&q=' + sub.substring(1), {
+                                headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                                success: function (data) {
+                                    data = JSON.parse(data)
+                                    if(s('#ac')) s('#ac').remove()
+                                    ev.target.after(n('<div id="ac"></div>'))
+                                    data.hashtags.forEach(a=>{s('#ac').append(n(`<div><span class="acct">${a.name}</span></div>`))})
+                                    sa('#ac>div').forEach(d=>{d.onclick = function() {
+                                        ev.target.selectionStart = ev.target.selectionStart - sub.length
+                                        ev.target.value = ev.target.value.substring(0, ev.target.selectionStart)+'#'+this.querySelector('.acct').innerText + ' ' +ev.target.value.substring(ev.target.selectionEnd)
+                                        ev.target.focus()
+                                        s('#ac').remove()
+                                    }})
+                                }
+                            })
+                        }
+                        if (sub.substring(0, 1) != '#' && sub.substring(0, 1) != '@') s('#ac').remove()
+                    }
                 }
+
+                // e.onkeyup = function(e) {
+                //     console.log(e)
+                // }
             })
         }
         tweakFileInput()
@@ -2153,17 +2218,21 @@ ${this.getAttribute('href')}`
             md = md.replaceAll('<br />', "\n")
             md = md.replaceAll('<br>', "\n")
             md = md.replaceAll('&gt;', '>')
+            // console.log(md)
 
             //ul
-            md = md.replace(/^\s*\n\*/gm, '<ul>\n*');
-            md = md.replace(/^(\*.+)\s*\n([^\*])/gm, '$1\n</ul>\n\n$2');
-            md = md.replace(/^\*(.+)/gm, '<li>$1</li>');
+            md = md.replace(/^\s[\*\-]\n[\*\-]/gm, '<ul>\n*');
+            md = md.replace(/^([\*\-].+)\s*\n([^\*\-])/gm, '$1\n</ul>\n\n$2');
+            // console.log(md)
+            md = md.replace(/^\n?\*(.+)\n/gm, '<li>$1</li>');
+            // console.log(md)
 
             //ol
             md = md.replace(/^\s*\n\d\./gm, '<ol>\n1.');
             md = md.replace(/^(\d\..+)\s*\n([^\d\.])/gm, '$1\n</ol>\n\n$2');
-            md = md.replace(/^\d\.(.+)/gm, '<li>$1</li>');
+            md = md.replace(/^\d\.(.+)\n/gm, '<li>$1</li>');
 
+            md = md.replaceAll(">\n<", '><')
             //blockquote
             md = md.replace(/^\>(.+)/gm, '<blockquote>$1</blockquote>');
             md = md.replace(/<\/blockquote>\s*<blockquote>/gm, '<br />')
@@ -2191,8 +2260,13 @@ ${this.getAttribute('href')}`
             //code
             md = md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code>');
             md = md.replaceAll('\n\n', '</p><p>')
-            md = md.replaceAll("\n", '<br />')
-// console.log(md)
+            md = md.replaceAll('\n', '<br />')
+            // console.log(md)
+
+            //p
+            md = md.replace(/^\s*(\n)?(.+)/gm, function (m) {
+                return /\<(\/)?(h\d|ul|ol|li|blockquote|pre|img)/.test(m) ? m : '<p>' + m + '</p>';
+            });
             return '<p>' + md + '</p>';
         }
 
