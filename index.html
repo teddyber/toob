@@ -1113,13 +1113,12 @@
             })
         }
         function updateTimeline(which, acct = 0) {
-            else feed = which
             if (which + '/' + acct != whichTimeline) {
                 whichTimeline = which + '/' + acct
                 maxId = 999999999999999999
                 waitingFor = 999999999999999999
                 s('#timeline').textContent = ''
-                ajax(getInstance(acct) + '/api/v1/' + feed + '?limit=40', {
+                ajax(getInstance(acct) + '/api/v1/' + which + '?limit=40', {
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                     success: function (data) {
                         JSON.parse(data).forEach(el => {
