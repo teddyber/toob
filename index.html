@@ -988,10 +988,6 @@
                     s('#title').innerHTML = `<svg><use href="#tags" /></svg> ${accounts[window.location.hash.split('/')[1]].display_name}`
                     updateTags(window.location.hash.split('/')[1]);
                     break;
-                case '#trend':
-                    showOnly('#timeline')
-                    updateTimeline('timelines/trend');
-                    break;
                 case '#notifications':
                     showOnly('#timeline')
                     s('#title').innerHTML = `<svg><use href="#notifications" /></svg> ${accounts[window.location.hash.split('/')[1]].display_name}`
@@ -1117,11 +1113,6 @@
             })
         }
         function updateTimeline(which, acct = 0) {
-            trend = false
-            if (which == 'timelines/trend') {
-                trend = true
-                feed = 'timelines/home'
-            }
             else feed = which
             if (which + '/' + acct != whichTimeline) {
                 whichTimeline = which + '/' + acct
@@ -1132,7 +1123,6 @@
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                     success: function (data) {
                         JSON.parse(data).forEach(el => {
-                            if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
                                 s('#timeline').append(n(displayStatus(el, acct)))
                                 if (s('[in_reply_to_id="s' + el.id + '"]')) { // put parent up in the timeline if there's a reply
                                     s('[in_reply_to_id="s' + acct + '-' + el.id + '"]').parentNode.insertBefore(s('#s' + acct + '-' + el.id), s('[in_reply_to_id="s' + acct + '-' + el.id + '"]'))
@@ -1141,7 +1131,6 @@
                                 sa('[in_reply_to_id="s' + acct + '-' + el.id + '"]').forEach(c => {
                                     s('#s' + acct + '-' + el.id).appendChild(c)
                                 })
-                            }
                         });
                         tweak();
                     }
@@ -1257,18 +1246,18 @@
         tags = []
         function getAccount(account) {
             return new Promise(resolve => {
-                ajax(getInstance(account) + '/api/v1/accounts/verify_credentials', {
+                ajax(getInstance(account) + '/api/v1/followed_tags', {
                     headers: { 'Authorization': 'Bearer ' + getAT(account) },
                     success: function (data) {
-                        r = JSON.parse(data)
-                        ajax(getInstance(account) + '/api/v1/followed_tags', {
+                        tags[account] = []
+                        JSON.parse(data).forEach(t => { tags[account].push(t.name.toLowerCase()) })
+                        ajax(getInstance(account) + '/api/v1/accounts/verify_credentials', {
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
                             success: function (data) {
-                                tags[account] = []
-                                JSON.parse(data).forEach(t => { tags[account].push(t.name.toLowerCase()) })
+                                r = JSON.parse(data)
+                                resolve(r)
                             }
                         })
-                        resolve(r)
                     }
                 })
             })
@@ -1595,6 +1584,7 @@
                 success: function (data) {
                     JSON.parse(data).forEach(e => {
                         s('#account').append(n(displayStatus(e, acct)))
+                        maxId = e.id
                     })
                     tweak();
                 }
@@ -1842,7 +1832,8 @@ ${this.getAttribute('href')}`
         }
         function replaceMentions(array, text, acct) {
             array.forEach(m => {
-                text = text.replaceAll(`href="${m.url}"`, `href="#account/${m.url}"`).replaceAll('target="_blank"', '')
+                // text = text.replaceAll(`href="${m.url}"`, `href="#account/${m.url}"`).replaceAll('target="_blank"', '')
+                text = text.replaceAll(`href="${m.url}"`, `href="#a/${acct}/${m.id}"`).replaceAll('target="_blank"', '')
             })
             return text
         }
@@ -2115,6 +2106,7 @@ ${this.getAttribute('href')}`
         window.onscroll = function (ev) {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
                 h = window.location.hash.split('/')
+                div='#timeline'
                 switch (h[0]) {
                     case '#home':
                         feed = 'timelines/home'
@@ -2136,23 +2128,25 @@ ${this.getAttribute('href')}`
                         feed = 'timelines/tag/' + h[1]
                         acct = h[2]
                         break;
+                    case '#a':
+                        feed = 'accounts/' + h[2] +'/statuses'
+                        acct = h[1]
+                        div='#account'
+                        break;
                     default:
                         break;
                 }
                 if (typeof acct === undefined) return;
-                trend = (timeline == '#trend')
-                // feed = trend ? 'timelines/home' : wt[0]+'/'+wt[1]
                 if (waitingFor > maxId) {
                     ajax(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
                         headers: { 'Authorization': 'Bearer ' + getAT(acct) }, success: function (data) {
+                            console.log(data)
                             JSON.parse(data).forEach(el => {
-                                if (!trend || el.replies_count + el.reblogs_count + el.favourites_count > 0) {
-                                    s('#timeline').append(n(h[0] == '#notifications' ? displayNotification(el, acct) : displayStatus(el, acct)))
+                                    s(div).append(n(h[0] == '#notifications' ? displayNotification(el, acct) : displayStatus(el, acct)))
                                     maxId = Math.min(maxId, el.id)
                                     sa('[in_reply_to_id="s' + acct + '-' + el.id + '"]').forEach(c => {
                                         s('#s' + acct + '-' + el.id).appendChild(c)
                                     })
-                                }
                             })
                             tweak();
                         }
