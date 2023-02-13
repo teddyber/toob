@@ -217,6 +217,11 @@
             overflow: auto;
         }
 
+        .text>a{
+            color: var(--color);
+            text-decoration: none;
+        }
+
         .text p a span.invisible {
             display: none;
         }
@@ -390,7 +395,7 @@
         #account>button {
             height: 32px;
             max-height: 32px;
-            width: 40px;
+            min-width: 40px;
         }
 
         .editthread label {
@@ -741,6 +746,42 @@
                 <circle cx="8.5" cy="7" r="4"></circle>
                 <line x1="23" y1="11" x2="17" y2="11"></line>
             </symbol>
+            <symbol id="lists" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </symbol>
+            <symbol id="list" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </symbol>
+            <symbol id="hide" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                </path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+            </symbol>
+            <symbol id="show" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </symbol>
+            <symbol id="save" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </symbol>
         </defs>
     </svg>
     <nav id="sidenav">
@@ -769,6 +810,7 @@
     </nav>
     <div id="timeline"></div>
     <div id="divtags"></div>
+    <div id="divlists"></div>
     <div id="status"></div>
     <div id="account"></div>
     <div id="write">
@@ -983,6 +1025,11 @@
                     s('#title').innerHTML = `<svg><use href="#home" /></svg> ${accounts[window.location.hash.split('/')[1]].display_name}`
                     updateTimeline('timelines/home', window.location.hash.split('/')[1]);
                     break;
+                case '#lists':
+                    showOnly('#divlists')
+                    s('#title').innerHTML = `<svg><use href="#lists" /></svg> ${accounts[window.location.hash.split('/')[1]].display_name}`
+                    updateLists(window.location.hash.split('/')[1]);
+                    break;
                 case '#tags':
                     showOnly('#divtags')
                     s('#title').innerHTML = `<svg><use href="#tags" /></svg> ${accounts[window.location.hash.split('/')[1]].display_name}`
@@ -1013,6 +1060,16 @@
                     s('#title').innerHTML = `<svg><use href="#search" /></svg> Search with ${accounts[account].display_name}`
                     updateSearch(window.location.hash.substring(8));
                     break;
+                case '#list':
+                    showOnly('#timeline')
+                    s('#title').innerHTML = `<svg><use href="#lists" /></svg> ${lists[window.location.hash.split('/')[2]].find(function (l) { return l.id == window.location.hash.split('/')[1] }).title} on ${accounts[window.location.hash.split('/')[2]].url.match(/https?:\/\/[^\/]+\//)} <a class="pin" href="#"><svg><use href="#pin" /></svg></a> <a href="#m${window.location.hash.substring(1)}"><svg><use href="#gear" /></svg></a>`
+                    updateTimeline('timelines/list/' + window.location.hash.split('/')[1], window.location.hash.split('/')[2]);
+                    break;
+                case '#mlist':
+                    showOnly('#divlists')
+                    s('#title').innerHTML = `<svg><use href="#lists" /></svg> ${lists[window.location.hash.split('/')[2]].find(function (l) { return l.id == window.location.hash.split('/')[1] }).title} on ${accounts[window.location.hash.split('/')[2]].url.match(/https?:\/\/[^\/]+\//)}` //TODO del list
+                    editList(window.location.hash.split('/')[1], window.location.hash.split('/')[2]);
+                    break;
                 case '#tag':
                     showOnly('#timeline')
                     s('#title').innerHTML = `<svg><use href="#tag" /></svg> #${window.location.hash.split('/')[1]} on ${accounts[window.location.hash.split('/')[2]].url.match(/https?:\/\/[^\/]+\//)} <a class="pin" href="#"><svg><use href="#pin" /></svg></a><a class="follow" href="#"><svg><use href="#plus" /></svg></a>`
@@ -1042,6 +1099,35 @@
                 default:
                     break;
             }
+        }
+        function editList(id, acct) {
+            s('#divlists').innerHTML = ''
+            ajax(getInstance(acct) + `/api/v1/lists/${id}`, {
+                headers: { 'Authorization': 'Bearer ' + getAT(acct) },
+                success: function (data) {
+                    // console.log(JSON.parse(data))
+                    s('#divlists').append(n(`<div><input value="${JSON.parse(data).title}" id="listname"/><svg class="sm savelist" list="${id}"><use href="#save"/></svg></div>`))
+                    ajax(getInstance(acct) + `/api/v1/lists/${id}/accounts`, {
+                        headers: { 'Authorization': 'Bearer ' + getAT(acct) },
+                        success: function (data) {
+                            data = JSON.parse(data)
+                            console.log((data))
+                            data.forEach(a => { s('#divlists').append(n(`<div><img class="sm" src="${a.avatar}"/>${a.display_name} (${a.acct})</div>`)) })
+                            s('.savelist').onclick = function () {
+                                // console.log(s('#listname'))
+                                ajax(getInstance(acct) + `/api/v1/lists/${id}`, {
+                                    headers: { 'Authorization': 'Bearer ' + getAT(acct) },
+                                    method: 'PUT',
+                                    data: { title: s('#listname').value, replies_policy: 'followed' },
+                                    // success: function (data) {
+                                    //     console.log(JSON.parse(data))
+                                    // }
+                                })
+                            }
+                        }
+                    })
+                }
+            })
         }
         function editStatus(id) {
             var [acct, id] = id.split('/')
@@ -1083,7 +1169,8 @@
                 success: function (data) {
                     data = JSON.parse(data)
                     sa('#search .status, #search .account, #search .hashtags').forEach(e => { e.remove() })
-                    data.accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${e.url}"><img loading="lazy" class="sm" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
+                    // data.accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#account/${e.url}"><img loading="lazy" class="sm" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
+                    data.accounts.forEach(e => { s('#search').append(n(`<div class="account"><a href="#a/${account}/${e.id}"><img loading="lazy" class="sm" src="${e.avatar}"/>${e.display_name} (${e.acct})</a></div>`)) })
                     data.hashtags.forEach(e => { s('#search').append(n(`<div class="hashtags"><a href="#tag/${e.name}/${account}">#${e.name}</a></div>`)) })
                     data.statuses.forEach(e => { s('#search').append(n(displayStatus(e, account))) })
                     tweak();
@@ -1106,6 +1193,47 @@
         function getAT(account) {
             return JSON.parse(window.localStorage.getItem('accounts') || '[]')[account] ? JSON.parse(window.localStorage.getItem('accounts') || '[]')[account].at : null
         }
+        function updateLists(acct) {
+            s('#divlists').innerHTML = ''
+            hiddenLists = JSON.parse(window.localStorage.getItem('hiddenlists')) || []
+            if (hiddenLists.length == 0) accounts.forEach(a => [hiddenLists.push([])])
+            lists[acct].forEach(l => {
+                s('#divlists').append(n(`<br/>
+                <a href="#list/${l.id}/${acct}">${l.title}</a>
+                <a href="#mlist/${l.id}/${acct}"><svg class="sm"><use href="#gear"/></svg></a>
+                <svg class="dellist sm" list="${l.id}"><use href="#cancel"/></svg>
+                <svg class="hidelist sm" list="${l.id}"><use href="#hide"/></svg>`))
+            })
+            hiddenLists.forEach(l=>{s(`[list="${l}"].hidelist use`).setAttribute('href', '#show')})
+            s('#divlists').append(n(`<div><input type="text" id="newlist"/><svg id="createlist" class="sm"><use href="#plus"/></svg></div>`))
+            s('#createlist').onclick = function () {
+                if (s('#newlist').getAttribute('value') != '') {
+                    ajax(getInstance(account) + '/api/v1/lists', {
+                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                        method: 'POST',
+                        data: { title: s('#newlist').getAttribute('value'), replies_policy: 'followed' },
+                        success: function (data) {
+                            console.log(JSON.parse(data))
+                        }
+                    })
+                }
+            }
+            sa('.dellist').forEach(b => {
+                b.onclick = function () {
+                    console.log('DEL', this.getAttribute('list'))
+                }
+            })
+            sa('.hidelist').forEach(b => {
+                b.onclick = function () {
+                    console.log(hiddenLists)
+                    idx = hiddenLists[acct].indexOf(this.getAttribute('list'))
+                    if (idx != -1) { hiddenLists[acct].splice(idx, 1); this.querySelector('use').setAttribute('href', '#hide') }
+                    else { hiddenLists[acct].push(this.getAttribute('list')); this.querySelector('use').setAttribute('href', '#show') }
+                    console.log(hiddenLists[acct])
+                    window.localStorage.setItem('hiddenlists', JSON.stringify(hiddenLists))
+                }
+            })
+        }
         function updateTags(acct) {
             s('#divtags').innerHTML = ''
             tags[acct].forEach(t => {
@@ -1122,31 +1250,25 @@
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                     success: function (data) {
                         JSON.parse(data).forEach(el => {
-                                s('#timeline').append(n(displayStatus(el, acct)))
-                                if (s('[in_reply_to_id="s' + el.id + '"]')) { // put parent up in the timeline if there's a reply
-                                    s('[in_reply_to_id="s' + acct + '-' + el.id + '"]').parentNode.insertBefore(s('#s' + acct + '-' + el.id), s('[in_reply_to_id="s' + acct + '-' + el.id + '"]'))
-                                }
-                                maxId = Math.min(maxId, el.id)  //  remmeber oldest toot for scrolling
-                                sa('[in_reply_to_id="s' + acct + '-' + el.id + '"]').forEach(c => {
-                                    s('#s' + acct + '-' + el.id).appendChild(c)
-                                })
+                            if (!hiddenAccounts.includes(el.account.id) || which.indexOf('list') != -1) s('#timeline').append(n(displayStatus(el, acct)))
+                            if (s('[in_reply_to_id="s' + el.id + '"]')) { // put parent up in the timeline if there's a reply
+                                s('[in_reply_to_id="s' + acct + '-' + el.id + '"]').parentNode.insertBefore(s('#s' + acct + '-' + el.id), s('[in_reply_to_id="s' + acct + '-' + el.id + '"]'))
+                            }
+                            maxId = Math.min(maxId, el.id)  //  remmeber oldest toot for scrolling
+                            sa('[in_reply_to_id="s' + acct + '-' + el.id + '"]').forEach(c => {
+                                s('#s' + acct + '-' + el.id).appendChild(c)
+                            })
                         });
                         tweak();
                     }
                 })
                 //tags
                 w = whichTimeline.split('/')
-                if (w[1] == "tag") {
+                if (w[1] == "tag" || w[1] == "list") {
                     w.splice(0, 1)
                     w.splice(2)
                     if (columns[acct].includes(w.join('/'))) s('#topnav a.pin').innerHTML = '<svg><use href="#unpin"/></svg>'
                     else s('#topnav a.pin').innerHTML = '<svg><use href="#pin"/></svg>'
-                    if (tags[account].includes(w[1].toLowerCase())) {
-                        s('#topnav a.follow').innerHTML = '<svg><use href="#minus"/></svg>'
-                    }
-                    else {
-                        s('#topnav a.follow').innerHTML = '<svg><use href="#plus"/></svg>'
-                    }
                     s('#topnav a.pin').onclick = function () {
                         if (columns[acct].includes(w.join('/'))) {
                             columns[acct].splice(columns[acct].indexOf(w.join('/')), 1)
@@ -1160,27 +1282,35 @@
                         window.localStorage.setItem('columns', JSON.stringify(columns))
                         return false
                     }
-                    s('#topnav a.follow').onclick = function () {
-                        if (typeof action !== 'undefined')
-                            console.log(action)
+                    if (w[1] == "tag") {
                         if (tags[account].includes(w[1].toLowerCase())) {
-                            action = 'unfollow'
-                            svg = 'plus'
-                        } else {
-                            action = 'follow'
-                            svg = 'minus'
+                            s('#topnav a.follow').innerHTML = '<svg><use href="#minus"/></svg>'
                         }
-                        t = this
-                        ajax(getInstance(account) + `/api/v1/tags/${w[1]}/${action}`, {
-                            headers: { 'Authorization': 'Bearer ' + getAT(account) },
-                            method: 'POST',
-                            success: function (data) {
-                                t.innerHTML = `<svg><use href="#${svg}"/></svg>`
-                                if (action == 'unfollow') tags[account].splice(tags[account].indexOf(w[1].toLowerCase()), 1)
-                                else tags[account].push(w[1].toLowerCase())
+                        else {
+                            s('#topnav a.follow').innerHTML = '<svg><use href="#plus"/></svg>'
+                        }
+                        s('#topnav a.follow').onclick = function () {
+                            if (typeof action !== 'undefined')
+                                console.log(action)
+                            if (tags[account].includes(w[1].toLowerCase())) {
+                                action = 'unfollow'
+                                svg = 'plus'
+                            } else {
+                                action = 'follow'
+                                svg = 'minus'
                             }
-                        })
-                        return false
+                            t = this
+                            ajax(getInstance(account) + `/api/v1/tags/${w[1]}/${action}`, {
+                                headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                                method: 'POST',
+                                success: function (data) {
+                                    t.innerHTML = `<svg><use href="#${svg}"/></svg>`
+                                    if (action == 'unfollow') tags[account].splice(tags[account].indexOf(w[1].toLowerCase()), 1)
+                                    else tags[account].push(w[1].toLowerCase())
+                                }
+                            })
+                            return false
+                        }
                     }
                 }
             }
@@ -1243,6 +1373,8 @@
         }
         setInterval(lookForNewNotif, 10000)
         tags = []
+        lists = []
+        hiddenAccounts = []
         function getAccount(account) {
             return new Promise(resolve => {
                 ajax(getInstance(account) + '/api/v1/followed_tags', {
@@ -1250,11 +1382,30 @@
                     success: function (data) {
                         tags[account] = []
                         JSON.parse(data).forEach(t => { tags[account].push(t.name.toLowerCase()) })
-                        ajax(getInstance(account) + '/api/v1/accounts/verify_credentials', {
+                        ajax(getInstance(account) + '/api/v1/lists', {
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
                             success: function (data) {
-                                r = JSON.parse(data)
-                                resolve(r)
+                                lists[account] = []
+                                console.log(JSON.parse(data))
+                                JSON.parse(data).forEach(l => { lists[account].push({ id: l.id, title: l.title }) })
+                                hiddenLists[account].forEach(l => {
+                                    ajax(getInstance(account) + `/api/v1/lists/${l}/accounts`, {
+                                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                                        success: function (data) {
+                                            data = JSON.parse(data)
+                                            data.forEach(a => { hiddenAccounts.push(a.id) })
+                                            console.log('h', hiddenAccounts)
+                                        }
+                                    })
+                                })
+                                ajax(getInstance(account) + '/api/v1/accounts/verify_credentials', {
+                                    headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                                    success: function (data) {
+                                        r = JSON.parse(data)
+                                        resolve(r)
+                                    }
+                                })
+
                             }
                         })
                     }
@@ -1264,6 +1415,9 @@
         function getAccounts() {
             return new Promise(resolve => {
                 accts = JSON.parse(window.localStorage.getItem('accounts')) || []
+                hiddenLists = JSON.parse(window.localStorage.getItem('hiddenlists')) || []
+                if (hiddenLists.length == 0) accts.forEach(a => [hiddenLists.push([])])
+
                 r = []
                 for (i = 0; i < accts.length; i++) {
                     r.push(getAccount(i).then(r => { return r }))
@@ -1311,6 +1465,7 @@
                     <button class="col outline" acct="${i}" col="federated"><svg><use href="#federated"/></svg></button>
                     <button class="col outline" acct="${i}" col="notifications"><svg><use href="#notifications"/></svg></button>
                     <button class="col outline" acct="${i}" col="tags"><svg><use href="#tags"/></svg></button>
+                    <button class="col outline" acct="${i}" col="lists"><svg><use href="#lists"/></svg></button>
                     </div>`))
                 columns[i].forEach(c => { sa(`[col="${c}"][acct="${i}"]`).forEach(b => { b.classList.remove('outline') }) })
                 i++
@@ -1537,10 +1692,13 @@
             ajax(inst + '/api/v1/accounts/' + id, {
                 success: function (data) {
                     data = JSON.parse(data)
+                    console.log(lists)
                     html = `
                     <img class="header" src="${data.header}"/>
                     <img class="avatar" src="${data.avatar}"/>
-                    <button id="follow" acct="${data.id}"></button> <a href="#account/${data.url}"><button><svg class="sm"><use href="#external"/></svg></button></a>
+                    <button id="follow" acct="${data.id}"></button>
+                    <a href="#account/${data.url}"><button><svg class="sm"><use href="#external"/></svg></button></a>
+                    `+ ((acct == account) ? lists[acct].map(l => { console.log(l); return `<button class="addlist outline" list="${l.id}">${l.title}</button>` }).join(' ') : '') + `
                     <div class="dn">${replaceEmojis(data.emojis, data.display_name)}</div>
                     <div class="acct">${data.acct}</div>
                     <div class="note">${data.note}</div>
@@ -1549,6 +1707,37 @@
                     <div class="statuses">Statuses ${data.statuses_count}</div>
                     `
                     s('#account').innerHTML = html
+                    ajax(getInstance(acct) + `/api/v1/accounts/${id}/lists`, {
+                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                        success: function (data) {
+                            data = JSON.parse(data)
+                            console.log('lists', data)
+                            data.forEach(l => { s(`[list="${l.id}"]`).classList.remove('outline') })
+                        }
+                    })
+                    sa('.addlist').forEach(b => {
+                        b.onclick = function () {
+                            if (this.classList.contains('outline')) {
+                                ajax(getInstance(acct) + `/api/v1/lists/${this.getAttribute('list')}/accounts`, {
+                                    method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                                    data: { 'account_ids[]': [id] },
+                                    success: function (data) {
+                                        // console.log(JSON.parse(data))
+                                        b.classList.remove('outline')
+                                    }
+                                })
+                            } else {
+                                ajax(getInstance(acct) + `/api/v1/lists/${this.getAttribute('list')}/accounts`, {
+                                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                                    data: { 'account_ids[]': [id] },
+                                    success: function (data) {
+                                        // console.log(JSON.parse(data))
+                                        b.classList.add('outline')
+                                    }
+                                })
+                            }
+                        }
+                    })
                     s('#title').innerHTML = `<img class="sm" src="${data.avatar}"/> ${replaceEmojis(data.emojis, data.display_name)}`
                     sa('.note .mention.u-url').forEach(a => {
                         a.removeAttribute('target')
@@ -1647,6 +1836,7 @@
                     })
                 }
             })
+            sa('.status .text').forEach(t=>{t.onclick = function(){window.location.href='#s/'+this.closest('.status').getAttribute('id').substring(1).replace('-', '/')}})
             sa('a.hashtag').forEach(e => { e.removeAttribute('target') })
             sa('.actions .rep, .actions .quo').forEach(e => {
                 e.onclick = function () {
@@ -1719,22 +1909,26 @@ ${this.getAttribute('href')}`
                     }
                 }
             })
-            if (nb < 10)
+            if (nb < 100)
                 sa('div.card.toresolve a').forEach(a => {
-                    ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
-                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
-                        success: function (data) {
-                            data = JSON.parse(data)
-                            if (data.statuses[0]) {
-                                a.parentNode.classList.remove('card')
-                                a.parentNode.classList.remove('toresolve')
-                                a.parentNode.innerHTML = displayStatus(data.statuses[0], account, 'quo')
-                                tweak(nb + 1)
-                            } else {
-                                a.parentNode.classList.remove('toresolve')
+                    // console.log(a.closest('.status').getAttribute('uri') , a.getAttribute('href')) 
+                    if (a.closest('.status').getAttribute('uri') != a.getAttribute('href')) {
+                        // console.log(a.closest('.status').outerHTML)
+                        ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
+                            headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                            success: function (data) {
+                                data = JSON.parse(data)
+                                if (data.statuses[0]) {
+                                    a.parentNode.classList.remove('card')
+                                    a.parentNode.classList.remove('toresolve')
+                                    a.parentNode.innerHTML = displayStatus(data.statuses[0], account, 'quo')
+                                    tweak(nb + 1)
+                                } else {
+                                    a.parentNode.classList.remove('toresolve')
+                                }
                             }
-                        }
-                    })
+                        })
+                    }
                 })
         }
         function vote(statusId, statusUri, from, ownvotes) {
@@ -1779,7 +1973,7 @@ ${this.getAttribute('href')}`
         function displayStatus(el, acct, cssClass = '', id_prefix = 's') {
             console.log(el)
             if (el.reblog) {
-                boost = `<svg class="sm"><use href="#reb"/></svg><a href="#account/${el.account.url}"><img class="sm" loading="lazy" src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
+                boost = `<svg class="sm"><use href="#reb"/></svg><a href="#a/${acct}/${el.account.id}"><img class="sm" loading="lazy" src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
             } else {
                 boost = ''
@@ -1805,7 +1999,7 @@ ${this.getAttribute('href')}`
                 ${accounts[acct].id == e.account.id ? `<span class="edit"><a href="#edit/${acct}/${e.id}"><svg><use href="#pen"/></svg></a></span>` : ''}
                 ${accounts[acct].id == e.account.id ? '<span class="del"><svg><use href="#cancel"/></svg></span>' : ''}
                 <span class="remote"><a href="#status/${e.url}"><svg><use href="#external"/></svg></a></span>
-                <span class="link"><a href="#s/${acct}/${e.id}"><svg><use href="#link"/></svg></a></span>
+                <!--<span class="link"><a href="#s/${acct}/${e.id}"><svg><use href="#link"/></svg></a></span>-->
                 <span class="rep" author="${e.account.acct.indexOf('@') != -1 ? e.account.acct : convertHTTPtoUri(e.account.url)}" mentions="${e.mentions.map(function (m) { return `@${m.acct.indexOf('@') != -1 ? m.acct : convertHTTPtoUri(m.url)}` }).join(' ')}" 
                 tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#rep"/></svg>(${e.replies_count})</span>
                 <span class="quo" author="${e.account.acct}" mentions="${e.mentions.map(function (m) { return `@${m.acct}` }).join(' ')}" href="${e.url}"
@@ -2105,7 +2299,7 @@ ${this.getAttribute('href')}`
         window.onscroll = function (ev) {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
                 h = window.location.hash.split('/')
-                div='#timeline'
+                div = '#timeline'
                 switch (h[0]) {
                     case '#home':
                         feed = 'timelines/home'
@@ -2127,10 +2321,14 @@ ${this.getAttribute('href')}`
                         feed = 'timelines/tag/' + h[1]
                         acct = h[2]
                         break;
-                    case '#a':
-                        feed = 'accounts/' + h[2] +'/statuses'
+                        case '#a':
+                        feed = 'accounts/' + h[2] + '/statuses'
                         acct = h[1]
-                        div='#account'
+                        div = '#account'
+                        break;
+                    case '#list':
+                        feed = 'timelines/list/' + h[1] 
+                        acct = h[2]
                         break;
                     default:
                         break;
@@ -2141,11 +2339,11 @@ ${this.getAttribute('href')}`
                         headers: { 'Authorization': 'Bearer ' + getAT(acct) }, success: function (data) {
                             console.log(data)
                             JSON.parse(data).forEach(el => {
-                                    s(div).append(n(h[0] == '#notifications' ? displayNotification(el, acct) : displayStatus(el, acct)))
-                                    maxId = Math.min(maxId, el.id)
-                                    sa('[in_reply_to_id="s' + acct + '-' + el.id + '"]').forEach(c => {
-                                        s('#s' + acct + '-' + el.id).appendChild(c)
-                                    })
+                                s(div).append(n(h[0] == '#notifications' ? displayNotification(el, acct) : (!hiddenAccounts.includes(el.account.id) || h[0] == '#list')? displayStatus(el, acct):''))
+                                maxId = Math.min(maxId, el.id)
+                                sa('[in_reply_to_id="s' + acct + '-' + el.id + '"]').forEach(c => {
+                                    s('#s' + acct + '-' + el.id).appendChild(c)
+                                })
                             })
                             tweak();
                         }
@@ -2214,6 +2412,7 @@ ${this.getAttribute('href')}`
             keyboard nav?
             lists & remove from timeline
             local view of (own) boosts/favs for remote statuses
+            don't reload window after vote
         */
     </script>
 </body>
