@@ -1105,23 +1105,17 @@
             ajax(getInstance(acct) + `/api/v1/lists/${id}`, {
                 headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                 success: function (data) {
-                    // console.log(JSON.parse(data))
                     s('#divlists').append(n(`<div><input value="${JSON.parse(data).title}" id="listname"/><svg class="sm savelist" list="${id}"><use href="#save"/></svg></div>`))
                     ajax(getInstance(acct) + `/api/v1/lists/${id}/accounts`, {
                         headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                         success: function (data) {
                             data = JSON.parse(data)
-                            console.log((data))
                             data.forEach(a => { s('#divlists').append(n(`<div><img class="sm" src="${a.avatar}"/>${a.display_name} (${a.acct})</div>`)) })
                             s('.savelist').onclick = function () {
-                                // console.log(s('#listname'))
                                 ajax(getInstance(acct) + `/api/v1/lists/${id}`, {
                                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                                     method: 'PUT',
                                     data: { title: s('#listname').value, replies_policy: 'followed' },
-                                    // success: function (data) {
-                                    //     console.log(JSON.parse(data))
-                                    // }
                                 })
                             }
                         }
@@ -1204,7 +1198,7 @@
                 <svg class="dellist sm" list="${l.id}"><use href="#cancel"/></svg>
                 <svg class="hidelist sm" list="${l.id}"><use href="#hide"/></svg>`))
             })
-            hiddenLists.forEach(l=>{s(`[list="${l}"].hidelist use`).setAttribute('href', '#show')})
+            hiddenLists[acct].forEach(l=>{s(`[list="${l}"].hidelist use`).setAttribute('href', '#show')})
             s('#divlists').append(n(`<div><input type="text" id="newlist"/><svg id="createlist" class="sm"><use href="#plus"/></svg></div>`))
             s('#createlist').onclick = function () {
                 if (s('#newlist').getAttribute('value') != '') {
@@ -1386,7 +1380,6 @@
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
                             success: function (data) {
                                 lists[account] = []
-                                console.log(JSON.parse(data))
                                 JSON.parse(data).forEach(l => { lists[account].push({ id: l.id, title: l.title }) })
                                 hiddenLists[account].forEach(l => {
                                     ajax(getInstance(account) + `/api/v1/lists/${l}/accounts`, {
@@ -1394,7 +1387,6 @@
                                         success: function (data) {
                                             data = JSON.parse(data)
                                             data.forEach(a => { hiddenAccounts.push(a.id) })
-                                            console.log('h', hiddenAccounts)
                                         }
                                     })
                                 })
@@ -1911,8 +1903,8 @@ ${this.getAttribute('href')}`
             })
             if (nb < 100)
                 sa('div.card.toresolve a').forEach(a => {
-                    // console.log(a.closest('.status').getAttribute('uri') , a.getAttribute('href')) 
-                    if (a.closest('.status').getAttribute('uri') != a.getAttribute('href')) {
+                    // console.log('compare', a.closest('.status').getAttribute('url') , a.getAttribute('href')) 
+                    if (a.closest('.status').getAttribute('url') != a.getAttribute('href')) {
                         // console.log(a.closest('.status').outerHTML)
                         ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
@@ -1971,7 +1963,7 @@ ${this.getAttribute('href')}`
             return date
         }
         function displayStatus(el, acct, cssClass = '', id_prefix = 's') {
-            console.log(el)
+            // console.log(el)
             if (el.reblog) {
                 boost = `<svg class="sm"><use href="#reb"/></svg><a href="#a/${acct}/${el.account.id}"><img class="sm" loading="lazy" src="${el.account.avatar}"/> ${replaceEmojis(el.account.emojis, el.account.display_name)}</a> boosted`;
                 e = el.reblog;
@@ -1987,7 +1979,7 @@ ${this.getAttribute('href')}`
 
             // e.card ? console.log(e.card) : '';
             // e.poll ? console.log(e.poll) : ''
-            return `<div uri="${e.uri}" id="${id_prefix}${acct}-${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="${id_prefix}${acct}-${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
+            return `<div uri="${e.uri}" url="${e.url}" id="${id_prefix}${acct}-${e.id}" ${e.in_reply_to_id ? `in_reply_to_id="${id_prefix}${acct}-${e.in_reply_to_id}"` : ''} class="status${e.favourited ? ' fav' : ''}${e.reblogged ? ' reb' : ''} ${cssClass}">
             <div class="boost">${boost}</div>
             <div class="reply_to">${mention ? '<svg class="sm"><use href="#rep"/></svg>' : ''}</div>
             <div class="author">
@@ -2337,7 +2329,6 @@ ${this.getAttribute('href')}`
                 if (waitingFor > maxId) {
                     ajax(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
                         headers: { 'Authorization': 'Bearer ' + getAT(acct) }, success: function (data) {
-                            console.log(data)
                             JSON.parse(data).forEach(el => {
                                 s(div).append(n(h[0] == '#notifications' ? displayNotification(el, acct) : (!hiddenAccounts.includes(el.account.id) || h[0] == '#list')? displayStatus(el, acct):''))
                                 maxId = Math.min(maxId, el.id)
