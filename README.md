@@ -19,4 +19,4 @@
 - #PWA installation
 - Paste image on toot compose
 
- Try me out! teddyber.github.io/toob/
+ Try me out! https://teddyber.github.io/toob/
