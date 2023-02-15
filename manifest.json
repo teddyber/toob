@@ -11,15 +11,9 @@
     "display": "standalone",
     "icons": [
         {
-            "src": "toob-512.png",
-            "type": "image/png",
-            "sizes": "512x512",
-            "purpose": "any"
-        },
-        {
-            "src": "toob-192.png",
-            "type": "image/png",
-            "sizes": "192x192",
+            "src": "toob.svg",
+            "type": "image/svg+xml",
+            "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 512x512",
             "purpose": "any"
         }
     ]

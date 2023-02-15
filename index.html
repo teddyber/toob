@@ -1206,24 +1206,22 @@
                         headers: { 'Authorization': 'Bearer ' + getAT(account) },
                         method: 'POST',
                         data: { title: s('#newlist').getAttribute('value'), replies_policy: 'followed' },
-                        success: function (data) {
-                            console.log(JSON.parse(data))
-                        }
+                        // success: function (data) {
+                        //     console.log(JSON.parse(data))
+                        // }
                     })
                 }
             }
             sa('.dellist').forEach(b => {
                 b.onclick = function () {
-                    console.log('DEL', this.getAttribute('list'))
+                    console.log('TODO DEL', this.getAttribute('list'))
                 }
             })
             sa('.hidelist').forEach(b => {
                 b.onclick = function () {
-                    console.log(hiddenLists)
                     idx = hiddenLists[acct].indexOf(this.getAttribute('list'))
                     if (idx != -1) { hiddenLists[acct].splice(idx, 1); this.querySelector('use').setAttribute('href', '#hide') }
                     else { hiddenLists[acct].push(this.getAttribute('list')); this.querySelector('use').setAttribute('href', '#show') }
-                    console.log(hiddenLists[acct])
                     window.localStorage.setItem('hiddenlists', JSON.stringify(hiddenLists))
                 }
             })
@@ -1276,7 +1274,7 @@
                         window.localStorage.setItem('columns', JSON.stringify(columns))
                         return false
                     }
-                    if (w[1] == "tag") {
+                    if (w[0] == "tag") {
                         if (tags[account].includes(w[1].toLowerCase())) {
                             s('#topnav a.follow').innerHTML = '<svg><use href="#minus"/></svg>'
                         }
@@ -1285,7 +1283,6 @@
                         }
                         s('#topnav a.follow').onclick = function () {
                             if (typeof action !== 'undefined')
-                                console.log(action)
                             if (tags[account].includes(w[1].toLowerCase())) {
                                 action = 'unfollow'
                                 svg = 'plus'
@@ -1328,23 +1325,23 @@
                             const img = `${e.account.avatar}`;
                             text = e.type
                             if (e.type == 'follow') {
-                                title = `${e.account.display_name} (${e.account.acct}) followed you!`;
+                                title = `➕ ${e.account.display_name} (${e.account.acct}) followed you!`;
                                 text = `${e.account.note.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
                             }
                             if (e.type == 'favourite') {
-                                title = `${e.account.display_name} (${e.account.acct}) favourited your status!`;
+                                title = `⭐ ${e.account.display_name} (${e.account.acct}) fav'd your status!`;
                                 text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
                             }
                             if (e.type == 'reblog') {
-                                title = `${e.account.display_name} (${e.account.acct}) reblogged your status!`;
+                                title = `🔁 ${e.account.display_name} (${e.account.acct}) boosted your status!`;
                                 text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
                             }
                             if (e.type == 'mention') {
-                                title = `${e.account.display_name} (${e.account.acct}) mentionned you!`;
+                                title = `👉 ${e.account.display_name} (${e.account.acct}) mentionned you!`;
                                 text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
                             }
                             if (e.type == 'poll') {
-                                title = `A poll you participated in just ended!`;
+                                title = `📊 A poll you participated in just ended!`;
                                 text = `${e.status.content.replaceAll(/<\/?[^>]+(>|$)/gi, "")}`
                             }
                             if (e.type == 'update') {
@@ -1450,9 +1447,9 @@
             i = 0;
             accounts.forEach(a => {
                 s('#settings').append(n(`<hr/><div><span><img loading="lazy" src="${a.avatar}" class="sm"/> ${a.display_name}
-                    <button class="logout" acct="${i}"><svg><use href="#logout"/></svg></button> |
-                    <!--<button class="resetnotif" acct="${i}"><svg><use href="#notifications"/></svg></button>-->
-                    <button class="col outline" acct="${i}" col="home"><svg><use href="#home"/></svg></button>
+                    <button class="logout" acct="${i}"><svg><use href="#logout"/></svg></button>
+                    <button class="resetnotif" acct="${i}"><svg><use href="#notifications"/></svg></button>
+                    | <button class="col outline" acct="${i}" col="home"><svg><use href="#home"/></svg></button>
                     <button class="col outline" acct="${i}" col="public"><svg><use href="#public"/></svg></button>
                     <button class="col outline" acct="${i}" col="federated"><svg><use href="#federated"/></svg></button>
                     <button class="col outline" acct="${i}" col="notifications"><svg><use href="#notifications"/></svg></button>
@@ -1553,7 +1550,7 @@
             maxId = Math.min(maxId, e.id)  //  remember oldest toot for scrolling
             switch (e.type) {
                 case 'follow':
-                    return `<div class="notif"><p>
+                    return `<div class="notif"><p>➕ 
                                         <a href="#account/${e.account.url}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
@@ -1561,11 +1558,13 @@
                     break;
                 case 'reblog':
                     if (!s(`#reb${e.status.id}`)) {
-                        return `<div class="notif" id="reb${e.status.id}"><p><a href="#account/${e.account.url}">
+                        return `<div class="notif" id="reb${e.status.id}"><p>🔁 <a href="#account/${e.account.url}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> ${e.status.reblogs_count > 1 ? `and ${e.status.reblogs_count - 1} other${e.status.reblogs_count == 1 ? '' : 's'}` : ''} reblogged your status!</p>
                                 ${displayStatus(e.status, acct)}</div>`
+                    }else {
+                        s(`#reb${e.status.id} p img`).before(n(`<img loading="lazy" class="md" src="${e.account.avatar}"/>`))
                     }
                     break;
                 case 'update':
@@ -1577,24 +1576,24 @@
                     break;
                 case 'favourite':
                     if (!s(`#fav${e.status.id}`)) {
-                        return `<div class="notif" id="fav${e.status.id}"><p><a href="#account/${e.account.url}">
+                        return `<div class="notif" id="fav${e.status.id}"><p>⭐ <a href="#account/${e.account.url}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> ${e.status.favourites_count > 1 ? `and ${e.status.favourites_count - 1} other${e.status.favourites_count == 2 ? '' : 's'}` : ''} favourited your status!</p>
                                 ${displayStatus(e.status, acct)}</div>`
                     } else {
-                        s(`#fav${e.status.id} p`).prepend(n(`<img loading="lazy" class="md" src="${e.account.avatar}"/>`))
+                        s(`#fav${e.status.id} p img`).before(n(`<img loading="lazy" class="md" src="${e.account.avatar}"/>`))
                     }
                     break;
                 case 'mention':
-                    return `<div class="notif"><p><a href="#account/${e.account.url}">
+                    return `<div class="notif"><p>👉 <a href="#account/${e.account.url}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> mentioned you!</p>
                                 ${displayStatus(e.status, acct)}</div>`
                     break;
                 case 'poll':
-                    return `<div class="notif"><p>A poll you participated in ended!</p>
+                    return `<div class="notif"><p>📊 A poll you participated in ended!</p>
                                 ${displayStatus(e.status, acct)}</div>`
                     break;
                 default:
@@ -1684,13 +1683,12 @@
             ajax(inst + '/api/v1/accounts/' + id, {
                 success: function (data) {
                     data = JSON.parse(data)
-                    console.log(lists)
                     html = `
                     <img class="header" src="${data.header}"/>
                     <img class="avatar" src="${data.avatar}"/>
                     <button id="follow" acct="${data.id}"></button>
                     <a href="#account/${data.url}"><button><svg class="sm"><use href="#external"/></svg></button></a>
-                    `+ ((acct == account) ? lists[acct].map(l => { console.log(l); return `<button class="addlist outline" list="${l.id}">${l.title}</button>` }).join(' ') : '') + `
+                    `+ ((acct == account) ? lists[acct].map(l => { return `<button class="addlist outline" list="${l.id}">${l.title}</button>` }).join(' ') : '') + `
                     <div class="dn">${replaceEmojis(data.emojis, data.display_name)}</div>
                     <div class="acct">${data.acct}</div>
                     <div class="note">${data.note}</div>
@@ -1703,7 +1701,6 @@
                         headers: { 'Authorization': 'Bearer ' + getAT(account) },
                         success: function (data) {
                             data = JSON.parse(data)
-                            console.log('lists', data)
                             data.forEach(l => { s(`[list="${l.id}"]`).classList.remove('outline') })
                         }
                     })
@@ -1714,7 +1711,6 @@
                                     method: 'POST', headers: { 'Authorization': 'Bearer ' + getAT(account) },
                                     data: { 'account_ids[]': [id] },
                                     success: function (data) {
-                                        // console.log(JSON.parse(data))
                                         b.classList.remove('outline')
                                     }
                                 })
@@ -1723,7 +1719,6 @@
                                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getAT(account) },
                                     data: { 'account_ids[]': [id] },
                                     success: function (data) {
-                                        // console.log(JSON.parse(data))
                                         b.classList.add('outline')
                                     }
                                 })
@@ -1828,7 +1823,7 @@
                     })
                 }
             })
-            sa('.status .text').forEach(t=>{t.onclick = function(){window.location.href='#s/'+this.closest('.status').getAttribute('id').substring(1).replace('-', '/')}})
+            sa('.status .text').forEach(t=>{t.onclick = function(e){if(e.target.parentNode.classList.contains('text'))window.location.href='#s/'+this.closest('.status').getAttribute('id').substring(1).replace('-', '/')}})
             sa('a.hashtag').forEach(e => { e.removeAttribute('target') })
             sa('.actions .rep, .actions .quo').forEach(e => {
                 e.onclick = function () {
@@ -1903,9 +1898,7 @@ ${this.getAttribute('href')}`
             })
             if (nb < 100)
                 sa('div.card.toresolve a').forEach(a => {
-                    // console.log('compare', a.closest('.status').getAttribute('url') , a.getAttribute('href')) 
                     if (a.closest('.status').getAttribute('url') != a.getAttribute('href')) {
-                        // console.log(a.closest('.status').outerHTML)
                         ajax(getInstance(account) + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
                             headers: { 'Authorization': 'Bearer ' + getAT(account) },
                             success: function (data) {
@@ -2378,8 +2371,9 @@ ${this.getAttribute('href')}`
             // md = md.replace(/[\[]{1}([^\]]+)[\]]{1}[\(]{1}([^\)\"]+)(\"(.+)\")?[\)]{1}/g, '<a href="$2" title="$4">$1</a>');
 
             //font styles
-            md = md.replace(/[\*\_]{2}([^\*\_]+)[\*\_]{2}/g, '<b>$1</b>');
-            md = md.replace(/[\*\_]{1}([^\*\_>=]+)[\*\_]{1}/g, '<i>$1</i>');
+            console.log(md)
+            md = md.replace(/\b[\*\_]{2}([^\*\_]+)[\*\_]{2}\b/g, '<b>$1</b>');
+            md = md.replace(/\b[\*\_]{1}([^\*\_>=]+)[\*\_]{1}\b/g, '<i>$1</i>');
             md = md.replace(/[\~]{2}([^\~]+)[\~]{2}/g, '<del>$1</del>');
 
             //pre
@@ -2401,7 +2395,6 @@ ${this.getAttribute('href')}`
             compose a poll
             remove / add picture while editing
             keyboard nav?
-            lists & remove from timeline
             local view of (own) boosts/favs for remote statuses
             don't reload window after vote
         */
