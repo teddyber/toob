@@ -217,12 +217,12 @@
             overflow: auto;
         }
 
-        .text>a{
+        .text>a {
             color: var(--color);
             text-decoration: none;
         }
 
-        .text p a span.invisible {
+        .text a span.invisible {
             display: none;
         }
 
@@ -1198,7 +1198,7 @@
                 <svg class="dellist sm" list="${l.id}"><use href="#cancel"/></svg>
                 <svg class="hidelist sm" list="${l.id}"><use href="#hide"/></svg>`))
             })
-            hiddenLists[acct].forEach(l=>{s(`[list="${l}"].hidelist use`).setAttribute('href', '#show')})
+            hiddenLists[acct].forEach(l => { s(`[list="${l}"].hidelist use`).setAttribute('href', '#show') })
             s('#divlists').append(n(`<div><input type="text" id="newlist"/><svg id="createlist" class="sm"><use href="#plus"/></svg></div>`))
             s('#createlist').onclick = function () {
                 if (s('#newlist').getAttribute('value') != '') {
@@ -1282,7 +1282,7 @@
                             s('#topnav a.follow').innerHTML = '<svg><use href="#plus"/></svg>'
                         }
                         s('#topnav a.follow').onclick = function () {
-                            if (typeof action !== 'undefined')
+                            // if (typeof action !== 'undefined') 
                             if (tags[account].includes(w[1].toLowerCase())) {
                                 action = 'unfollow'
                                 svg = 'plus'
@@ -1551,24 +1551,24 @@
             switch (e.type) {
                 case 'follow':
                     return `<div class="notif"><p>➕ 
-                                        <a href="#account/${e.account.url}">
+                                        <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> followed you!</p></div>`
                     break;
                 case 'reblog':
                     if (!s(`#reb${e.status.id}`)) {
-                        return `<div class="notif" id="reb${e.status.id}"><p>🔁 <a href="#account/${e.account.url}">
+                        return `<div class="notif" id="reb${e.status.id}"><p>🔁 <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> ${e.status.reblogs_count > 1 ? `and ${e.status.reblogs_count - 1} other${e.status.reblogs_count == 1 ? '' : 's'}` : ''} reblogged your status!</p>
                                 ${displayStatus(e.status, acct)}</div>`
-                    }else {
+                    } else {
                         s(`#reb${e.status.id} p img`).before(n(`<img loading="lazy" class="md" src="${e.account.avatar}"/>`))
                     }
                     break;
                 case 'update':
-                    return `<div class="notif"><p><a href="#account/${e.account.url}">
+                    return `<div class="notif"><p><a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> updated their status!</p>
@@ -1576,7 +1576,7 @@
                     break;
                 case 'favourite':
                     if (!s(`#fav${e.status.id}`)) {
-                        return `<div class="notif" id="fav${e.status.id}"><p>⭐ <a href="#account/${e.account.url}">
+                        return `<div class="notif" id="fav${e.status.id}"><p>⭐ <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> ${e.status.favourites_count > 1 ? `and ${e.status.favourites_count - 1} other${e.status.favourites_count == 2 ? '' : 's'}` : ''} favourited your status!</p>
@@ -1586,7 +1586,7 @@
                     }
                     break;
                 case 'mention':
-                    return `<div class="notif"><p>👉 <a href="#account/${e.account.url}">
+                    return `<div class="notif"><p>👉 <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> mentioned you!</p>
@@ -1637,7 +1637,8 @@
                     headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                     success: function (data) {
                         current = JSON.parse(data)
-                        s('#title').innerHTML = `Toot by <img loading="lazy" class="sm" src="${current.account.avatar}"/> ${replaceEmojis(current.account.emojis, current.account.display_name)}`
+                        s('#title').innerHTML = `Toot by <img loading="lazy" class="sm" src="${current.account.avatar}"/> ${replaceEmojis(current.account.emojis, current.account.display_name)}
+                        from ${replaceEmojis(accounts[acct].emojis, accounts[acct].display_name)}`
                         ajax(inst + '/api/v1/statuses/' + (current.reblog ? current.reblog.id : statusId) + '/context', {
                             headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                             success: function (data) {
@@ -1725,14 +1726,15 @@
                             }
                         }
                     })
-                    s('#title').innerHTML = `<img class="sm" src="${data.avatar}"/> ${replaceEmojis(data.emojis, data.display_name)}`
+                    s('#title').innerHTML = `<img class="sm" src="${data.avatar}"/> ${replaceEmojis(data.emojis, data.display_name)}
+                    from ${replaceEmojis(accounts[acct].emojis, accounts[acct].display_name)}`
                     sa('.note .mention.u-url').forEach(a => {
                         a.removeAttribute('target')
                         ajax(inst + "/api/v2/search?resolve=true&q=" + a.getAttribute('href'), {
                             headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                             success: function (data, xhr) {
-                                // a.setAttribute('href', '#account/' + acct + '/' + JSON.parse(data).accounts[0].id)
-                                a.setAttribute('href', '#account/' + JSON.parse(data).accounts[0].url)
+                                a.setAttribute('href', '#a/' + acct + '/' + JSON.parse(data).accounts[0].id)
+                                // a.setAttribute('href', '#account/' + JSON.parse(data).accounts[0].url)
                             }
                         })
                     })
@@ -1823,7 +1825,7 @@
                     })
                 }
             })
-            sa('.status .text').forEach(t=>{t.onclick = function(e){if(e.target.parentNode.classList.contains('text'))window.location.href='#s/'+this.closest('.status').getAttribute('id').substring(1).replace('-', '/')}})
+            sa('.status .text, .status .poll.voted').forEach(t => { t.onclick = function (e) { if (e.target.parentNode.tagName != 'A' && window.getSelection().toString().length === 0) window.location.href = '#s/' + this.closest('.status').getAttribute('id').substring(1).replace('-', '/') } })
             sa('a.hashtag').forEach(e => { e.removeAttribute('target') })
             sa('.actions .rep, .actions .quo').forEach(e => {
                 e.onclick = function () {
@@ -1994,7 +1996,7 @@ ${this.getAttribute('href')}`
             </div>
             <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, parseMd(e.content)).replace(/href=\"https:\/\/[\w\.\-\/]+\/tags\/(\w+)/g, `href="#tag/$1/${acct}`), acct)}</div>
             ${e.poll && !e.poll.voted && !e.poll.expired ? '<div class="poll">' + e.poll.options.map(function (o, i) { return `<div><input type="${e.poll.multiple ? 'checkbox' : 'radio'}" name="option_${e.poll.id}[]" id="option_${e.poll.id}_${i}"/><label for="option_${e.poll.id}_${i}">${o.title}</label></div>` }).join('') + `<div><button class="vote" id="poll_${acct}_${e.poll.id}">Vote!</button></div><div>${e.poll.votes_count} voters</div></div>` : ''}
-            ${e.poll && (e.poll.voted || e.poll.expired) ? '<div class="poll">' + e.poll.options.map(function (o, i) { return `<div  class="${e.poll.own_votes.includes(i) ? 'gras' : ''}">${o.title} : ${Math.round(o.votes_count / e.poll.voters_count * 100)}%</div><div style="height:6px;width:${o.votes_count / e.poll.voters_count * 100}%;background-color:var(--highlight)"></div>` }).join('') + `</div><div>${e.poll.votes_count} voters</div>` : ''}
+            ${e.poll && (e.poll.voted || e.poll.expired) ? '<div class="poll voted">' + e.poll.options.map(function (o, i) { return `<div  class="${e.poll.own_votes.includes(i) ? 'gras' : ''}">${o.title} : ${Math.round(o.votes_count / e.poll.voters_count * 100)}%</div><div style="height:6px;width:${o.votes_count / e.poll.voters_count * 100}%;background-color:var(--highlight)"></div>` }).join('') + `</div><div>${e.poll.votes_count} voters</div>` : ''}
             <div class="media${e.media_attachments.length > 1 ? ' multi' : ''}">${e.media_attachments.map(function (m) {
                 if (m.type == 'image') return `<img loading="lazy" alt="${m.description ? m.description.replaceAll('"', '&quot;') : ''}" title="${m.description ? m.description.replaceAll('"', '&quot;') : ''}" aria-label="${m.description ? m.description.replaceAll('"', '&quot;') : ''}" src="${m.preview_url}"/>`;
                 if (m.type == 'video') return `<video preload="none" src="${m.url}" poster="${m.preview_url}" controls volume="1" aria-label="${m.description ? m.description.replaceAll('"', '&quot;') : ''}" title="${m.description ? m.description.replaceAll('"', '&quot;') : ''}"></video>`
@@ -2105,8 +2107,10 @@ ${this.getAttribute('href')}`
                 }
                 e.oninput = function (ev) { //paste or inject GIF URL
                     if ((ev.inputType == 'insertText' || ev.inputType == 'insertFromPaste' || ev.inputType == 'insertCompositionText') && ev.data.substring(0, 4) == 'http' && (url = new URL(ev.data))) {
-                        attach = parseInt(e.parentNode.parentNode.getAttribute('attach'))
-                        e.parentNode.parentNode.querySelector(`.media_attachments div:nth-child(${attach + 1}) img.media`).src = ev.data
+                        editthread = e.closest('.editthread')
+                        attach = parseInt(editthread.getAttribute('attach'))
+                        console.log(attach)
+                        editthread.querySelector(`.media_attachments div:nth-child(${attach + 1}) img.media`).src = ev.data
                     }
                     e.parentNode.querySelector('.size').innerText = 500 - e.value.replace(/https?:\/\/\S+/gm, '12345678901234567890123').replace(/([\s^]@[\w]+)@[\w]+\b/gm, '$1').length //TODO base this on instance config + 23 chars per URL, no domain name in @
                     if (ev.target.selectionEnd == ev.target.selectionStart) {
@@ -2282,7 +2286,7 @@ ${this.getAttribute('href')}`
         }
 
         window.onscroll = function (ev) {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1000) {
                 h = window.location.hash.split('/')
                 div = '#timeline'
                 switch (h[0]) {
@@ -2306,13 +2310,13 @@ ${this.getAttribute('href')}`
                         feed = 'timelines/tag/' + h[1]
                         acct = h[2]
                         break;
-                        case '#a':
+                    case '#a':
                         feed = 'accounts/' + h[2] + '/statuses'
                         acct = h[1]
                         div = '#account'
                         break;
                     case '#list':
-                        feed = 'timelines/list/' + h[1] 
+                        feed = 'timelines/list/' + h[1]
                         acct = h[2]
                         break;
                     default:
@@ -2323,7 +2327,7 @@ ${this.getAttribute('href')}`
                     ajax(getInstance(acct) + '/api/v1/' + feed + '?limit=40&max_id=' + maxId, {
                         headers: { 'Authorization': 'Bearer ' + getAT(acct) }, success: function (data) {
                             JSON.parse(data).forEach(el => {
-                                s(div).append(n(h[0] == '#notifications' ? displayNotification(el, acct) : (!hiddenAccounts.includes(el.account.id) || h[0] == '#list')? displayStatus(el, acct):''))
+                                s(div).append(n(h[0] == '#notifications' ? displayNotification(el, acct) : (!hiddenAccounts.includes(el.account.id) || h[0] == '#list') ? displayStatus(el, acct) : ''))
                                 maxId = Math.min(maxId, el.id)
                                 sa('[in_reply_to_id="s' + acct + '-' + el.id + '"]').forEach(c => {
                                     s('#s' + acct + '-' + el.id).appendChild(c)
@@ -2344,6 +2348,7 @@ ${this.getAttribute('href')}`
             md = md.replaceAll('<br>', "\n")
             md = md.replaceAll('&gt;', '>')
 
+            // console.log(md)
             //ul
             md = md.replace(/^\s*\n\*/gm, '<ul>\n*');
             md = md.replace(/^([\*\-].+)\s*\n([^\*\-])/gm, '$1\n</ul>\n\n$2');
@@ -2371,9 +2376,8 @@ ${this.getAttribute('href')}`
             // md = md.replace(/[\[]{1}([^\]]+)[\]]{1}[\(]{1}([^\)\"]+)(\"(.+)\")?[\)]{1}/g, '<a href="$2" title="$4">$1</a>');
 
             //font styles
-            console.log(md)
-            md = md.replace(/\b[\*\_]{2}([^\*\_]+)[\*\_]{2}\b/g, '<b>$1</b>');
-            md = md.replace(/\b[\*\_]{1}([^\*\_>=]+)[\*\_]{1}\b/g, '<i>$1</i>');
+            md = md.replace(/[\*\_]{2}\b([^\*\_]+)\b[\*\_]{2}/g, '<b>$1</b>');
+            md = md.replace(/[\*\_]{1}\b([^\*\_>=]+)\b[\*\_]{1}/g, '<i>$1</i>');
             md = md.replace(/[\~]{2}([^\~]+)[\~]{2}/g, '<del>$1</del>');
 
             //pre
