@@ -782,6 +782,24 @@
                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
                 <polyline points="7 3 7 8 15 8"></polyline>
             </symbol>
+            <symbol id="globe" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                </path>
+            </symbol>
+            <symbol id="at" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
+            </symbol>
+            <symbol id="poll" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </symbol>
         </defs>
     </svg>
     <nav id="sidenav">
@@ -1550,7 +1568,7 @@
             maxId = Math.min(maxId, e.id)  //  remember oldest toot for scrolling
             switch (e.type) {
                 case 'follow':
-                    return `<div class="notif"><p>➕ 
+                    return `<div class="notif"><p><svg class="sm"><use href="#userplus"/></svg>
                                         <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
@@ -1558,7 +1576,7 @@
                     break;
                 case 'reblog':
                     if (!s(`#reb${e.status.id}`)) {
-                        return `<div class="notif" id="reb${e.status.id}"><p>🔁 <a href="#a/${acct}/${e.account.id}">
+                        return `<div class="notif" id="reb${e.status.id}"><p><svg class="sm"><use href="#reb"/></svg> <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> ${e.status.reblogs_count > 1 ? `and ${e.status.reblogs_count - 1} other${e.status.reblogs_count == 1 ? '' : 's'}` : ''} reblogged your status!</p>
@@ -1568,7 +1586,7 @@
                     }
                     break;
                 case 'update':
-                    return `<div class="notif"><p><a href="#a/${acct}/${e.account.id}">
+                    return `<div class="notif"><p><svg class="sm"><use href="#pen"/> </svg> <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> updated their status!</p>
@@ -1576,7 +1594,7 @@
                     break;
                 case 'favourite':
                     if (!s(`#fav${e.status.id}`)) {
-                        return `<div class="notif" id="fav${e.status.id}"><p>⭐ <a href="#a/${acct}/${e.account.id}">
+                        return `<div class="notif" id="fav${e.status.id}"><p><svg class="sm"><use href="#star"/></svg> <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> ${e.status.favourites_count > 1 ? `and ${e.status.favourites_count - 1} other${e.status.favourites_count == 2 ? '' : 's'}` : ''} favourited your status!</p>
@@ -1586,14 +1604,14 @@
                     }
                     break;
                 case 'mention':
-                    return `<div class="notif"><p>👉 <a href="#a/${acct}/${e.account.id}">
+                    return `<div class="notif"><p><svg class="sm"><use href="#at"/></svg> <a href="#a/${acct}/${e.account.id}">
                                             <img loading="lazy" class="md" src="${e.account.avatar}"/>
                                             ${replaceEmojis(e.account.emojis, e.account.display_name)} (${e.account.acct})
                                         </a> mentioned you!</p>
                                 ${displayStatus(e.status, acct)}</div>`
                     break;
                 case 'poll':
-                    return `<div class="notif"><p>📊 A poll you participated in ended!</p>
+                    return `<div class="notif"><p><svg class="sm"><use href="#poll"/></svg> A poll you participated in ended!</p>
                                 ${displayStatus(e.status, acct)}</div>`
                     break;
                 default:
@@ -1810,6 +1828,20 @@
                     statusPostAction(st.getAttribute('id'), st.getAttribute('uri'), account, st.classList.contains('reb') ? 'unreblog' : 'reblog')
                 }
             })
+            sa('.Actions .translate').forEach(e => {
+                e.onclick = function () {
+                    st = this.parentNode.parentNode
+                    id = st.getAttribute('id').substring(1)
+                    ajax(getInstance(account) + `/api/v1/statuses/${id.split('-')[1]}/translate`, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                        success: function (data) {
+                            st.querySelector('.text').innerHTML = JSON.parse(data).content
+                            console.log(data)
+                        }
+                    })
+                }
+            })
             sa('.actions .del').forEach(e => {
                 e.onclick = function () {
                     id = this.parentNode.parentNode.getAttribute('id').substring(1);
@@ -1993,6 +2025,7 @@ ${this.getAttribute('href')}`
                 tags="${e.tags.map(function (t) { return `#${t.name}` }).join(' ')}"><svg><use href="#quote"/></svg></span>
                 <span class="reb"><svg><use href="#reb" /></svg>(${e.reblogs_count})</span>
                 <span class="fav"><svg><use href="#star" /></svg>(${e.favourites_count})</span>
+                <span class="translate"><svg><use href="#globe" /></svg></span>
             </div>
             <div class="text">${replaceMentions(e.mentions, replaceEmojis(e.emojis, parseMd(e.content)).replace(/href=\"https:\/\/[\w\.\-\/]+\/tags\/(\w+)/g, `href="#tag/$1/${acct}`), acct)}</div>
             ${e.poll && !e.poll.voted && !e.poll.expired ? '<div class="poll">' + e.poll.options.map(function (o, i) { return `<div><input type="${e.poll.multiple ? 'checkbox' : 'radio'}" name="option_${e.poll.id}[]" id="option_${e.poll.id}_${i}"/><label for="option_${e.poll.id}_${i}">${o.title}</label></div>` }).join('') + `<div><button class="vote" id="poll_${acct}_${e.poll.id}">Vote!</button></div><div>${e.poll.votes_count} voters</div></div>` : ''}
