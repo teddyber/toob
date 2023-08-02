@@ -1832,12 +1832,14 @@
                 e.onclick = function () {
                     st = this.parentNode.parentNode
                     id = st.getAttribute('id').substring(1)
-                    ajax(getInstance(account) + `/api/v1/statuses/${id.split('-')[1]}/translate`, {
+                    console.log(id)
+                    acct = id.split('-')[0]
+                    console.log(acct)
+                    ajax(getInstance(acct) + `/api/v1/statuses/${id.split('-')[1]}/translate`, {
                         method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + getAT(account) },
+                        headers: { 'Authorization': 'Bearer ' + getAT(acct) },
                         success: function (data) {
                             st.querySelector('.text').innerHTML = JSON.parse(data).content
-                            console.log(data)
                         }
                     })
                 }
